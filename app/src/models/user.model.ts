@@ -23,6 +23,7 @@ export interface UserAttributes {
   id: number;
   name: string;
   email: string;
+  password: string;
 }
 
 /**
@@ -47,6 +48,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   /** Dirección de correo electrónico única del usuario. */
   public email!: string;
+
+  /** Contraseña del usuario. */
+  public password!: string;
 }
 
 /**
@@ -72,6 +76,10 @@ User.init(
       unique: true,
       allowNull: false,
     },
+    password: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    }
   },
   {
     sequelize,

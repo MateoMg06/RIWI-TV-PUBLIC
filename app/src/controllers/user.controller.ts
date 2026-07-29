@@ -158,3 +158,23 @@ export const getUsers = async (_req: Request, res: Response): Promise<Response> 
     }
 
 };
+
+export const authUser = async (_req: Request, res: Response): Promise<Response> => {
+
+    try {
+
+        // Solicita la información al servicio.
+        const users = await userService.findAll();
+
+        // Retorna la colección de usuarios.
+        return res.status(200).json(users);
+
+    } catch (error: any) {
+
+        return res.status(500).json({
+            error: error.message
+        });
+
+    }
+
+};

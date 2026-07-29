@@ -31,6 +31,18 @@ class UserRepository implements IUserRepository {
         return await User.findAll();
 
     }
+    
+    /**
+     * Obtiene uno de los usuarios.
+     */
+    async findOne(email: string): Promise<User| string>{
+
+        const resposes =  await User.findOne({
+            where : {email : email}
+        });
+
+        return resposes ? resposes : "no lo encontre";
+    }
 
 }
 
