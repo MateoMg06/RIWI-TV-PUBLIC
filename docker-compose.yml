@@ -1,11 +1,10 @@
-
 services:
   app:
     build: ./app
     container_name: ${APP_CONTAINER_NAME}
     working_dir: /usr/src/app
     ports:
-      - "${APP_PORT}:3000"
+      - '${APP_PORT}:3000'
     volumes:
       - ./app:/usr/src/app
       - ./.env:/usr/src/app/.env
@@ -19,7 +18,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${APP_CPU_LIMIT}"
+          cpus: '${APP_CPU_LIMIT}'
           memory: ${APP_MEM_LIMIT}
     networks:
       - backend
@@ -37,7 +36,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${DB_CPU_LIMIT}"
+          cpus: '${DB_CPU_LIMIT}'
           memory: ${DB_MEM_LIMIT}
     networks:
       - backend
