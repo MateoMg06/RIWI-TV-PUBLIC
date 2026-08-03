@@ -1,7 +1,8 @@
 // app/src/repositories/user.repository.ts
 
-import User, { UserCreationAttributes } from "../models/user.model";
-import { IUserRepository } from "./interfaces/user.repository.interface";
+import User, { UserCreationAttributes } from '../models/user.model';
+import { IUserRepository } from './interfaces/user.repository.interface';
+import user from '../services/user.service';
 
 /**
  * Repositorio de Usuarios
@@ -13,25 +14,25 @@ import { IUserRepository } from "./interfaces/user.repository.interface";
  */
 
 class UserRepository implements IUserRepository {
+  /**
+   * Crea un nuevo usuario.
+   */
+  async create(data: UserCreationAttributes): Promise<User> {
+    return await User.create(data);
+  }
 
-    /**
-     * Crea un nuevo usuario.
-     */
-    async create(data: UserCreationAttributes): Promise<User> {
-
-        return await User.create(data);
-
-    }
-
-    /**
-     * Obtiene todos los usuarios.
-     */
-    async findAll(): Promise<User[]> {
-
-        return await User.findAll();
-
-    }
-
+  /**
+   * Obtiene todos los usuarios.
+   */
+  async findAll(): Promise<User[]> {
+    return await User.findAll();
+  }
+  /**
+   * Obtiene un usuario por id.
+   */
+  async findUserByEmail(email:string): Promise<User | null> {
+    return await User.findOne({ where: { email:email} });
+  }
 }
 
 export default new UserRepository();

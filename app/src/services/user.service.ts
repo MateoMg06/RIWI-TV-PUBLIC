@@ -4,6 +4,7 @@ import User from "../models/user.model";
 import { CreateUserDto } from "../dto/create-user.dto";
 import repository from "../repositories/user.repository";
 import { IUserService } from "./interfaces/user.service.interface";
+import user from "../repositories/user.repository";
 
 /**
  * Servicio de Usuarios
@@ -85,6 +86,15 @@ class UserService implements IUserService {
      */
     async findAll(): Promise<User[]> {
         return await repository.findAll();
+    }
+    async findEmail(email:string,password:string): Promise<User | null> {
+        const user=await repository.findUserByEmail(email)
+        if (!user){
+            
+            
+        }
+        
+        return user ;
     }
 
 }
