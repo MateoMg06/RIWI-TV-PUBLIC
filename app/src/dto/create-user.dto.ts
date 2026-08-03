@@ -19,7 +19,6 @@
  * @property {string} name - Nombre completo del usuario.
  * @property {string} email - Dirección de correo electrónico única del usuario.
  * @property {string} password - Contraseña
- *
  * @example
  * const dto: CreateUserDto = {
  *   name: "David Mtz",s
