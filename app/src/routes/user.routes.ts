@@ -137,8 +137,8 @@ router.get('/', getUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       201:
- *         description: Usuario creado exitosamente
+ *       200:
+ *         description: logueado
  *         content:
  *           application/json:
  *             example:
@@ -146,18 +146,18 @@ router.get('/', getUsers);
  *               name: John Doe
  *               email: john.doe@example.com
  *               password: "123"
- *       400:
- *         description: Datos inválidos
+ *       401:
+ *         description: Correo o contraseña incorrecto 
  *         content:
  *           application/json:
  *             example:
- *               error: El correo ya existe
+ *               error: Correo o contraseña incorrecto
  *       500:
  *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             example:
- *               error: No se pudo crear el usuario
+ *               error: se cayo el caserio 
  */
 
 router.post('/auth', getOneUsers);

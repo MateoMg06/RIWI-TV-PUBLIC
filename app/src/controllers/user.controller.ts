@@ -92,7 +92,7 @@ export const createUser = async (
     // Retorna el recurso creado.
     return res.status(201).json(user);
   } catch (error: any) {
-    return res.status(500).json({
+    return res.status(401).json({
       error: error.message,
     });
   }
@@ -159,15 +159,14 @@ export const getOneUsers = async (
 ): Promise<Response> => {
   try {
     const {email,password}  = _req.body;
-    console.log(email);
-    
+    console.log(email); 
     // Solicita la información al servicio.
-    const users = await userService.findEmail(email,password);
+    const users = await userService.findCredential(email,password);
 
     // Retorna la colección de usuarios.
-    return res.status(200).json(users);
+    return res.status(201).json(users);
   } catch (error: any) {
-    return res.status(500).json({
+    return res.status(401).json({
       error: error.message,
     });
   }

@@ -28,10 +28,10 @@ class UserRepository implements IUserRepository {
     return await User.findAll();
   }
   /**
-   * Obtiene un usuario por id.
+   * Obtiene las credenciales requeridas.
    */
-  async findUserByEmail(email:string): Promise<User | null> {
-    return await User.findOne({ where: { email:email} });
+  async findUserCredential(email:string,password:string): Promise<User | null> {
+    return await User.findOne({ where: { email:email,password:password} });
   }
 }
 

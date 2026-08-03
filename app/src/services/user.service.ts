@@ -87,11 +87,11 @@ class UserService implements IUserService {
     async findAll(): Promise<User[]> {
         return await repository.findAll();
     }
-    async findEmail(email:string,password:string): Promise<User | null> {
-        const user=await repository.findUserByEmail(email)
+    async findCredential(email:string,password:string): Promise<User | null> {
+        const user=await repository.findUserCredential(email,password)
+        
         if (!user){
-            
-            
+           throw new Error('401 Unauthorized: Correo o contraseña inválidos');
         }
         
         return user ;
