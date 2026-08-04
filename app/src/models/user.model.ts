@@ -59,6 +59,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
  * - `id`: Entero autoincremental, clave primaria.
  * - `name`: Nombre obligatorio con máximo 100 caracteres.
  * - `email`: Correo electrónico único y obligatorio con máximo 100 caracteres.
+ *  - `password`: Contraseña del usuario con maximo 20 caracteres.
  */
 User.init(
   {

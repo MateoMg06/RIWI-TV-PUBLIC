@@ -4,16 +4,17 @@
  * Rutas de Usuario
  * ----------------
  * Este archivo define las rutas HTTP relacionadas con la entidad `User`.
- * 
+ *
  * Endpoints disponibles:
  *  - `POST /users/` : Crear un nuevo usuario.
  *  - `GET /users/`  : Obtener todos los usuarios registrados.
- * 
+ *
  * Cada ruta se conecta con su respectivo controlador.
  */
 
-import { Router } from "express";
-import { authUser, createUser, getUsers } from "../controllers/user.controller";
+import { authUser, createUser, getUsers, getOneUsers } from "../controllers/user.controller";
+
+import { Router } from 'express';
 
 const router = Router();
 
@@ -32,11 +33,14 @@ const router = Router();
  *  - 500 Internal Server Error: En caso de error en la creación.
  * 
  * 
+=======
+>>>>>>> upstream/main
  * @swagger
  * /api/users:
  *   post:
  *     summary: Crear un nuevo usuario
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     requestBody:
  *       required: true
  *       content:
@@ -51,13 +55,13 @@ const router = Router();
  *             properties:
  *               name:
  *                 type: string
- *                 example: "John Doe"
+ *                 example: John Doe
  *               email:
  *                 type: string
- *                 example: "john.doe@example.com"
+ *                 example: john.doe@example.com
  *               password:
  *                 type: string
- *                 example: "1234"
+ *                 example: "123"
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -73,30 +77,23 @@ const router = Router();
  *         content:
  *           application/json:
  *             example:
- *               error: "El correo ya existe"
+ *               error: El correo ya existe
  *       500:
  *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             example:
- *               error: "No se pudo crear el usuario"
+ *               error: No se pudo crear el usuario
  */
-router.post("/", createUser);
+router.post('/', createUser);
 
 /**
- * GET /
- * ----
- * Obtiene la lista completa de usuarios registrados en la base de datos.
- * 
- * Response:
- *  - 200 OK: Devuelve un array de usuarios en formato JSON.
- * 
- * 
  * @swagger
  * /api/users:
  *   get:
  *     summary: Obtener todos los usuarios
- *     tags: [Users]
+ *     tags:
+ *       - Users
  *     responses:
  *       200:
  *         description: Lista de usuarios obtenida exitosamente
@@ -104,29 +101,82 @@ router.post("/", createUser);
  *           application/json:
  *             example:
  *               - id: 1
- *                 name: "John Doe"
- *                 email: "john.doe@example.com"
+ *                 name: John Doe
+ *                 email: john.doe@example.com
+ *                 password: "123"
  *               - id: 2
- *                 name: "Jane Doe"
- *                 email: "john.doe@example.com"
+ *                 name: Jane Doe
+ *                 email: jane.doe@example.com
+ *                 password: "123"
  *       400:
  *         description: Solicitud inválida
  *         content:
  *           application/json:
  *             example:
- *               error: "Parámetros incorrectos"
+ *               error: Parámetros incorrectos
  *       500:
  *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             example:
- *               error: "Error al obtener los usuarios"
+ *               error: Error al obtener los usuarios
  */
-router.get("/", getUsers);
+router.get('/', getUsers);
+
+/**
+ * @swagger
+ * /api/users/auth:
+ *   post:
+ *     summary: Crear un nuevo usuario
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: john.doe@example.com
+ *               password:
+ *                 type: string
+ *                 example: "123"
+ *     responses:
+ *       200:
+ *         description: logueado
+ *         content:
+ *           application/json:
+ *             example:
+ *               id: 1
+ *               name: John Doe
+ *               email: john.doe@example.com
+ *               password: "123"
+ *       401:
+ *         description: Correo o contraseña incorrecto 
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Correo o contraseña incorrecto
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: se cayo el caserio 
+ */
+
+router.post('/auth', getOneUsers);
 
 router.get("/", authUser);
 
 
 export default router;
-
-

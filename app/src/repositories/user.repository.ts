@@ -1,7 +1,8 @@
 // app/src/repositories/user.repository.ts
 
-import User, { UserCreationAttributes } from "../models/user.model";
-import { IUserRepository } from "./interfaces/user.repository.interface";
+import User, { UserCreationAttributes } from '../models/user.model';
+import { IUserRepository } from './interfaces/user.repository.interface';
+import user from '../services/user.service';
 
 /**
  * Repositorio de Usuarios
@@ -13,7 +14,6 @@ import { IUserRepository } from "./interfaces/user.repository.interface";
  */
 
 class UserRepository implements IUserRepository {
-
     /**
      * Crea un nuevo usuario.
      */

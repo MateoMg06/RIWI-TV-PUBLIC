@@ -16,17 +16,17 @@ const PORT = process.env.APP_PORT || 3000;
 const start = async () => {
   try {
     await sequelize.authenticate();
-    console.log("Conexión a la BD establecida...");
+    console.log('Conexión a la BD establecida...');
 
     await sequelize.sync({
-      alter: true,
+      alter: true, // Sincroniza automáticamente con la BD
     });
 
     app.listen(PORT, () => {
       console.log(`Servidor escuchando en puerto ${PORT}`);
     });
   } catch (error) {
-    console.error("Error al conectar a la BD :", error);
+    console.error('Error al conectar a la BD :', error);
     process.exit(1);
   }
 };
