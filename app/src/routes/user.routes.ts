@@ -113,7 +113,7 @@ router.get('/', getUsers);
  * @swagger
  * /api/users/auth:
  *   post:
- *     summary: Crear un nuevo usuario
+ *     summary: Autenticar usuario
  *     tags:
  *       - Users
  *     requestBody:
@@ -137,7 +137,7 @@ router.get('/', getUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       200:
+ *       201:
  *         description: logueado
  *         content:
  *           application/json:
@@ -157,7 +157,7 @@ router.get('/', getUsers);
  *         content:
  *           application/json:
  *             example:
- *               error: se cayo el caserio 
+ *               error: error de servidor
  */
 
 router.post('/auth', getOneUsers);
