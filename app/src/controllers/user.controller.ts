@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 
@@ -162,7 +161,7 @@ export const getOneUsers = async (
     console.log(email); 
     // Solicita la información al servicio.
     const users = await userService.findCredential(email,password);
-
+    
         // Retorna la colección de usuarios.
         return res.status(200).json(users);
 

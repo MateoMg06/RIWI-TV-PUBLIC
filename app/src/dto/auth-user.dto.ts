@@ -18,7 +18,7 @@
  *
  * @property {string} email - Dirección de correo electrónico única del usuario.
  * @property {string} password - Contraseña
- *
+ * @property {string} role - Rol
  * @example
  * const dto: AuthUserDto = {
  *   email: "david@example.com"
@@ -38,5 +38,10 @@ export interface AuthUserDto {
      * Contraseña del usuario.
      */
     password: string;
+
+    /**
+     * Contraseña del usuario.
+     */
+    rol: string;
 }
 

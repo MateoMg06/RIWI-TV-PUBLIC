@@ -23,7 +23,9 @@ export interface IUserRepository {
     findAll(): Promise<User[]>;
 
     /**
-     * Obtiene uno de los usuarios.
+     * Obtiene email del usuario 
      */
-    findOne(email:string): Promise<User|string>;
+
+    findUserCredential(email:string):Promise<User | null>;
+
 }

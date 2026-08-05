@@ -12,29 +12,16 @@
  * Cada ruta se conecta con su respectivo controlador.
  */
 
-import { authUser, createUser, getUsers, getOneUsers } from "../controllers/user.controller";
-
 import { Router } from 'express';
+import {
+  createUser,
+  getUsers,
+  getOneUsers,
+} from '../controllers/user.controller';
 
 const router = Router();
 
 /**
- * POST /
- * -----
- * Crea un nuevo usuario en la base de datos.
- * 
- * Request Body:
- *  - `name`: string (obligatorio)
- *  - `email`: string (obligatorio, único)
- *  - `password`: string (obligatorio)
- * 
- * Response:
- *  - 201 Created: Retorna el usuario creado en formato JSON.
- *  - 500 Internal Server Error: En caso de error en la creación.
- * 
- * 
-=======
->>>>>>> upstream/main
  * @swagger
  * /api/users:
  *   post:
@@ -50,8 +37,7 @@ const router = Router();
  *             required:
  *               - name
  *               - email
- *               - password              
- *              
+ *               - password
  *             properties:
  *               name:
  *                 type: string
@@ -68,10 +54,10 @@ const router = Router();
  *         content:
  *           application/json:
  *             example:
- *               id: 3
- *               name: "John Doe"
- *               email: "john.doe@example.com"
- *               password: "1234"           
+ *               id: 1
+ *               name: John Doe
+ *               email: john.doe@example.com
+ *               password: "123"
  *       400:
  *         description: Datos inválidos
  *         content:
@@ -127,7 +113,7 @@ router.get('/', getUsers);
  * @swagger
  * /api/users/auth:
  *   post:
- *     summary: Crear un nuevo usuario
+ *     summary: Autenticar usuario
  *     tags:
  *       - Users
  *     requestBody:
@@ -151,7 +137,7 @@ router.get('/', getUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       200:
+ *       201:
  *         description: logueado
  *         content:
  *           application/json:
@@ -171,12 +157,9 @@ router.get('/', getUsers);
  *         content:
  *           application/json:
  *             example:
- *               error: se cayo el caserio 
+ *               error: error de servidor
  */
 
 router.post('/auth', getOneUsers);
-
-router.get("/", authUser);
-
 
 export default router;

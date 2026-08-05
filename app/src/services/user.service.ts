@@ -4,7 +4,8 @@ import User from "../models/user.model";
 import { CreateUserDto } from "../dto/create-user.dto";
 import repository from "../repositories/user.repository";
 import { IUserService } from "./interfaces/user.service.interface";
-import user from "../repositories/user.repository";
+import errorhandler from "../error/errorHandler";
+import { hashPassword, comparePassword } from "../utils/bcrypt";
 
 /**
  * Servicio de Usuarios
@@ -34,7 +35,12 @@ import user from "../repositories/user.repository";
 class UserService implements IUserService {
 
     async create(dto: CreateUserDto): Promise<User> {
-
+        const hashedPassword= await hashPassword(dto.password, process.env.SALT_ROUNDS as string)
+        dto.password= hashedPassword
+        const existingUser= await repository.findUserCredential(dto.email);
+        if (existingUser) {
+            throw new errorhandler(409, "Credenciales incorrectas");
+        }
         /**
          * Ejemplo de regla de negocio:
          *
@@ -88,17 +94,19 @@ class UserService implements IUserService {
         return await repository.findAll();
     }
     async findCredential(email:string,password:string): Promise<User | null> {
-        const user=await repository.findUserCredential(email,password)
-        
+        const user = await repository.findUserCredential(email)
+
         if (!user){
-           throw new Error('401 Unauthorized: Correo o contraseña inválidos');
+           throw new errorhandler(401,"not found")
+        }
+        
+        const validatorPasswords= await comparePassword(password, user.password)
+
+        if (!validatorPasswords) {
+            throw new errorhandler(401,"Credenciales inválidas"); 
         }
         
         return user ;
-    }
-
-    async findOne(email :string): Promise<User | string> {
-        return await repository.findOne(email);
     }
 
 }

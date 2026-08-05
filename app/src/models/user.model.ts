@@ -24,6 +24,7 @@ export interface UserAttributes {
   name: string;
   email: string;
   password: string;
+  role: string;
 }
 
 /**
@@ -51,6 +52,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
   /** Contraseña del usuario. */
   public password!: string;
+
+  /** Rol del usuario. */
+  public role!: string
 }
 
 /**
@@ -78,7 +82,11 @@ User.init(
       allowNull: false,
     },
     password: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    role: {
+      type: DataTypes.STRING(20),
       allowNull: false,
     }
   },
