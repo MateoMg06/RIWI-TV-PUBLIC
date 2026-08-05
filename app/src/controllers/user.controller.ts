@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { createToken } from '../utils/jwt';
+import { cookieOptions } from '../config/cookie';
 
 /**
  * ============================================================================
@@ -178,12 +180,33 @@ export const getOneUsers = async (
 export const authUser = async (_req: Request, res: Response): Promise<Response> => {
 
     try {
-
+        const {email, password, role}  = _req.body;
+        const payload= {
+          email: email,
+          password: password,
+          role: role
+        }
+        const accessToken= createToken(
+          payload,
+          process.env.JWT_SECRET as string,
+          {expiresIn: "1h"}
+        )
+        const refreshToken= createToken(
+          payload,
+          process.env.JWT_SECRET as string,
+          {expiresIn: "7d"}
+        )
         // Solicita la información al servicio.
         const users = await userService.findAll();
-
-        // Retorna la colección de usuarios.
-        return res.status(200).json(users);
+        return res
+          .status(201)
+          .cookie("accessToken", accessToken, cookieOptions)
+          .json({
+            message: "Login exitoso",
+            accessToken,
+            refreshToken,
+            user: payload
+          })
 
     } catch (error: any) {
 
