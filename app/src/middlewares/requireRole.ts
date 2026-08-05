@@ -5,11 +5,13 @@ export default function requireRole(...allowedRoles: string[]): RequestHandler {
         const user= req.user
         const userRole= user?.role
         if(!user){ 
-            return res.status(401).json({error: 'Usuario no autenticado'})
+            res.status(401).json({error: 'Usuario no autenticado'})
+            return
         }
 
         if(!allowedRoles.includes(userRole)){
-            return res.status(403).json({error: 'Usuario no autorizado'})
+            res.status(401).json({error: 'Usuario no autorizado'})
+            return
         }
         next()
     }

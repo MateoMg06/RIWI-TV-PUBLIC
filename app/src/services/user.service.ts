@@ -37,6 +37,7 @@ class UserService implements IUserService {
     async create(dto: CreateUserDto): Promise<User> {
         const hashedPassword= await hashPassword(dto.password, process.env.SALT_ROUNDS as string)
         dto.password= hashedPassword
+        dto.role= "usuario"
         const existingUser= await repository.findUserCredential(dto.email);
         if (existingUser) {
             throw new errorhandler(409, "Credenciales incorrectas");
