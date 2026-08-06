@@ -25,7 +25,6 @@ app.get('/api/test', (req, res) => {
 
 // Rutas
 app.use('/api/users', userRoutes);
-app.use('/api/auth', userRoutes);
 
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

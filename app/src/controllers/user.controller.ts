@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
+import { raw, Request, Response } from 'express';
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { createToken, verifyToken } from '../utils/jwt';
 import { cookieOptions } from '../config/cookie';
+import { JwtPayload } from 'jsonwebtoken';
 
 /**
  * ============================================================================
@@ -191,7 +192,6 @@ export const login = async (_req: Request, res: Response): Promise<Response> => 
         }
         const payload= {
           email: email,
-          password: password,
           role: role
         }
         const accessToken= createToken(
@@ -201,7 +201,7 @@ export const login = async (_req: Request, res: Response): Promise<Response> => 
         )
         const refreshToken= createToken(
           payload,
-          String(process.env.JWT_SECRET),
+          String(process.env.JWT_REFRESH_SECRET),
           {expiresIn: "7d"}
         )
         return res
@@ -231,28 +231,28 @@ export const refresh = async (_req: Request, res: Response): Promise<Response> =
 
     try {
         const {refreshToken}  = _req.body;
-        const {user}  = _req.body;
         if(!refreshToken){
           return res.status(401).json({error: "Usuario sin token"})
         }
-        const data= verifyToken(refreshToken, String(process.env.JWT_SECRET))
+        const payload= verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as JwtPayload
         
-        if(!data){
+        if(!payload){
           return res.status(401).json({error: "Token inválido"})
         }
 
         const newToken= createToken(
           {
-            email: user.email,
-            role: user.role
+            email: payload.email,
+            role: payload.role
           },
           String(process.env.JWT_SECRET),
           {expiresIn: "1h"}
         )
         return res
           .status(201)
-          .cookie("newToken", newToken, cookieOptions)
+          .cookie("accessToken", newToken, cookieOptions)
           .json({newToken: newToken})
+
     } catch (error: any) {
 
         return res.status(500).json({

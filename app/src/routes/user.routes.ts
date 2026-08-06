@@ -163,7 +163,7 @@ router.get('/getUsers', getUsers);
  *               error: error de servidor
  */
 
-router.post('/getOneUsers', getOneUsers);
+router.get('/getOneUsers', getOneUsers);
 router.post('/login', login);
 router.post('/refresh', refresh);
 router.post('/logout', logout);
