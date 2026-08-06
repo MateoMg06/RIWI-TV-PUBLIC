@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { createToken } from '../utils/jwt';
+import { createToken, verifyToken } from '../utils/jwt';
 import { cookieOptions } from '../config/cookie';
 
 /**
@@ -196,8 +196,6 @@ export const authUser = async (_req: Request, res: Response): Promise<Response> 
           process.env.JWT_SECRET as string,
           {expiresIn: "7d"}
         )
-        // Solicita la información al servicio.
-        const users = await userService.findAll();
         return res
           .status(201)
           .cookie("accessToken", accessToken, cookieOptions)
@@ -205,9 +203,48 @@ export const authUser = async (_req: Request, res: Response): Promise<Response> 
             message: "Login exitoso",
             accessToken,
             refreshToken,
-            user: payload
+            user: {
+              email: payload.email,
+              role: payload.role
+            }
           })
 
+    } catch (error: any) {
+
+        return res.status(500).json({
+            error: error.message
+        });
+
+    }
+
+};
+
+export const refresh = async (_req: Request, res: Response): Promise<Response> => {
+
+    try {
+        const {refreshToken}  = _req.body;
+        const {user}  = _req.body;
+        if(!refreshToken){
+          return res.status(401).json({error: "Usuario sin token"})
+        }
+        const data= verifyToken(refreshToken, process.env.JWT_SECRET as string)
+        
+        if(!data){
+          return res.status(401).json({error: "Token inválido"})
+        }
+
+        const newToken= createToken(
+          {
+            email: user.email,
+            role: user.role
+          },
+          process.env.JWT_SECRET as string,
+          {expiresIn: "1h"}
+        )
+        return res
+          .status(201)
+          .cookie("newToken", newToken, cookieOptions)
+          .json({newToken: newToken})
     } catch (error: any) {
 
         return res.status(500).json({
