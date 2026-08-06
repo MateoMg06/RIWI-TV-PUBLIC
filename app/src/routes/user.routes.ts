@@ -17,6 +17,9 @@ import {
   createUser,
   getUsers,
   getOneUsers,
+  logout,
+  login,
+  refresh,
 } from '../controllers/user.controller';
 
 const router = Router();
@@ -71,7 +74,7 @@ const router = Router();
  *             example:
  *               error: No se pudo crear el usuario
  */
-router.post('/', createUser);
+router.post('/register', createUser);
 
 /**
  * @swagger
@@ -107,7 +110,7 @@ router.post('/', createUser);
  *             example:
  *               error: Error al obtener los usuarios
  */
-router.get('/', getUsers);
+router.get('/getUsers', getUsers);
 
 /**
  * @swagger
@@ -160,6 +163,9 @@ router.get('/', getUsers);
  *               error: error de servidor
  */
 
-router.post('/auth', getOneUsers);
+router.post('/getOneUsers', getOneUsers);
+router.post('/login', login);
+router.post('/refresh', refresh);
+router.post('/logout', logout);
 
 export default router;

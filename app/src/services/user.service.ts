@@ -35,7 +35,7 @@ import { hashPassword, comparePassword } from "../utils/bcrypt";
 class UserService implements IUserService {
 
     async create(dto: CreateUserDto): Promise<User> {
-        const hashedPassword= await hashPassword(dto.password, process.env.SALT_ROUNDS as string)
+        const hashedPassword= await hashPassword(dto.password, Number(process.env.SALT_ROUNDS))
         dto.password= hashedPassword
         dto.role= "usuario"
         const existingUser= await repository.findUserCredential(dto.email);

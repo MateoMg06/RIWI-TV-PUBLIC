@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 
-export function hashPassword(password: string, saltRounds: string){
+export function hashPassword(password: string, saltRounds: number){
     return bcrypt.hash(password, saltRounds)
 }
 

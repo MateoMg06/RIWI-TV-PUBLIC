@@ -177,10 +177,18 @@ export const getOneUsers = async (
 
 };
 
-export const authUser = async (_req: Request, res: Response): Promise<Response> => {
+export const login = async (_req: Request, res: Response): Promise<Response> => {
+
+    const {email, password, role}  = _req.body;
+    if (!email || !password) { // Validar que se proporcionen tanto el correo del usuario como su contraseña
+        return res.status(400).json({ error: 'Correo y contraseña son requeridos' });
+    }
 
     try {
-        const {email, password, role}  = _req.body;
+        const validUser= await userService.findCredential(email, password)
+        if(!validUser){
+          return res.status(401).json({error: "Unauthorized access due to any invalid credential"})
+        }
         const payload= {
           email: email,
           password: password,
@@ -188,12 +196,12 @@ export const authUser = async (_req: Request, res: Response): Promise<Response> 
         }
         const accessToken= createToken(
           payload,
-          process.env.JWT_SECRET as string,
+          String(process.env.JWT_SECRET),
           {expiresIn: "1h"}
         )
         const refreshToken= createToken(
           payload,
-          process.env.JWT_SECRET as string,
+          String(process.env.JWT_SECRET),
           {expiresIn: "7d"}
         )
         return res
@@ -227,7 +235,7 @@ export const refresh = async (_req: Request, res: Response): Promise<Response> =
         if(!refreshToken){
           return res.status(401).json({error: "Usuario sin token"})
         }
-        const data= verifyToken(refreshToken, process.env.JWT_SECRET as string)
+        const data= verifyToken(refreshToken, String(process.env.JWT_SECRET))
         
         if(!data){
           return res.status(401).json({error: "Token inválido"})
@@ -238,7 +246,7 @@ export const refresh = async (_req: Request, res: Response): Promise<Response> =
             email: user.email,
             role: user.role
           },
-          process.env.JWT_SECRET as string,
+          String(process.env.JWT_SECRET),
           {expiresIn: "1h"}
         )
         return res
@@ -254,3 +262,21 @@ export const refresh = async (_req: Request, res: Response): Promise<Response> =
     }
 
 };
+
+export const logout= async (_req: Request, res: Response): Promise<Response> => {
+
+    try {
+
+        return res
+          .status(200)
+          .clearCookie("accessToken", cookieOptions)
+          .json({message: "Sesión cerrada correctamente"})
+
+    } catch (error: any) {
+
+        return res.status(500).json({
+              error: error.message
+          });
+
+    }
+}
