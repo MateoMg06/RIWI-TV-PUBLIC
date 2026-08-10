@@ -1,29 +1,28 @@
 // app/src/repositories/interfaces/movie.repository.interface.ts
 
-import movie, { movieCreationAttributes } from "../../models/movie.model";
+import Movie, { MovieCreationAttributes } from "../../models/movie.model";
 
 /**
  * Contrato del Repositorio de Películas
  * -----------------------------------
- * Define las operaciones de persistencia disponibles para la entidad User.
+ * Define las operaciones de persistencia disponibles para la entidad Movie.
  *
  * Cualquier implementación deberá cumplir esta interfaz.
  */
-
-export interface ImovieRepository {
-
-    /**
-     * Crea un usuario.
-     */
-    create(data: movieCreationAttributes): Promise<movie>;
+export interface IMovieRepository {
 
     /**
-     * Obtiene todos los usuarios.
+     * Crea una película.
      */
-    findAll(): Promise<movie[]>;
+    create(data: MovieCreationAttributes): Promise<Movie>;
 
     /**
-     * Obtiene uno de los usuarios.
+     * Obtiene todas las películas.
      */
-    findOne(name:string): Promise<movie|string>;
+    findAll(): Promise<Movie[]>;
+
+    /**
+     * Obtiene una película por nombre.
+     */
+    findOne(name: string): Promise<Movie | null>;
 }

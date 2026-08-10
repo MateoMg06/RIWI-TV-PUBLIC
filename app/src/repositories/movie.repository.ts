@@ -1,49 +1,40 @@
 // app/src/repositories/movie.repository.ts
 
-import Movie, { movieCreationAttributes } from '../models/movie.model';
-import { ImovieRepository } from './interfaces/movie.repository.interface';
-import movie from '../models/movie.model';
+import Movie, { MovieCreationAttributes } from '../models/movie.model';
+import { IMovieRepository } from './interfaces/movie.repository.interface';
 
 /**
  * Repositorio de Películas
  * -----------------------
  * Implementa el patrón Repository para encapsular todas las operaciones
- * de persistencia relacionadas con la entidad User.
+ * de persistencia relacionadas con la entidad Movie.
  *
  * Esta clase es la única responsable de interactuar con Sequelize.
  */
+class MovieRepository implements IMovieRepository {
 
-class movieRepository implements ImovieRepository {
     /**
-     * Crea un nuevo usuario.
+     * Crea una nueva película.
      */
-    async create(data: movieCreationAttributes): Promise<movie> {
-
-        return await movie.create(data);
-
+    async create(data: MovieCreationAttributes): Promise<Movie> {
+        return await Movie.create(data);
     }
 
     /**
-     * Obtiene todos los usuarios.
+     * Obtiene todas las películas.
      */
-    async findAll(): Promise<movie[]> {
-
-        return await movie.findAll();
-
+    async findAll(): Promise<Movie[]> {
+        return await Movie.findAll();
     }
-    
-    /**
-     * Obtiene uno de los usuarios.
-     */
-    async findOne(name: string): Promise<movie| string>{
 
-        const resposes =  await movie.findOne({
-            where : {name : name}
+    /**
+     * Obtiene una película por nombre.
+     */
+    async findOne(name: string): Promise<Movie | null> {
+        return await Movie.findOne({
+            where: { name: name }
         });
-
-        return resposes ? resposes : "no lo encontre";
     }
-
 }
 
-export default new movieRepository();
+export default new MovieRepository();
