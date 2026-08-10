@@ -11,15 +11,15 @@ class UserRepository implements IUserRepository {
   }
 
   async findOne(email: string): Promise<User | null> {
-    return await User.findOne({
-      where: { email },
-    });
+    return await User.findOne({ where: { email } });
   }
 
-  async findUserCredential(email: string, password: string): Promise<User | null> {
-    return await User.findOne({
-      where: { email, password },
-    });
+  async findUserCredential(email: string, password?: string): Promise<User | null> {
+    if (password) {
+      return await User.findOne({ where: { email, password } });
+    }
+
+    return await User.findOne({ where: { email } });
   }
 }
 

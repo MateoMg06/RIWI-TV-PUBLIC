@@ -1,18 +1,3 @@
-// app/src/models/user.model.ts
-
-/**
- * Modelo de Usuario
- * -----------------
- * Este archivo define el modelo `User` de Sequelize, que representa la tabla `users` en la base de datos.
- *
- * Contiene:
- *  - Atributos del modelo (`UserAttributes`).
- *  - Atributos requeridos para la creación (`UserCreationAttributes`).
- *  - Definición del modelo con sus columnas y restricciones.
- *
- * Este modelo es utilizado por los servicios y controladores para realizar operaciones CRUD.
- */
-
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
@@ -21,6 +6,7 @@ export interface UserAttributes {
   name: string;
   email: string;
   password: string;
+  role: string;
 }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
@@ -30,6 +16,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public name!: string;
   public email!: string;
   public password!: string;
+  public role!: string;
 }
 
 User.init(
@@ -49,8 +36,13 @@ User.init(
       allowNull: false,
     },
     password: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    role: {
       type: DataTypes.STRING(20),
       allowNull: false,
+      defaultValue: 'usuario',
     },
   },
   {

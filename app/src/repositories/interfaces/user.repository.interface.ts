@@ -4,5 +4,5 @@ export interface IUserRepository {
   create(data: UserCreationAttributes): Promise<User>;
   findAll(): Promise<User[]>;
   findOne(email: string): Promise<User | null>;
-  findUserCredential(email: string, password: string): Promise<User | null>;
+  findUserCredential(email: string, password?: string): Promise<User | null>;
 }
