@@ -18,7 +18,7 @@
  *
  * @property {string} name - Nombre completo del usuario.
  * @property {string} email - Dirección de correo electrónico única del usuario.
-*   @property {string} password - Contraseña del usuario.
+ * @property {string} password - Contraseña del usuario.
  * @property {string} role - Rol del usuario.
 
  * @example

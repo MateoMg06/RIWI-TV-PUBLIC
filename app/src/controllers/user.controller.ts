@@ -1,4 +1,4 @@
-import { raw, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { createToken, verifyToken } from '../utils/jwt';
@@ -163,10 +163,10 @@ export const getOneUsers = async (
     const {email,password}  = _req.body;
     console.log(email); 
     // Solicita la información al servicio.
-    const users = await userService.findCredential(email,password);
+    const user = await userService.findCredential(email,password);
     
         // Retorna la colección de usuarios.
-        return res.status(200).json(users);
+        return res.status(200).json(user);
 
     } catch (error: any) {
 
@@ -180,7 +180,8 @@ export const getOneUsers = async (
 
 export const login = async (_req: Request, res: Response): Promise<Response> => {
 
-    const {email, password, role}  = _req.body;
+    const {email, password}  = _req.body;
+    const user = await userService.findCredential(email,password);
     if (!email || !password) { // Validar que se proporcionen tanto el correo del usuario como su contraseña
         return res.status(400).json({ error: 'Correo y contraseña son requeridos' });
     }
@@ -188,16 +189,17 @@ export const login = async (_req: Request, res: Response): Promise<Response> => 
     try {
         const validUser= await userService.findCredential(email, password)
         if(!validUser){
-          return res.status(401).json({error: "Unauthorized access due to any invalid credential"})
+          return res.status(401).json({error: "Acceso no autorizado, credenciales inválidas"})
         }
         const payload= {
+          name: user?.name,
           email: email,
-          role: role
+          role: user?.role,
         }
         const accessToken= createToken(
           payload,
           String(process.env.JWT_SECRET),
-          {expiresIn: "1h"}
+          {expiresIn: "15m"}
         )
         const refreshToken= createToken(
           payload,
@@ -212,8 +214,9 @@ export const login = async (_req: Request, res: Response): Promise<Response> => 
             accessToken,
             refreshToken,
             user: {
+              name: payload.name,
               email: payload.email,
-              role: payload.role
+              role: payload.role,
             }
           })
 
@@ -242,8 +245,9 @@ export const refresh = async (_req: Request, res: Response): Promise<Response> =
 
         const newToken= createToken(
           {
+            name: payload.name,
             email: payload.email,
-            role: payload.role
+            role: payload.role,
           },
           String(process.env.JWT_SECRET),
           {expiresIn: "1h"}
