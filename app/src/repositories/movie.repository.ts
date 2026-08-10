@@ -33,7 +33,7 @@ class movieRepository implements ImovieRepository {
     }
     
     /**
-     * Obtiene uno de los peliculas.
+     * Obtiene uno de los usuarios.
      */
     async findOne(name: string): Promise<movie| string>{
 

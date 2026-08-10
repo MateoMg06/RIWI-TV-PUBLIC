@@ -20,20 +20,6 @@
  * @property {string} clasification - Clasificación de la película.
  * @property {number} duration - Duración de la película en minutos.
  * @property {string} gener - Género de la película.
- * @property {string} director - director de la pelicula
- * @property {string} idioma - idioma de la pelicula
-   @property {string} traduccion - traduccion de la pelicula
-   @property {string} formatos - formatos de la pelicula
-   @property {string} horarios -  horarios de la pelicula
-   @property {number} valorEntradaFormato valor de la entrada
-  @property {date} fechaEstreno fecha de estreno
-  @property {string} actoresPrincipales actores de la pelicula
-  @property {string} sinopsis sinopsis de la pelicula
-  @property {string} trailer trailer de la pelicula
-  @property {string} banner banner de la pelicula
-  @property {string} poster
-  @property {string} posterOficial
-
  * @example
  * const dto: CreateMovieDto = {
  *   name: "Spiderman",
@@ -64,31 +50,5 @@ export interface CreateMovieDto {
      * Género de la película.
      */
     gener: string;
-
-    director :string;
-
-    idioma :string;
-
-    traduccion: string;
-
-    formatos: string;
-
-    horarios:string;
-
-    valorEntradaFormato: number;
-    
-    fechaEstreno: Date;
-
-    actoresPrincipales: string;
-
-    sinopsis: string;
-
-    trailer: string;
-
-    banner: string;
-
-    poster:string;
-    
-    posterOficial: string;
 }
 

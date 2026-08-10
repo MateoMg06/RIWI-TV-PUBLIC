@@ -13,4 +13,8 @@ export interface IUserService {
 
     findAll(): Promise<User[]>;
 
+    findOne(email:string): Promise<User | string>;
+
+    findUserCredential(email:string,password:string): Promise<User | null>;
+
 }

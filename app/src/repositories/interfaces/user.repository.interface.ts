@@ -23,11 +23,12 @@ export interface IUserRepository {
     findAll(): Promise<User[]>;
 
     /**
-     * Obtiene email del usuario 
+     * Obtiene uno de los usuarios.
      */
+    findOne(email:string): Promise<User|string>;
 
-    findUserCredential(email:string):Promise<User | null>;
-
-   
-
+    /**
+     * Obtiene uno de los usuarios con sus credenciales.
+     */
+    findUserCredential(email: string, password: string): Promise<User|string>;
 }

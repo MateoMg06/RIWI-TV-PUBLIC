@@ -14,25 +14,48 @@ import user from '../services/user.service';
  */
 
 class UserRepository implements IUserRepository {
-  /**
-   * Crea un nuevo usuario.
-   */
-  async create(data: UserCreationAttributes): Promise<User> {
-    return await User.create(data);
-  }
+    /**
+     * Crea un nuevo usuario.
+     */
+    async create(data: UserCreationAttributes): Promise<User> {
 
-  /**
-   * Obtiene todos los usuarios.
-   */
-  async findAll(): Promise<User[]> {
-    return await User.findAll();
-  }
-  /**
-   * Obtiene las credenciales requeridas.
-   */
-  async findUserCredential(email:string): Promise<User | null> {
-    return await User.findOne({ where: { email:email} });
-  }
+        return await User.create(data);
+
+    }
+
+    /**
+     * Obtiene todos los usuarios.
+     */
+    async findAll(): Promise<User[]> {
+
+        return await User.findAll();
+
+    }
+    
+    /**
+     * Obtiene uno de los usuarios.
+     */
+    async findOne(email: string): Promise<User| string>{
+
+        const resposes =  await User.findOne({
+            where : {email : email}
+        });
+
+        return resposes ? resposes : "no lo encontre";
+    }
+
+    
+
+
+    async findUserCredential(email: string, password: string): Promise<User| string>{
+
+        const resposes =  await User.findUserCredential({
+            where : {email : email, password: password}
+        });
+
+        return resposes ? resposes : "no lo encontre";
+    }
+
 }
 
 export default new UserRepository();

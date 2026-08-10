@@ -4,7 +4,7 @@ import User from "../models/user.model";
 import { CreateUserDto } from "../dto/create-user.dto";
 import repository from "../repositories/user.repository";
 import { IUserService } from "./interfaces/user.service.interface";
-import errorhandler from "../error/errorHandler";
+import user from "../repositories/user.repository";
 
 /**
  * Servicio de Usuarios
@@ -87,21 +87,18 @@ class UserService implements IUserService {
     async findAll(): Promise<User[]> {
         return await repository.findAll();
     }
-    async findCredential(email:string,password:string): Promise<User | null> {
-        const user = await repository.findUserCredential(email)
-
-        if (!user){
-           throw new errorhandler(401,"not found")
-        }
+    async findCredential(email:string,password:string): Promise<User | string> {
+        const user=await repository.findUserCredential(email,password)
         
-        const validatorPasswords = user.password === password
-
-        if (!validatorPasswords) {
-            throw new errorhandler(401,"Credenciales invalidas"); 
+        if (!user){
+           throw new Error('401 Unauthorized: Correo o contraseña inválidos');
         }
-
         
         return user ;
+    }
+
+    async findOne(email :string): Promise<User | string> {
+        return await repository.findOne(email);
     }
 
 }

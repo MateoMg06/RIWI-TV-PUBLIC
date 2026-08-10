@@ -1,16 +1,29 @@
 // app/src/services/interfaces/movie.service.interface.ts
 
-import movie from "../../models/movie.model";
-import { CreateMovieDto } from "../../dto/create-movie.dto";
+import { MovieCreationAttributes } from "../../models/movie.model";
+import { GetMovieCatalogDto } from "../../dto/get-movie-catalog.dto";
 
 /**
- * Contrato del Servicio de Películas.
+ * Contrato del Servicio de Películas
+ * -----------------------------------
+ * Define la lógica de negocio disponible para la entidad Movie.
+ *
+ * Cualquier implementación deberá cumplir esta interfaz.
  */
+export interface IMovieService {
 
-export interface ImovieService {
+    /**
+     * Registra una nueva película.
+     */
+    create(data: MovieCreationAttributes): Promise<GetMovieCatalogDto>;
 
-    create(dto: CreateMovieDto): Promise<movie>;
+    /**
+     * Obtiene la cartelera completa de películas.
+     */
+    getCatalog(): Promise<GetMovieCatalogDto[]>;
 
-    findAll(): Promise<movie[]>;
-
+    /**
+     * Obtiene una película por nombre.
+     */
+    getByName(name: string): Promise<GetMovieCatalogDto>;
 }

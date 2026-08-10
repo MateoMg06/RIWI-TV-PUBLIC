@@ -26,7 +26,7 @@
 - [Documentation](#-documentation)
 - [Installation](#-installation)
 - [Docker](#-docker)
-- [Contributors And Authors](#-contributors-and-authors).
+- [Contributors And Authors](#-contributors-and-authors)
 
 ---
 
