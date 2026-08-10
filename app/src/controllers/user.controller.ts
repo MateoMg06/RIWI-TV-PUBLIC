@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 
 import userService from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import errorhandler from '../error/errorHandler';
 
 /**
  * ============================================================================
@@ -163,17 +162,36 @@ export const getOneUsers = async (
     console.log(email); 
     // Solicita la información al servicio.
     const users = await userService.findCredential(email,password);
-    
-    // Retorna la colección de usuarios.
-    return res.status(201).json(users);
-  } catch (error: any) {
-    if (error instanceof errorhandler) {
-      return res.status(error.estado).json({
-        error: error.message,
-      })
+
+        // Retorna la colección de usuarios.
+        return res.status(200).json(users);
+
+    } catch (error: any) {
+
+        return res.status(500).json({
+            error: error.message
+        });
+
     }
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
+
+};
+
+export const authUser = async (_req: Request, res: Response): Promise<Response> => {
+
+    try {
+
+        // Solicita la información al servicio.
+        const users = await userService.findAll();
+
+        // Retorna la colección de usuarios.
+        return res.status(200).json(users);
+
+    } catch (error: any) {
+
+        return res.status(500).json({
+            error: error.message
+        });
+
+    }
+
 };

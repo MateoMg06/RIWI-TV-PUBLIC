@@ -7,9 +7,9 @@
  * - Arrancar el servidor (app.listen).
  * - Es el que realmente ejecutas cuando corres npm run dev o docker-compose up.
  */
-
-import app from './server';
-import sequelize from './config/database';
+import 'dotenv/config';
+import app from "./server";
+import sequelize from "./config/database";
 
 const PORT = process.env.APP_PORT || 3000;
 
@@ -19,8 +19,8 @@ const start = async () => {
     console.log('Conexión a la BD establecida...');
 
     await sequelize.sync({
-    alter: true,
-    }); // crea tablas si no existen
+      alter: true, // Sincroniza automáticamente con la BD
+    });
 
     app.listen(PORT, () => {
       console.log(`Servidor escuchando en puerto ${PORT}`);

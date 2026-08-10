@@ -1,15 +1,16 @@
-// app/src/services/user.service.ts
+// app/src/services/movie.service.ts
 
-import User from "../models/user.model";
-import { CreateUserDto } from "../dto/create-user.dto";
-import repository from "../repositories/user.repository";
-import { IUserService } from "./interfaces/user.service.interface";
-import user from "../repositories/user.repository";
+import movie from "../models/movie.model";
+import { CreateMovieDto } from "../dto/create-movie.dto";
+import repository from "../repositories/movie.repository";
+import { ImovieService } from "./interfaces/movie.service.interface";
+import Movie from "../repositories/movie.repository";
+
 
 /**
- * Servicio de Usuarios
- * --------------------
- * Contiene toda la lógica de negocio relacionada con la entidad User.
+ * Servicio de Películas
+ * ---------------------
+ * Contiene toda la lógica de negocio relacionada con la entidad Movie.
  *
  * Responsabilidades:
  *  - Validar reglas de negocio.
@@ -31,9 +32,9 @@ import user from "../repositories/user.repository";
  * El Repository únicamente conoce cómo guardar y consultar información.
  */
 
-class UserService implements IUserService {
+class movieService implements ImovieService {
 
-    async create(dto: CreateUserDto): Promise<User> {
+    async create(dto: CreateMovieDto): Promise<movie> {
 
         /**
          * Ejemplo de regla de negocio:
@@ -68,39 +69,41 @@ class UserService implements IUserService {
      * controlador.
      *
      * @async
-     * @returns {Promise<User[]>} Promesa que resuelve con un arreglo de objetos
-     *                            de tipo {@link User} que representan los usuarios
-     *                            encontrados en la base de datos.
+     * @returns {Promise<movie[]>} Promesa que resuelve con un arreglo de objetos
+     *                            de tipo {@link movie} que representan las películas
+     *                            encontradas en la base de datos.
      *
      * @example
-     * const users = await userService.findAll();
+     * const movies = await movieService.findAll();
      *
-     * console.log(users);
+     * console.log(movies);
      * // [
      * //   {
      * //     id: 1,
-     * //     name: "David",
-     * //     email: "david@example.com"
+     * //     name: "spider man",
+     * //     classification: "PG-13",
+     * //     duration: 120,
+     * //     genre: "Action"
      * //   }
      * // ]
      */
-    async findAll(): Promise<User[]> {
+    async findAll(): Promise<movie[]> {
         return await repository.findAll();
     }
-    async findCredential(email:string,password:string): Promise<User | string> {
-        const user=await repository.findUserCredential(email,password)
+    async findCredential(name: string): Promise<movie | string>  {
+        const movie=await repository.findOne(name)
         
-        if (!user){
-           throw new Error('401 Unauthorized: Correo o contraseña inválidos');
+        if (!movie){
+           throw new Error('401 nombre inválido');
         }
         
-        return user ;
+        return movie;
     }
 
-    async findOne(email :string): Promise<User | string> {
-        return await repository.findOne(email);
+    async findOne(name :string): Promise<movie | string> {
+        return await repository.findOne(name);
     }
 
 }
 
-export default new UserService();
+export default new movieService();
