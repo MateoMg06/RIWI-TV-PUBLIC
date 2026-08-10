@@ -51,7 +51,7 @@ class MovieController {
      */
     async getByName(req: Request, res: Response): Promise<void> {
         try {
-            const { name } = req.params;
+            const name = Array.isArray(req.params.name) ? req.params.name[0] : req.params.name;
             const movie = await movieService.getByName(name);
             res.status(200).json(movie);
         } catch (error) {

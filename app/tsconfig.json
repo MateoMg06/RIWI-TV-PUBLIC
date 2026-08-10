@@ -10,6 +10,6 @@
     "outDir": "./dist",
     "types": ["node"]
   },
-  "include": ["src", "src/types", "src/middlewares"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

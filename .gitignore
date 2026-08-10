@@ -95,4 +95,8 @@ reports/
 *.orig
 
 # Package
+<<<<<<< HEAD
 package-lock.json
+=======
+package-lock.json
+>>>>>>> develop
