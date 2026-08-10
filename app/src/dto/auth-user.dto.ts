@@ -1,7 +1,7 @@
 // app/src/dto/create-user.dto.ts
 
 /**
- * DTO - Creación de Usuario
+ * DTO - Autenticación de Usuario
  * -------------------------
  * Este DTO representa la información necesaria para crear un nuevo usuario.
  *
@@ -16,20 +16,27 @@
 /**
  * Objeto de transferencia de datos para la creación de usuarios.
  *
- * @property {string} name - Nombre completo del usuario.
  * @property {string} email - Dirección de correo electrónico única del usuario.
- * @property {string} password - Contraseña del usuario.
+ * @property {string} password - Contraseña
  *
  * @example
- * const dto: CreateUserDto = {
- *   name: "David Mtz",
- *   email: "david@example.com",
- *   password: "123"
+ * const dto: AuthUserDto = {
+ *   email: "david@example.com"
+ *   password: '1234'
  * };
  */
 
-export interface CreateUserDto {
-  name: string;
-  email: string;
-  password: string;
+export interface AuthUserDto {
+
+
+    /**
+     * Correo electrónico del usuario.
+     */
+    email: string;
+
+    /**
+     * Contraseña del usuario.
+     */
+    password: string;
 }
+

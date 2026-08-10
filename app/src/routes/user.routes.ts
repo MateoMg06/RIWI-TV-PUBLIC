@@ -1,22 +1,22 @@
-// app/src/routes/user.routes.ts
-
 /**
  * Rutas de Usuario
  * ----------------
- * Este archivo define las rutas HTTP relacionadas con la entidad `User`.
+ * Este archivo define los endpoints HTTP relacionados con la entidad User.
  *
  * Endpoints disponibles:
- *  - `POST /users/` : Crear un nuevo usuario.
- *  - `GET /users/`  : Obtener todos los usuarios registrados.
- *
- * Cada ruta se conecta con su respectivo controlador.
+ *  - POST /api/users/ : Crear un usuario.
+ *  - GET /api/users/ : Obtener todos los usuarios.
+ *  - POST /api/users/auth : Autenticar un usuario.
+ *  - POST /api/users/login : Login alternativo.
  */
 
 import { Router } from 'express';
+
 import {
+  authUser,
   createUser,
-  getUsers,
   getOneUsers,
+  getUsers,
 } from '../controllers/user.controller';
 
 const router = Router();
@@ -51,25 +51,10 @@ const router = Router();
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
- *         content:
- *           application/json:
- *             example:
- *               id: 1
- *               name: John Doe
- *               email: john.doe@example.com
- *               password: "123"
  *       400:
  *         description: Datos inválidos
- *         content:
- *           application/json:
- *             example:
- *               error: El correo ya existe
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: No se pudo crear el usuario
  */
 router.post('/', createUser);
 
@@ -83,29 +68,8 @@ router.post('/', createUser);
  *     responses:
  *       200:
  *         description: Lista de usuarios obtenida exitosamente
- *         content:
- *           application/json:
- *             example:
- *               - id: 1
- *                 name: John Doe
- *                 email: john.doe@example.com
- *                 password: "123"
- *               - id: 2
- *                 name: Jane Doe
- *                 email: jane.doe@example.com
- *                 password: "123"
- *       400:
- *         description: Solicitud inválida
- *         content:
- *           application/json:
- *             example:
- *               error: Parámetros incorrectos
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: Error al obtener los usuarios
  */
 router.get('/', getUsers);
 
@@ -123,13 +87,9 @@ router.get('/', getUsers);
  *           schema:
  *             type: object
  *             required:
- *               - name
  *               - email
  *               - password
  *             properties:
- *               name:
- *                 type: string
- *                 example: John Doe
  *               email:
  *                 type: string
  *                 example: john.doe@example.com
@@ -137,29 +97,44 @@ router.get('/', getUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       201:
- *         description: logueado
- *         content:
- *           application/json:
- *             example:
- *               id: 1
- *               name: John Doe
- *               email: john.doe@example.com
- *               password: "123"
+ *       200:
+ *         description: Usuario autenticado exitosamente
  *       401:
- *         description: Correo o contraseña incorrecto 
- *         content:
- *           application/json:
- *             example:
- *               error: Correo o contraseña incorrecto
+ *         description: Credenciales inválidas
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: error de servidor
  */
-
 router.post('/auth', getOneUsers);
+
+/**
+ * @swagger
+ * /api/users/login:
+ *   post:
+ *     summary: Login alternativo de usuario
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: john.doe@example.com
+ *               password:
+ *                 type: string
+ *                 example: "123"
+ *     responses:
+ *       200:
+ *         description: Login correcto
+ *       401:
+ *         description: Credenciales incorrectas
+ */
+router.post('/login', authUser);
 
 export default router;
