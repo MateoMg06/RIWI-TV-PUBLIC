@@ -44,6 +44,15 @@ class UserService implements IUserService {
 
     return user;
   }
+
+  // async verifyAttempts(email: string): Promise<boolean>{
+  //   const user= await repository.findUserCredential(email)
+  //   const attempts: number= user?.failedLoginAttempts ? user?.failedLoginAttempts : 0
+  //   if (attempts >= 5){
+  //     throw new errorhandler(401, 'Acceso no autorizado');
+  //   }
+  //   return isValid
+  // }
 }
 
 export default new UserService();

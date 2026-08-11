@@ -84,8 +84,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     const user = await userService.findCredential(email, password);
     const payload = {
       name: user?.name,
-      email: user?.email,
-      role: user?.role,
+      membership: user?.membership
     };
 
     const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: '15m' });
@@ -100,8 +99,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         refreshToken,
         user: {
           name: payload.name,
-          email: payload.email,
-          role: payload.role,
+          membership: payload.membership
         },
       });
   } catch (error: any) {
@@ -130,8 +128,7 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
     const newToken = createToken(
       {
         name: payload.name,
-        email: payload.email,
-        role: payload.role,
+        membership: payload.membership
       },
       String(process.env.JWT_SECRET),
       { expiresIn: '1h' }
