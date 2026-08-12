@@ -26,5 +26,8 @@ export interface IMovieRepository {
      */
     findOne(name: string): Promise<Movie | null>;
 
-    
+    /**
+     * Obtiene una película por ID.
+     */
+    findByPk(id: number): Promise<Movie | null>;
 }

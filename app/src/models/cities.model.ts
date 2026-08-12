@@ -20,8 +20,7 @@
    export interface CityAttributes {
     id: number;
     city: string;
-   
-    
+    departmentId: number;
   }
 
   export interface CityCreationAttributes extends Optional<CityAttributes, "id"> {}
@@ -29,8 +28,7 @@
   class City extends Model<CityAttributes, CityCreationAttributes> implements CityAttributes {
     public id!: number;
     public city!: string;
-   
-    
+    public departmentId!: number;
   }
 
   City.init(
@@ -43,12 +41,17 @@
       city: {
         type: DataTypes.STRING(100),
         allowNull: false,
+      },
+      departmentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: "department_id",
       }
     },
     {
       sequelize,
-      modelName: "Department",
-      tableName: "department",
+      modelName: "City",
+      tableName: "cities",
       timestamps: true,
     }
   );

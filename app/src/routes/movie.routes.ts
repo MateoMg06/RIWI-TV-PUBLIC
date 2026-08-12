@@ -49,6 +49,29 @@ router.get("/", movieController.getCatalog);
 
 /**
  * @swagger
+ * /api/movies/{id}/cinemas:
+ *   get:
+ *     summary: Obtiene los cines donde se proyecta una película
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la película
+ *     responses:
+ *       200:
+ *         description: Lista de cines donde se proyecta la película
+ *       400:
+ *         description: ID inválido
+ *       404:
+ *         description: Película no encontrada
+ */
+router.get("/:id/cinemas", movieController.getMovieCinemas);
+
+/**
+ * @swagger
  * /api/movies/{name}:
  *   get:
  *     summary: Obtiene una película por nombre

@@ -36,6 +36,13 @@ class MovieRepository implements IMovieRepository {
         });
     }
 
+    /**
+     * Obtiene una película por ID.
+     */
+    async findByPk(id: number): Promise<Movie | null> {
+        return await Movie.findByPk(id);
+    }
+
 
 }
 

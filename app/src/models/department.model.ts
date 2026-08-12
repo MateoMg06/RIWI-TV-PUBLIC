@@ -20,8 +20,7 @@
    export interface DepartmentAttributes {
     id: number;
     department: string;
-   
-    
+    countryId: number;
   }
 
   export interface DepartmentCreationAttributes extends Optional<DepartmentAttributes, "id"> {}
@@ -29,8 +28,7 @@
   class Department extends Model<DepartmentAttributes, DepartmentCreationAttributes> implements DepartmentAttributes {
     public id!: number;
     public department!: string;
-   
-    
+    public countryId!: number;
   }
 
   Department.init(
@@ -43,6 +41,11 @@
       department: {
         type: DataTypes.STRING(100),
         allowNull: false,
+      },
+      countryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        field: "country_id",
       }
     },
     {

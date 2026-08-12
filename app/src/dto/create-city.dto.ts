@@ -19,13 +19,13 @@
  * @property {string} city - Nombre de la ciudad.
  *
  * @example
- * const dto: CreateCitytDto = {
+ * const dto: CreateCityDto = {
  *   city: "Barranquilla"
  *   
  * };
  */
 
-export interface CreateCitytDto {
+export interface CreateCityDto {
 
     /**
      * Nombre de la ciudad.
