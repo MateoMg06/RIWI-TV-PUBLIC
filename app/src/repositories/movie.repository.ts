@@ -35,6 +35,8 @@ class MovieRepository implements IMovieRepository {
             where: { name: name }
         });
     }
+
+
 }
 
 export default new MovieRepository();

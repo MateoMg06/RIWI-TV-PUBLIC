@@ -20,12 +20,18 @@
  * @property {string} clasification - Clasificación de la película.
  * @property {number} duration - Duración de la película en minutos.
  * @property {string} gener - Género de la película.
+ * @property {string} pais - pais de la película.
+ * @property {string} departamento - departamento de la película.
+ * @property {string} ciudad - ciudad de la película.
  * @example
  * const dto: CreateMovieDto = {
  *   name: "Spiderman",
  *   clasification: "PG-13",
  *   duration: 120,
- *   gener: "Acción"
+ *   gener: "Acción",
+ *   pais: "Colombia",
+ *   departamento: "Atlantico",
+ *   ciudad: "Barranquilla"
  * };
  */
 
@@ -50,5 +56,20 @@ export interface CreateMovieDto {
      * Género de la película.
      */
     gener: string;
+
+     /**
+     * pais de la película.
+     */
+    pais: string;
+
+     /**
+     * departamento de la película.
+     */
+    departamento: string;
+
+     /**
+     * ciudad de la película.
+     */
+    ciudad: string;
 }
 
