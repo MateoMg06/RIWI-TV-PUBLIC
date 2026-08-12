@@ -1,4 +1,4 @@
-import User from '../models/user.model';
+import User, { UserAttributes } from '../models/user.model';
 import { CreateUserDto } from '../dto/create-user.dto';
 import repository from '../repositories/user.repository';
 import { IUserService } from './interfaces/user.service.interface';
@@ -39,20 +39,43 @@ class UserService implements IUserService {
 
     const passwordMatches = await comparePassword(password, user.password);
     if (!passwordMatches) {
+      await this.registerFailedAttempt(user)
       throw new errorhandler(401, 'Credenciales inválidas');
     }
 
     return user;
   }
 
-  // async verifyAttempts(email: string): Promise<boolean>{
-  //   const user= await repository.findUserCredential(email)
-  //   const attempts: number= user?.failedLoginAttempts ? user?.failedLoginAttempts : 0
-  //   if (attempts >= 5){
-  //     throw new errorhandler(401, 'Acceso no autorizado');
-  //   }
-  //   return isValid
-  // }
+  async registerFailedAttempt(user: User): Promise<void>{
+    const now= new Date()
+    const lockDuration= parseInt(process.env.LOCK_DURATION_MS || String(15 * 60 * 1000), 10)
+    const maxAttempts= parseInt(process.env.MAX_FAILED_ATTEMPTS || "5", 10)
+    const expiredStreak= user.lastLoginAttempt !== null && now.getTime() - user.lastLoginAttempt.getTime() > lockDuration
+    const previousAttempts= expiredStreak? 0 : user.failedLoginAttempts;
+    const updatedAttempts = previousAttempts + 1;
+ 
+    const data: Partial<UserAttributes> = {
+      failedLoginAttempts: updatedAttempts,
+      lastLoginAttempt: now,
+    };
+ 
+    if (updatedAttempts >= maxAttempts) {
+      data.lockedUntil = new Date(now.getTime() + lockDuration);
+    }
+ 
+    await repository.updateByID(user.id, data)
+  }
+
+  async clearAttempts(user: User): Promise<void>{
+    if(user.failedLoginAttempts > 0 || user.lockedUntil){
+      await repository.updateByID(user.id, {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        lastLoginAttempt: null
+      })
+    }
+  }
+
 }
 
 export default new UserService();

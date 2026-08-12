@@ -82,12 +82,22 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     const user = await userService.findCredential(email, password);
+    if (!user) {
+      return res.status(401).json({error: 'Credenciales inválidas'})
+    }
+    
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
+      return res.status(401).json({error: 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos'});
+    }
+    
+    await userService.clearAttempts(user)
+    
     const payload = {
       name: user?.name,
       membership: user?.membership
     };
 
-    const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: '15m' });
+    const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: '15m'});
     const refreshToken = createToken(payload, String(process.env.JWT_REFRESH_SECRET), { expiresIn: '7d' });
 
     return res
@@ -131,7 +141,7 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
         membership: payload.membership
       },
       String(process.env.JWT_SECRET),
-      { expiresIn: '1h' }
+      { expiresIn: '15m' }
     );
 
     return res
