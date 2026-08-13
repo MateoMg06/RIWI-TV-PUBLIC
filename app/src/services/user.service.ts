@@ -40,7 +40,7 @@ class UserService implements IUserService {
     const passwordMatches = await comparePassword(password, user.password);
     if (!passwordMatches) {
       await this.registerFailedAttempt(user)
-      throw new errorhandler(401, 'Credenciales inválidas');
+      throw new errorhandler(401, 'Contraseña incorrecta');
     }
 
     return user;
@@ -51,7 +51,7 @@ class UserService implements IUserService {
     const lockDuration= parseInt(process.env.LOCK_DURATION_MS || String(15 * 60 * 1000), 10)
     const maxAttempts= parseInt(process.env.MAX_FAILED_ATTEMPTS || "5", 10)
     const expiredStreak= user.lastLoginAttempt !== null && now.getTime() - user.lastLoginAttempt.getTime() > lockDuration
-    const previousAttempts= expiredStreak? 0 : user.failedLoginAttempts;
+    const previousAttempts= expiredStreak? user.failedLoginAttempts : 0;
     const updatedAttempts = previousAttempts + 1;
  
     const data: Partial<UserAttributes> = {
