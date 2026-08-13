@@ -65,12 +65,12 @@ User.init(
     },
     lastLoginAttempt: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: null
     },
     lockedUntil: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: null
     }
   },
