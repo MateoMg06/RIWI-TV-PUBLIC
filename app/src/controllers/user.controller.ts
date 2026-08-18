@@ -81,16 +81,22 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    const user = await userService.findCredential(email, password);
+    const user = await userService.findOne(email);
+
     if (!user) {
-      return res.status(401).json({error: 'Credenciales inválidas'})
+      return res.status(401).json({error: 'Credenciales inválidas'});
     }
-    
-    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
+
+    if (user.failedLoginAttempts >= 5 || user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
       return res.status(401).json({error: 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos'});
     }
-    
-    await userService.clearAttempts(user)
+
+    const validatedUser = await userService.findCredential(email, password);
+    if (!validatedUser) {
+      return res.status(401).json({error: 'Credenciales inválidas'})
+    }
+
+    await userService.clearAttempts(validatedUser)
     
     const payload = {
       name: user?.name,
