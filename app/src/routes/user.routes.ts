@@ -107,7 +107,7 @@ router.post('/auth', getOneUsers);
  * /api/users/login:
  *   post:
  *     summary: Iniciar sesión con JWT
- *     tags: [Users]
+ *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
@@ -125,7 +125,7 @@ router.post('/auth', getOneUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       201:
+ *       200:
  *         description: Login exitoso
  *       401:
  *         description: Credenciales incorrectas
@@ -133,7 +133,43 @@ router.post('/auth', getOneUsers);
  *         description: Error interno del servidor
  */
 router.post('/login', login);
+/**
+ * @swagger
+ * /api/users/auth:
+ *   post:
+ *     summary: Refrescar el token y darle uno nuevo al usuario
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Nuevo accessToken generado
+ *       401:
+ *         description: Refresh token inválido, expirado o no proporcionado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post('/refresh', refresh);
+
+/**
+ * @openapi
+ * /api/auth/logout:
+ *   post:
+ *     summary: Cierra la sesión, eliminando la cookie del accessToken
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada correctamente
+ */
 router.post('/logout', logout);
 router.post('/legacy-login', authUser);
 
