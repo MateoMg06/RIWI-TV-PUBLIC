@@ -125,7 +125,7 @@ router.post('/auth', getOneUsers);
  *                 type: string
  *                 example: "123"
  *     responses:
- *       200:
+ *       201:
  *         description: Login exitoso
  *       401:
  *         description: Credenciales incorrectas
@@ -133,9 +133,10 @@ router.post('/auth', getOneUsers);
  *         description: Error interno del servidor
  */
 router.post('/login', login);
+
 /**
  * @swagger
- * /api/users/auth:
+ * /api/users/refresh:
  *   post:
  *     summary: Refrescar el token y darle uno nuevo al usuario
  *     tags: [Auth]
@@ -162,7 +163,7 @@ router.post('/refresh', refresh);
 
 /**
  * @openapi
- * /api/auth/logout:
+ * /api/users/logout:
  *   post:
  *     summary: Cierra la sesión, eliminando la cookie del accessToken
  *     tags: [Auth]
