@@ -87,7 +87,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       return res.status(401).json({error: 'Credenciales inválidas'});
     }
 
-    if (user.failedLoginAttempts >= 5 || user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
       return res.status(401).json({error: 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos'});
     }
 

@@ -48,11 +48,11 @@ class UserService implements IUserService {
 
   async registerFailedAttempt(user: User): Promise<void>{
     const now= new Date()
-    const lockDuration= parseInt(process.env.LOCK_DURATION_MS || String(15 * 60 * 1000), 10)
+    const lockDuration= 900000
     const maxAttempts= parseInt(process.env.MAX_FAILED_ATTEMPTS || "5", 10)
     const expiredStreak= user.lastLoginAttempt !== null && now.getTime() - user.lastLoginAttempt.getTime() > lockDuration
-    const previousAttempts= expiredStreak? user.failedLoginAttempts : 0;
-    const updatedAttempts = previousAttempts + 1;
+    const previousAttempts= expiredStreak? 0 : user.failedLoginAttempts
+    const updatedAttempts= previousAttempts + 1
  
     const data: Partial<UserAttributes> = {
       failedLoginAttempts: updatedAttempts,
@@ -60,7 +60,7 @@ class UserService implements IUserService {
     };
  
     if (updatedAttempts >= maxAttempts) {
-      data.lockedUntil = new Date(now.getTime() + lockDuration);
+      data.lockedUntil = new Date(now.getTime() + lockDuration)
     }
  
     await repository.updateByID(user.id, data)
