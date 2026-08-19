@@ -1,5 +1,6 @@
 import User, { UserAttributes } from '../models/user.model';
 import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import repository from '../repositories/user.repository';
 import { IUserService } from './interfaces/user.service.interface';
 import errorhandler from '../error/errorHandler';
@@ -28,6 +29,10 @@ class UserService implements IUserService {
 
   async findOne(email: string): Promise<User | null> {
     return await repository.findOne(email);
+  }
+
+  async findByID(id: number): Promise<User | null>{
+    return await repository.findByID(id)
   }
 
   async findCredential(email: string, password: string): Promise<User | null> {
@@ -76,6 +81,28 @@ class UserService implements IUserService {
     }
   }
 
+  async updateUser(id: number, dto: UpdateUserDto): Promise<User | null>{
+    const user= repository.findByID(id)
+    if(!user) throw new errorhandler(404, "Usuario no encontrado")
+    
+    const data: Partial<UserAttributes> = {}
+    if(dto.name !== undefined) data.name= dto.name
+    if(dto.email !== undefined) data.email= dto.email
+    if(dto.membership !== undefined) data.membership= dto.membership
+    
+    if(dto.role !== undefined){
+      data.role= dto.role as UserAttributes["role"]
+    } 
+    if(dto.password !== undefined){
+      const saltRounds = Number(process.env.SALT_ROUNDS || 10)
+      data.password= await hashPassword(dto.password, saltRounds)
+    } 
+    if (Object.keys(data).length=== 0){
+      throw new errorhandler(400, "No se proporcionaron datos para actualizar")
+    }
+    await repository.updateByID(id, data)
+    return await repository.findByID(id) as User
+  }
 }
 
 export default new UserService();

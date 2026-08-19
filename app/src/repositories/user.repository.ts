@@ -22,6 +22,10 @@ class UserRepository implements IUserRepository {
     return await User.findOne({ where: { email } });
   }
   
+  async findByID(id: number):  Promise<User | null>{
+    return await User.findByPk(id)
+  }
+
   async updateByID(id: number, data: Partial<UserAttributes>): Promise<void> {
     await User.update(data, {where: {id}})
   }

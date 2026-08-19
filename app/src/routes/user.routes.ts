@@ -9,12 +9,13 @@ import { Router } from 'express';
 import {
   authUser,
   createUser,
-  getOneUsers,
   getUsers,
   login,
   logout,
   refresh,
+  updateUser,
 } from '../controllers/user.controller';
+import { authToken } from '../middlewares/authToken';
 
 const router = Router();
 
@@ -100,7 +101,7 @@ router.get('/getUsers', getUsers);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/auth', getOneUsers);
+router.post('/auth', authUser);
 
 /**
  * @swagger
@@ -162,7 +163,7 @@ router.post('/login', login);
 router.post('/refresh', refresh);
 
 /**
- * @openapi
+ * @swagger
  * /api/users/logout:
  *   post:
  *     summary: Cierra la sesión, eliminando la cookie del accessToken
@@ -172,6 +173,54 @@ router.post('/refresh', refresh);
  *         description: Sesión cerrada correctamente
  */
 router.post('/logout', logout);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   put:
+ *     summary: Actualizar los datos de un usuario existente
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               role:
+ *                 type: string
+ *               membership:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente
+ *       400:
+ *         description: Datos inválidos o sin campos para actualizar
+ *       401:
+ *         description: Usuario sin token/ token inválido
+ *       404:
+ *         description: Usuario no encontrado
+ *       409:
+ *         description: El correo ya está en uso por otro usuario
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:id', authToken, updateUser)
 router.post('/legacy-login', authUser);
 
 export default router;
