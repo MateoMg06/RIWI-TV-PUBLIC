@@ -88,11 +88,7 @@ class UserService implements IUserService {
     const data: Partial<UserAttributes> = {}
     if(dto.name !== undefined) data.name= dto.name
     if(dto.email !== undefined) data.email= dto.email
-    if(dto.membership !== undefined) data.membership= dto.membership
     
-    if(dto.role !== undefined){
-      data.role= dto.role as UserAttributes["role"]
-    } 
     if(dto.password !== undefined){
       const saltRounds = Number(process.env.SALT_ROUNDS || 10)
       data.password= await hashPassword(dto.password, saltRounds)
