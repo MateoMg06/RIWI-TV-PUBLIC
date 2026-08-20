@@ -87,7 +87,13 @@ class UserService implements IUserService {
     
     const data: Partial<UserAttributes> = {}
     if(dto.name !== undefined) data.name= dto.name
-    if(dto.email !== undefined) data.email= dto.email
+    if(dto.email !== undefined){
+      const existingUser= await repository.findUserCredential(dto.email);
+      if (existingUser) {
+        throw new errorhandler(409, 'Este correo ya está vinculado a un usuario');
+      }
+      data.email= dto.email
+    } 
     
     if(dto.password !== undefined){
       const saltRounds = Number(process.env.SALT_ROUNDS || 10)
