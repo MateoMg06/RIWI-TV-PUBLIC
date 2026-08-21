@@ -5,6 +5,7 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 
 import { swaggerSpec } from './docs/swagger';
+import './models';
 import movieRoutes from './routes/movie.routes';
 import userRoutes from './routes/user.routes';
 import countryRoutes from './routes/country.routes';
@@ -29,7 +30,6 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/departments/:departmentId/cities', cityRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/cinemas', cinemaRoutes);
-app.use('/api/movies', movieRoutes);
 
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
