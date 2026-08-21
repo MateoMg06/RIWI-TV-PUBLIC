@@ -3,20 +3,6 @@ services:
     build: ./app
     container_name: ${APP_CONTAINER_NAME}
     working_dir: /usr/src/app
-<<<<<<< HEAD
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
-    volumes:
-      - ./app:/usr/src/app
-      - ./.env:/usr/src/app/.env
-    env_file:
-      - ./.env
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}
-    depends_on:
-      - db
-=======
 
     ports:
       - "${APP_PORT}:${APP_PORT}"
@@ -36,16 +22,11 @@ services:
     depends_on:
       - db
 
->>>>>>> feature/filter-location-movie
     deploy:
       resources:
         limits:
           cpus: "${APP_CPU_LIMIT}"
           memory: ${APP_MEM_LIMIT}
-<<<<<<< HEAD
-=======
-
->>>>>>> feature/filter-location-movie
     networks:
       - backend
 
@@ -53,46 +34,29 @@ services:
     image: postgres:15-alpine
     container_name: ${DB_CONTAINER_NAME}
     restart: always
-<<<<<<< HEAD
-    ports:
-      - "${POSTGRES_HOST_PORT}:${POSTGRES_PORT}"
-=======
 
     ports:
       - "${POSTGRES_HOST_PORT}:${POSTGRES_PORT}"
 
->>>>>>> feature/filter-location-movie
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-<<<<<<< HEAD
-    volumes:
-      - db_data:/var/lib/postgresql/data
-=======
 
     volumes:
       - db_data:/var/lib/postgresql/data
 
->>>>>>> feature/filter-location-movie
     deploy:
       resources:
         limits:
           cpus: "${DB_CPU_LIMIT}"
           memory: ${DB_MEM_LIMIT}
-<<<<<<< HEAD
-=======
-
->>>>>>> feature/filter-location-movie
     networks:
       - backend
 
 volumes:
   db_data:
-<<<<<<< HEAD
-=======
   node_modules:
->>>>>>> feature/filter-location-movie
 
 networks:
   backend:
