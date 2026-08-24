@@ -82,7 +82,7 @@ class UserService implements IUserService {
   }
 
   async updateUser(id: number, dto: UpdateUserDto): Promise<User | null>{
-    const user= repository.findByID(id)
+    const user= await repository.findByID(id)
     if(!user) throw new errorhandler(404, "Usuario no encontrado")
     
     const data: Partial<UserAttributes> = {}

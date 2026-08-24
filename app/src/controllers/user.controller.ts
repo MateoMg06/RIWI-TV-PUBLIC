@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
 
 import userService from '../services/user.service';
+import { AuthPayload } from '../types/index.d';
 import { CreateUserDto } from '../dto/create-user.dto';
 import errorhandler from '../error/errorHandler';
 import { createToken, verifyToken } from '../utils/jwt';
@@ -82,6 +82,8 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     await userService.clearAttempts(validatedUser)
     
     const payload = {
+      role: user?.role,
+      id: user?.id,
       name: user?.name,
       membership: user?.membership
     };
@@ -97,6 +99,8 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         accessToken,
         refreshToken,
         user: {
+          role: payload.role,
+          id: payload.id,
           name: payload.name,
           membership: payload.membership
         },
@@ -118,7 +122,7 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
       return res.status(401).json({ error: 'Usuario sin token' });
     }
 
-    const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as JwtPayload;
+    const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as AuthPayload;
 
     if (!payload) {
       return res.status(401).json({ error: 'Token inválido' });
@@ -126,6 +130,8 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
 
     const newToken = createToken(
       {
+        role: payload.role,
+        id: payload.id,
         name: payload.name,
         membership: payload.membership
       },
@@ -155,9 +161,12 @@ export const logout = async (_req: Request, res: Response): Promise<Response> =>
 
 export const updateUser= async (req: Request, res: Response): Promise<Response> => {
   try {
-    const id = Number(req.params.id)
-    const dto: UpdateUserDto = req.body;
-    const updatedUser= await userService.updateUser(id, dto)
+    if (!req.user || !req.user.id){
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+    const userID: number= req.user.id
+    const dto: UpdateUserDto= req.body
+    const updatedUser= await userService.updateUser(userID, dto)
     return res
       .status(200)
       .json({
