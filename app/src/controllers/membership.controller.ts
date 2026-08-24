@@ -14,13 +14,13 @@ import MembershipRepository from "../repositories/membership.repository";
  * Recibe el Request/Response de Express, delega la lógica de negocio
  * al service, y construye la respuesta HTTP correspondiente.
  */
-class MembershipController {
+
 
     /**
      * POST /memberships
      * Crea una nueva membresía.
      */
-    async create(req: Request, res: Response): Promise<void> {
+   export const create = async (req: Request, res: Response): Promise<void> => {
         try {
             const membership = await membershipService.create(req.body);
             res.status(201).json(membership);
@@ -36,9 +36,9 @@ class MembershipController {
      * GET /memberships
      * Obtiene la lista completa de membresías.
      */
-    async getAll(req: Request, res: Response): Promise<void> {
+    export const getAll = async (req: Request, res: Response): Promise<void> => {
         try {
-            const memberships = await membershipService.getCatalog();
+            const memberships = await membershipService.getAll();
             res.status(200).json(memberships);
         } catch (error) {
             res.status(500).json({
@@ -52,7 +52,7 @@ class MembershipController {
      * GET /memberships/:name
      * Obtiene una membresía por nombre de usuario.
      */
-    async getByUserName(req: Request, res: Response): Promise<void> {
+    export const getByUserName = async (req: Request, res: Response): Promise<void> => {
         try {
             const name = Array.isArray(req.params.name)
                 ? req.params.name[0] 
@@ -75,12 +75,5 @@ class MembershipController {
         }
     }
 
-    /**
-     * GET /memberships/:id/cinemas
-     * Obtiene los cines donde se proyecta una membresía.
-     */
-    
-}
+   
 
-
-export default new MembershipController();

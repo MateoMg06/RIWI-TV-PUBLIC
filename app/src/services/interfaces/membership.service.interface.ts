@@ -1,9 +1,9 @@
 // app/src/services/interfaces/membership.service.interface.ts
 
-import { CreateMembershipDto } from "../../dto/create-membership.dto";
+import { CreateTypeMembershipDto } from "../dto/create-typeMembership.dto";
 
 export interface IMembershipService {
-    create(data: CreateMembershipDto): Promise<any>;
+    create(data: CreateTypeMembershipDto): Promise<any>;
 
     getAll(): Promise<any[]>;
 

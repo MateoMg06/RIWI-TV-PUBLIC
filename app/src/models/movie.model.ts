@@ -22,7 +22,16 @@
     name: string;
     clasification: string;
     duration: number;
-    gener: string;
+    poster: string;
+    director: string;
+    idioma: string;
+    dobladaje: boolean;
+    subtitulos: boolean;
+    formatos: string;
+    estado : boolean;
+    fechaEstreno: Date;
+    clasificacionPublica: string;
+
     
   }
 
@@ -33,7 +42,15 @@
     public name!: string;
     public clasification!: string;
     public duration!: number;
-    public gener!: string;
+    public poster!: string;
+    public director!: string;
+    public idioma!: string;
+    public dobladaje!: boolean;
+    public subtitulos!: boolean;
+    public formatos!: string;
+    public estado!: boolean;
+    public fechaEstreno!: Date;
+    public clasificacionPublica!: string;
     
   }
 
@@ -56,8 +73,40 @@
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      gener: {
+      poster: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
+      director: {
         type: DataTypes.STRING(100),
+        allowNull: false,
+      },
+      idioma: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+      },
+      dobladaje: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
+      subtitulos: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
+      formatos: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+      },
+      estado: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
+      fechaEstreno: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      clasificacionPublica: {
+        type: DataTypes.STRING(50),
         allowNull: false,
       }
     },

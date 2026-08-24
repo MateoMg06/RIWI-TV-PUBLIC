@@ -71,5 +71,23 @@ export interface CreateMovieDto {
      * ciudad de la película.
      */
     ciudad: string;
+    
+    poster: string;
+    
+    director: string;
+    
+    idioma: string;
+
+    dobladaje: boolean;
+    
+    subtitulos: boolean;
+    
+    formatos: string;
+
+    estado : boolean;
+    
+    fechaEstreno: Date;
+    
+    clasificacionPublica: string;
 }
 

@@ -1,12 +1,12 @@
 // app/src/services/membership.service.ts
 
 import membershipRepository from "../repositories/membership.repository";
-import { CreateMembershipDto } from "../dto/create-membership.dto";
+import { CreateTypeMembershipDto } from "../dto/create-typeMembership.dto";
 import { IMembershipService } from "./interfaces/membership.service.interface";
 
 class MembershipService implements IMembershipService {
 
-    async create(data: CreateMembershipDto) {
+    async create(data: CreateTypeMembershipDto) {
         return await membershipRepository.create(data);
     }
 

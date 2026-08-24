@@ -1,7 +1,6 @@
 // app/src/repositories/interfaces/membership.repository.interface.ts
 
-import {CreateMembershipDto} from "../../dto/create-membership.dto";
-
+import { CreateTypeMembershipDto } from "../dto/create-typeMembership.dto";
 /**
  * Contrato del Repositorio de Membresías
  * -----------------------------------
@@ -14,7 +13,7 @@ export interface IMembershipRepository {
     /**
      * Crea una membresía.
      */
-    create(data: CreateMembershipDto): Promise<any>;
+    create(data: CreateTypeMembershipDto): Promise<any>;
 
     /**
      * Obtiene todas las membresías.

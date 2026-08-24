@@ -45,5 +45,5 @@ export interface GetMovieCatalogDto {
     /**
      * Género de la película.
      */
-    gener: string;
+    genre: string;
 }
