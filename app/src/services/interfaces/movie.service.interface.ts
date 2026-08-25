@@ -26,4 +26,10 @@ export interface IMovieService {
      * Obtiene una película por nombre.
      */
     getByName(name: string): Promise<GetMovieCatalogDto>;
+
+
+    /**
+     * Obtiene las películas de la semana.
+     */
+    getWeeklyMovies(): Promise<GetMovieCatalogDto[]>;
 }

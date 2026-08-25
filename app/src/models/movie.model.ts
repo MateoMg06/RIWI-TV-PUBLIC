@@ -16,23 +16,25 @@
 
   import { DataTypes, Model, Optional } from "sequelize";
   import sequelize from "../config/database";
+  
 
   export interface MovieAttributes {
     id: number;
     name: string;
-    clasification: string;
+    synopsis: string;
+    classification: string;
     duration: number;
-    poster: string;
+    genre: string;
     director: string;
-    idioma: string;
-    dobladaje: boolean;
-    subtitulos: boolean;
-    formatos: string;
-    estado : boolean;
-    fechaEstreno: Date;
-    clasificacionPublica: string;
-
-    
+    cast: string;
+    poster_url: string;
+    banner_url: string;
+    trailer_url: string;
+    release_date: Date;
+    status: boolean;
+    audience_rating: number;
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   export interface MovieCreationAttributes extends Optional<MovieAttributes, "id"> {}
@@ -40,17 +42,20 @@
   class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
     public id!: number;
     public name!: string;
-    public clasification!: string;
+    public synopsis!: string;
+    public classification!: string;
     public duration!: number;
-    public poster!: string;
+    public genre!: string;
     public director!: string;
-    public idioma!: string;
-    public dobladaje!: boolean;
-    public subtitulos!: boolean;
-    public formatos!: string;
-    public estado!: boolean;
-    public fechaEstreno!: Date;
-    public clasificacionPublica!: string;
+    public cast!: string;
+    public poster_url!: string;
+    public banner_url!: string;
+    public trailer_url!: string;
+    public release_date!: Date;
+    public status! : boolean;
+    public audience_rating!: number;
+    public createdAt!: Date;
+    public updatedAt!: Date;
     
   }
 
@@ -65,7 +70,11 @@
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      clasification: {
+      synopsis: {
+        type: DataTypes.STRING(500),
+        allowNull: false,
+      }, 
+      classification: {
         type: DataTypes.STRING(50),
         allowNull: false,
       },
@@ -73,40 +82,48 @@
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      poster: {
-        type: DataTypes.STRING(255),
-        allowNull: true,
+      genre: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
       },
       director: {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      idioma: {
-        type: DataTypes.STRING(50),
+      cast: {
+        type: DataTypes.STRING(255),
         allowNull: false,
       },
-      dobladaje: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
+      poster_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
       },
-      subtitulos: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
+      banner_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
       },
-      formatos: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
+      trailer_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
       },
-      estado: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-      },
-      fechaEstreno: {
+      release_date: {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      clasificacionPublica: {
-        type: DataTypes.STRING(50),
+      status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+      },
+      audience_rating: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
         allowNull: false,
       }
     },

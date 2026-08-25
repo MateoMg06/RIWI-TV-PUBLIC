@@ -30,4 +30,9 @@ export interface IMovieRepository {
      * Obtiene una película por ID.
      */
     findByPk(id: number): Promise<Movie | null>;
+
+    /**
+     * Obtiene las películas de la semana.
+     */
+    findWeeklyMovies(): Promise<Movie[]>;
 }

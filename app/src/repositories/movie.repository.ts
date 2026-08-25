@@ -1,6 +1,7 @@
 // app/src/repositories/movie.repository.ts
 
 import Movie, { MovieCreationAttributes } from '../models/movie.model';
+import { Op } from 'sequelize';
 import { IMovieRepository } from './interfaces/movie.repository.interface';
 
 /**
@@ -41,6 +42,31 @@ class MovieRepository implements IMovieRepository {
      */
     async findByPk(id: number): Promise<Movie | null> {
         return await Movie.findByPk(id);
+    }
+
+    /**
+     * 
+     * obtiene las películas de la semana. 
+     */
+    async findWeeklyMovies(): Promise<Movie[]> {
+        const today = new Date();
+
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(today);
+        endOfWeek.setDate(today.getDate() - today.getDay() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        return await Movie.findAll({
+            where: {
+                createdAt: {
+                    [Op.gte]: startOfWeek,
+                    [Op.lte]: endOfWeek
+                }
+            }
+        });
     }
 
 

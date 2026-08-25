@@ -8,16 +8,16 @@
  *
  * @property {number} id - Identificador único de la película.
  * @property {string} name - Nombre completo de la película.
- * @property {string} clasification - Clasificación de la película.
+ * @property {string} classification - Clasificación de la película.
  * @property {number} duration - Duración de la película en minutos.
- * @property {string} gener - Género de la película.
+ * @property {string} genre - Género de la película.
  * @example
  * const dto: GetMovieCatalogDto = {
  *   id: 1,
  *   name: "Spiderman",
- *   clasification: "PG-13",
+ *   classification: "PG-13",
  *   duration: 120,
- *   gener: "Acción"
+ *   genre: "Acción"
  * };
  */
 export interface GetMovieCatalogDto {
@@ -35,7 +35,7 @@ export interface GetMovieCatalogDto {
     /**
      * Clasificación de la película.
      */
-    clasification: string;
+    classification: string;
 
     /**
      * Duración de la película en minutos.

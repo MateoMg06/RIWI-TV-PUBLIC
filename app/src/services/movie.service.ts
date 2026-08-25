@@ -3,6 +3,7 @@
 import { IMovieService } from "./interfaces/movie.service.interface";
 import movieRepository from "../repositories/movie.repository";
 import { MovieCreationAttributes } from "../models/movie.model";
+import Movie from "../models/movie.model";
 import { GetMovieCatalogDto } from "../dto/get-movie-catalog.dto";
 
 /**
@@ -28,7 +29,7 @@ class MovieService implements IMovieService {
      */
     async getCatalog(): Promise<GetMovieCatalogDto[]> {
         const movies = await movieRepository.findAll();
-        return movies.map(this.toDto);
+        return movies.map((movie) => this.toDto(movie));
     }
 
     /**
@@ -48,15 +49,21 @@ class MovieService implements IMovieService {
     /**
      * Mapea una instancia de Movie al DTO de salida.
      */
-    private toDto(movie: { id: number; name: string; clasification: string; duration: number; gener: string }): GetMovieCatalogDto {
+    private toDto(movie: Movie): GetMovieCatalogDto {
         return {
             id: movie.id,
             name: movie.name,
-            clasification: movie.clasification,
+            classification: movie.classification,
             duration: movie.duration,
-            gener: movie.gener,
+            genre: movie.genre,
         };
     }
+
+    async getWeeklyMovies(): Promise<GetMovieCatalogDto[]> {
+        const weeklyMovies = await movieRepository.findWeeklyMovies();
+        return weeklyMovies.map((movie) => this.toDto(movie));
+    }
+        
 }
 
 export default new MovieService();

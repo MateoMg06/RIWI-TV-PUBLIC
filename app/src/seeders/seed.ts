@@ -137,23 +137,23 @@ async function seed() {
 
     const avatar = await Movie.create({
       name: 'Avatar',
-      clasification: 'PG-13',
+      classification: 'PG-13',
       duration: 192,
-      gener: 'Ciencia Ficción'
+      genre: 'Ciencia Ficción'
     });
 
     const spiderman = await Movie.create({
       name: 'Spiderman: No Way Home',
-      clasification: 'PG-13',
+      classification: 'PG-13',
       duration: 159,
-      gener: 'Acción'
+      genre: 'Acción'
     });
 
     const inception = await Movie.create({
       name: 'Inception',
-      clasification: 'PG-13',
+      classification: 'PG-13',
       duration: 148,
-      gener: 'Ciencia Ficción'
+      genre: 'Ciencia Ficción'
     });
 
     console.log(`✓ 3 películas creadas`);

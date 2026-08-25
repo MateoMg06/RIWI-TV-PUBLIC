@@ -14,13 +14,13 @@ import errorhandler from "../error/errorHandler";
  * Recibe el Request/Response de Express, delega la lógica de negocio
  * al service, y construye la respuesta HTTP correspondiente.
  */
-class MovieController {
+
 
     /**
      * POST /movies
      * Crea una nueva película.
      */
-    async create(req: Request, res: Response): Promise<void> {
+    export const create = async (req: Request, res: Response): Promise<void> => {
         try {
             const movie = await movieService.create(req.body);
             res.status(201).json(movie);
@@ -36,7 +36,7 @@ class MovieController {
      * GET /movies
      * Obtiene la cartelera completa de películas.
      */
-    async getCatalog(req: Request, res: Response): Promise<void> {
+    export const getCatalog = async (req: Request, res: Response): Promise<void> => {
         try {
             const catalog = await movieService.getCatalog();
             res.status(200).json(catalog);
@@ -52,7 +52,7 @@ class MovieController {
      * GET /movies/:name
      * Obtiene una película por nombre.
      */
-    async getByName(req: Request, res: Response): Promise<void> {
+    export const getByName = async (req: Request, res: Response): Promise<void> => {
         try {
             const name = Array.isArray(req.params.name) ? req.params.name[0] : req.params.name;
             const movie = await movieService.getByName(name);
@@ -68,7 +68,7 @@ class MovieController {
      * GET /movies/:id/cinemas
      * Obtiene los cines donde se proyecta una película.
      */
-    async getMovieCinemas(req: Request, res: Response): Promise<void> {
+    export const getMovieCinemas = async (req: Request, res: Response): Promise<void> => {
         try {
             const { id } = req.params;
             const movieId = parseInt(id as string, 10);
@@ -94,6 +94,29 @@ class MovieController {
             res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
         }
     }
-}
 
-export default new MovieController();
+
+
+
+    
+    export const getWeeklyMovies = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const movies = await movieService.getWeeklyMovies();
+
+    return res.status(200).json(movies);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+

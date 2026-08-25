@@ -1,13 +1,16 @@
 // app/src/routes/movie.routes.ts
 
 import { Router } from "express";
-import movieController from "../controllers/movie.controller";
+import {
+  create,
+  getCatalog,
+  getByName,
+  getMovieCinemas,
+  getWeeklyMovies
+} from "../controllers/movie.controller";
 
 /**
  * Rutas de Películas
- * -------------------
- * Define los endpoints HTTP relacionados con la entidad Movie
- * y los conecta con sus respectivos métodos del controller.
  */
 const router = Router();
 
@@ -33,19 +36,33 @@ const router = Router();
  *                   name:
  *                     type: string
  *                     example: Spiderman
- *                   clasification:
+ *                   classification:
  *                     type: string
  *                     example: PG-13
  *                   duration:
  *                     type: integer
  *                     example: 120
- *                   gener:
+ *                   genre:
  *                     type: string
  *                     example: Acción
  *       500:
  *         description: Error al obtener la cartelera
  */
-router.get("/", movieController.getCatalog);
+router.get("/", getCatalog);
+
+/**
+ * @swagger
+ * /api/movies/weeklyMovies:
+ *   get:
+ *     summary: Obtiene las películas de la semana
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Lista de películas de la semana
+ *       500:
+ *         description: Error al obtener las películas de la semana
+ */
+router.get("/weeklyMovies", getWeeklyMovies);
 
 /**
  * @swagger
@@ -68,7 +85,93 @@ router.get("/", movieController.getCatalog);
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:id/cinemas", movieController.getMovieCinemas);
+router.get("/:id/cinemas", getMovieCinemas);
+
+/**
+ * @swagger
+ * /api/movies:
+ *   post:
+ *     summary: Crea una nueva película
+ *     tags: [Movies]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - synopsis
+ *               - classification
+ *               - duration
+ *               - genre
+ *               - director
+ *               - cast
+ *               - poster_url
+ *               - banner_url
+ *               - trailer_url
+ *               - release_date
+ *               - status
+ *               - audience_rating
+ *               - createdAt
+ *               - updatedAt
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Spiderman
+ *               synopsis:
+ *                 type: string
+ *                 example: Un superhéroe arácnido lucha contra el crimen en Nueva York.
+ *               classification:
+ *                 type: string
+ *                 example: PG-13
+ *               duration:
+ *                 type: integer
+ *                 example: 120
+ *               genre:
+ *                 type: string
+ *                 example: Acción
+ *               director:
+ *                 type: string
+ *                 example: Sam Raimi
+ *               cast:
+ *                 type: string
+ *                 example: Tobey Maguire, Kirsten Dunst, Willem Dafoe
+ *               poster_url:
+ *                 type: string
+ *                 example: https://example.com/poster.jpg
+ *               banner_url:
+ *                 type: string
+ *                 example: https://example.com/banner.jpg
+ *               trailer_url:
+ *                 type: string
+ *                 example: https://example.com/trailer.mp4
+ *               release_date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2002-05-03T00:00:00.000Z
+ *               status:
+ *                 type: boolean
+ *                 example: true
+ *               audience_rating:
+ *                 type: number
+ *                 format: float
+ *                 example: 8.5
+ *               createdAt:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2026-08-25T10:00:00.000Z
+ *               updatedAt:
+ *                 type: string
+ *                 format: date-time 
+ *                 example: 2026-08-25T10:00:00.000Z
+ *     responses:
+ *       201:
+ *         description: Película creada exitosamente
+ *       500:
+ *         description: Error al crear la película
+ */
+router.post("/", create);
 
 /**
  * @swagger
@@ -89,44 +192,6 @@ router.get("/:id/cinemas", movieController.getMovieCinemas);
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:name", movieController.getByName);
-
-/**
- * @swagger
- * /api/movies:
- *   post:
- *     summary: Crea una nueva película
- *     tags: [Movies]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - clasification
- *               - duration
- *               - gener
- *             properties:
- *               name:
- *                 type: string
- *                 example: Spiderman
- *               clasification:
- *                 type: string
- *                 example: PG-13
- *               duration:
- *                 type: integer
- *                 example: 120
- *               gener:
- *                 type: string
- *                 example: Acción
- *     responses:
- *       201:
- *         description: Película creada exitosamente
- *       500:
- *         description: Error al crear la película
- */
-router.post("/", movieController.create);
+router.get("/:name", getByName);
 
 export default router;
