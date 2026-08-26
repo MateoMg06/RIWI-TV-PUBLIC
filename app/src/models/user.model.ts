@@ -20,6 +20,9 @@ export interface UserAttributes {
   acceptsDataProcessing: boolean;
   acceptsTerms: boolean;
   acceptsNotifications: boolean;
+  accountStatus: "active" | "inactive";
+  activationToken: string | null;
+  activationTokenExpires: Date | null;
 }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
@@ -43,7 +46,9 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public acceptsDataProcessing!: boolean;
   public acceptsTerms!: boolean;
   public acceptsNotifications!: boolean;
-
+  public accountStatus!: "active" | "inactive";
+  public activationToken!: string | null;
+  public activationTokenExpires!: Date | null;
 }
 
 User.init(
@@ -129,6 +134,19 @@ User.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    accountStatus: {
+      type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
+      defaultValue: 'inactive',
+    },
+    activationToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    activationTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     }
   },
   {

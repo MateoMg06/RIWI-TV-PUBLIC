@@ -12,6 +12,8 @@ import countryRoutes from './routes/country.routes';
 import departmentRoutes from './routes/department.routes';
 import cityRoutes from './routes/city.routes';
 import cinemaRoutes from './routes/cinema.routes';
+import authRoutes from './routes/auth.routes';
+import membershipRoutes from './routes/membership.routes';
 
 const app = express();
 
@@ -30,6 +32,8 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/departments/:departmentId/cities', cityRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/cinemas', cinemaRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/membership', membershipRoutes);
 
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

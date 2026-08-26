@@ -80,6 +80,10 @@ class UserService implements IUserService {
       throw new errorhandler(401, 'Correo o contraseña inválidos');
     }
 
+    if (user.accountStatus === 'inactive') {
+      throw new errorhandler(401, 'Cuenta no activada. Por favor active su cuenta desde el correo enviado.');
+    }
+
     const passwordMatches = await comparePassword(password, user.password);
     if (!passwordMatches) {
       await this.registerFailedAttempt(user)
