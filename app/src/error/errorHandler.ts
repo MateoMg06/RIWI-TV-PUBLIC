@@ -6,7 +6,7 @@ export default class errorhandler extends Error {
       super (mensaje)
        this.estado = estado
       
-    }          
+    }
 
     
 }

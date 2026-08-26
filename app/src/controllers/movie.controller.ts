@@ -4,7 +4,6 @@ import { Request, Response } from "express";
 import movieService from "../services/movie.service";
 import Movie from "../models/movie.model";
 import movieRepository from "../repositories/movie.repository";
-import errorhandler from "../error/errorHandler";
 
 /**
  * Controlador de Películas
@@ -95,6 +94,7 @@ import errorhandler from "../error/errorHandler";
         }
     }
 
+<<<<<<< HEAD
 
 
 
@@ -120,3 +120,6 @@ import errorhandler from "../error/errorHandler";
 
 
 
+=======
+export default new MovieController();
+>>>>>>> develop

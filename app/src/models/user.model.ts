@@ -1,66 +1,33 @@
-// app/src/models/user.model.ts
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
 
-/**
- * Modelo de Usuario
- * -----------------
- * Este archivo define el modelo `User` de Sequelize, que representa la tabla `users` en la base de datos.
- * 
- * Contiene:
- *  - Atributos del modelo (`UserAttributes`).
- *  - Atributos requeridos para la creación (`UserCreationAttributes`).
- *  - Definición del modelo con sus columnas y restricciones.
- * 
- * Este modelo es utilizado por los servicios y controladores para realizar operaciones CRUD.
- */
-
-import { DataTypes, Model, Optional } from "sequelize";
-import sequelize from "../config/database";
-
-/**
- * Atributos principales de la entidad `User`.
- */
 export interface UserAttributes {
   id: number;
   name: string;
   email: string;
   password: string;
+  role: "admin" | "usuario";
+  membership: string;
+  failedLoginAttempts: number;
+  lastLoginAttempt: Date | null;
+  lockedUntil: Date | null;
 }
 
-/**
- * Atributos utilizados para la creación de un nuevo usuario.
- * 
- * Se utiliza `Optional` para indicar que `id` no es requerido al momento
- * de la creación, ya que se genera automáticamente por la base de datos.
- */
-export interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
+export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
-/**
- * Clase que representa el modelo `User` en Sequelize.
- * 
- * Implementa los atributos definidos en `UserAttributes` y `UserCreationAttributes`.
- */
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  /** Identificador único del usuario (clave primaria). */
   public id!: number;
-
-  /** Nombre completo del usuario. */
   public name!: string;
-
-  /** Dirección de correo electrónico única del usuario. */
   public email!: string;
-
-  /** Contraseña del usuario. */
   public password!: string;
+  public role!: "admin" | "usuario";
+  public membership!: string;
+  public failedLoginAttempts!: number;
+  public lastLoginAttempt!: Date | null;
+  public lockedUntil!: Date | null;
+
 }
 
-/**
- * Inicialización del modelo `User` con la configuración de Sequelize.
- * 
- * - `id`: Entero autoincremental, clave primaria.
- * - `name`: Nombre obligatorio con máximo 100 caracteres.
- * - `email`: Correo electrónico único y obligatorio con máximo 100 caracteres.
- *  - `password`: Contraseña del usuario con maximo 20 caracteres.
- */
 User.init(
   {
     id: {
@@ -78,15 +45,40 @@ User.init(
       allowNull: false,
     },
     password: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
+    role: {
+      type: DataTypes.ENUM("admin", "usuario"),
+      allowNull: false,
+      defaultValue: 'usuario',
+    },
+    membership: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'básica',
+    },
+    failedLoginAttempts: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    lastLoginAttempt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null
+    },
+    lockedUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null
+    }
   },
   {
     sequelize,
-    modelName: "User",      // Nombre del modelo en Sequelize
-    tableName: "users",     // Nombre de la tabla en la base de datos
-    timestamps: true,      // Incluye createdAt y updatedAt
+    modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
   }
 );
 
