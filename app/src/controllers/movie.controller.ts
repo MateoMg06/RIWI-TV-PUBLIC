@@ -86,10 +86,10 @@ import errorhandler from "../error/errorHandler";
             }
 
             const cinemas = await Movie.findByPk(movieId, {
-                include: [{ association: 'cinemas', through: { attributes: [] } }]
+                include: [{ association: 'movieCinemas', through: { attributes: [] } }]
             });
 
-            res.status(200).json((cinemas as any)?.['cinemas'] || []);
+            res.status(200).json((cinemas as any)?.['movieCinemas'] || []);
         } catch (error) {
             res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
         }

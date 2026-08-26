@@ -33,8 +33,7 @@
     release_date: Date;
     status: boolean;
     audience_rating: number;
-    createdAt: Date;
-    updatedAt: Date;
+    
   }
 
   export interface MovieCreationAttributes extends Optional<MovieAttributes, "id"> {}
@@ -54,8 +53,7 @@
     public release_date!: Date;
     public status! : boolean;
     public audience_rating!: number;
-    public createdAt!: Date;
-    public updatedAt!: Date;
+    
     
   }
 
@@ -116,14 +114,6 @@
       },
       audience_rating: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
         allowNull: false,
       }
     },

@@ -91,7 +91,23 @@
   // @ts-ignore
   Movie.belongsToMany(Cinema, {
     through: Showtime,
-    as: "cinemas",
+    as: "movieCinemas",
+    foreignKey: "movieId",
+  });
+
+  /**
+   * Relaciones directas de Showtime (tabla intermedia)
+   * Permiten hacer include de Cinema o Movie desde una consulta de Showtime.
+   */
+  // @ts-ignore
+  Showtime.belongsTo(Cinema, {
+    as: "cinema",
+    foreignKey: "cinemaId",
+  });
+
+  // @ts-ignore
+  Showtime.belongsTo(Movie, {
+    as: "movie",
     foreignKey: "movieId",
   });
 

@@ -137,24 +137,37 @@ async function seed() {
 
     const avatar = await Movie.create({
       name: 'Avatar',
+      synopsis: 'Un exmarine se embarca en una misión en Pandora y termina involucrándose profundamente con la población Na’vi.',
       classification: 'PG-13',
-      duration: 192,
-      genre: 'Ciencia Ficción'
+      duration: 162,
+      genre: 'Ciencia Ficción',
+      director: 'James Cameron',
+      cast: 'Sam Worthington, Zoe Saldana, Sigourney Weaver',
+      poster_url: 'https://example.com/posters/avatar.jpg',
+      banner_url: 'https://example.com/banners/avatar.jpg',
+      trailer_url: 'https://example.com/trailers/avatar.mp4',
+      release_date: new Date('2009-12-18'),
+      status: true,
+      audience_rating: 8.5,
     });
 
-    const spiderman = await Movie.create({
-      name: 'Spiderman: No Way Home',
-      classification: 'PG-13',
-      duration: 159,
-      genre: 'Acción'
+    const Interstellar = await Movie.create({
+    name: 'Interstellar',
+    synopsis: 'Un grupo de astronautas viaja a través de un agujero de gusano en busca de un nuevo hogar para la humanidad.',
+    classification: 'PG-13',
+    duration: 169,
+    genre: 'Ciencia Ficción',
+    director: 'Christopher Nolan',
+    cast: 'Matthew McConaughey, Anne Hathaway, Jessica Chastain',
+    poster_url: 'https://example.com/posters/interstellar.jpg',
+    banner_url: 'https://example.com/banners/interstellar.jpg',
+    trailer_url: 'https://example.com/trailers/interstellar.mp4',
+    release_date: new Date('2014-11-07'),
+    status: true,
+    audience_rating: 8.7,
     });
 
-    const inception = await Movie.create({
-      name: 'Inception',
-      classification: 'PG-13',
-      duration: 148,
-      genre: 'Ciencia Ficción'
-    });
+    
 
     console.log(`✓ 3 películas creadas`);
 
@@ -186,7 +199,7 @@ async function seed() {
     // Spiderman en Cinépolis Bogotá
     await Showtime.create({
       cinemaId: cinepolis_bogota.id,
-      movieId: spiderman.id,
+      movieId: Interstellar.id,
       horario: '18:00',
       fecha: '2026-08-20',
       sala: 'A-1',
@@ -196,7 +209,7 @@ async function seed() {
     // Spiderman en Cinemark México City
     await Showtime.create({
       cinemaId: cinemark_mexico.id,
-      movieId: spiderman.id,
+      movieId: avatar.id,
       horario: '19:30',
       fecha: '2026-08-21',
       sala: 'C-2',
@@ -206,7 +219,7 @@ async function seed() {
     // Inception en Cinemark Buenos Aires
     await Showtime.create({
       cinemaId: cinemark_buenos_aires.id,
-      movieId: inception.id,
+      movieId: Interstellar.id,
       horario: '20:30',
       fecha: '2026-08-22',
       sala: 'D-1',
@@ -216,7 +229,7 @@ async function seed() {
     // Inception en Cinemark México City
     await Showtime.create({
       cinemaId: cinemark_mexico.id,
-      movieId: inception.id,
+      movieId: avatar.id,
       horario: '21:00',
       fecha: '2026-08-22',
       sala: 'A-4',
