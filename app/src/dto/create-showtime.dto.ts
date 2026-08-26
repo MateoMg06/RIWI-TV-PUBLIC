@@ -60,4 +60,9 @@ export interface CreateShowtimeDto {
    * Precio de la entrada.
    */
   precio: number;
+
+  /**
+   * Estado de la función (ACTIVE/INACTIVE), default ACTIVE.
+   */
+  showtime_status?: string;
 }

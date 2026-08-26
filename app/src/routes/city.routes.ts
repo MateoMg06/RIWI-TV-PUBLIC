@@ -11,6 +11,7 @@
 import { Router } from 'express';
 import {
   getCityCinemas,
+  getCitiesByDepartment,
   createCity,
 } from '../controllers/city.controller';
 
@@ -41,6 +42,31 @@ const router = Router({ mergeParams: true });
  *         description: Error interno del servidor
  */
 router.get('/:id/cinemas', getCityCinemas);
+
+/**
+ * @swagger
+ * /api/cities/{departmentId}:
+ *   get:
+ *     summary: Obtener ciudades de un departamento (HU2 - solo activas)
+ *     tags: [Cities]
+ *     parameters:
+ *       - in: path
+ *         name: departmentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del departamento
+ *     responses:
+ *       200:
+ *         description: Lista de ciudades activas obtenida exitosamente
+ *       400:
+ *         description: departmentId inválido
+ *       404:
+ *         description: Departamento no encontrado
+ *       500:
+ *         description: Error interno
+ */
+router.get('/:departmentId', getCitiesByDepartment);
 
 /**
  * @swagger

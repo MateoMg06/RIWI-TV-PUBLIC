@@ -16,6 +16,18 @@ class CinemaRepository implements ICinemaRepository {
     });
   }
 
+  async findActiveByCityId(cityId: number): Promise<Cinema[]> {
+    return await Cinema.findAll({
+      where: { cityId, active: true },
+    });
+  }
+
+  async countActiveByCityId(cityId: number): Promise<number> {
+    return await Cinema.count({
+      where: { cityId, active: true },
+    });
+  }
+
   async create(data: CinemaCreationAttributes): Promise<Cinema> {
     return await Cinema.create(data);
   }

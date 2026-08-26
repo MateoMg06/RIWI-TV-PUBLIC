@@ -32,7 +32,10 @@ export interface CreateCityDto {
      */
     city: string;
 
-
+    /**
+     * Estado activo de la ciudad (opcional, default true).
+     */
+    active?: boolean;
     
 }
 

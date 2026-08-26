@@ -23,6 +23,11 @@ export interface IMovieService {
     getCatalog(): Promise<GetMovieCatalogDto[]>;
 
     /**
+     * Obtiene la cartelera filtrada por ciudad (solo funciones activas de cines activos).
+     */
+    getCatalogByCity(cityId: number): Promise<{ city: any; data: GetMovieCatalogDto[]; message?: string }>;
+
+    /**
      * Obtiene una película por nombre.
      */
     getByName(name: string): Promise<GetMovieCatalogDto>;

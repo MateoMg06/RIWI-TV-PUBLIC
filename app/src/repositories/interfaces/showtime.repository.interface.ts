@@ -5,6 +5,8 @@ export interface IShowtimeRepository {
   findByCinemaId(cinemaId: number): Promise<Showtime[]>;
   findByMovieId(movieId: number): Promise<Showtime[]>;
   findByCinemaAndMovie(cinemaId: number, movieId: number): Promise<Showtime | null>;
+  findActiveByCinemaIds(cinemaIds: number[]): Promise<Showtime[]>;
+  findActiveByCityId(cityId: number): Promise<Showtime[]>;
   create(data: ShowtimeCreationAttributes): Promise<Showtime>;
   destroy(id: number): Promise<number>;
 }

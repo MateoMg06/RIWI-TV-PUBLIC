@@ -2,6 +2,8 @@ import User, { UserAttributes } from '../models/user.model';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import repository from '../repositories/user.repository';
+import cityRepository from '../repositories/city.repository';
+import cinemaRepository from '../repositories/cinema.repository';
 import { IUserService } from './interfaces/user.service.interface';
 import errorhandler from '../error/errorHandler';
 import { comparePassword, hashPassword } from '../utils/bcrypt';
@@ -82,14 +84,14 @@ class UserService implements IUserService {
   }
 
   async updateUser(id: number, dto: UpdateUserDto): Promise<User | null>{
-    const user= repository.findByID(id)
+    const user= await repository.findByID(id)
     if(!user) throw new errorhandler(404, "Usuario no encontrado")
     
     const data: Partial<UserAttributes> = {}
     if(dto.name !== undefined) data.name= dto.name
     if(dto.email !== undefined){
       const existingUser= await repository.findUserCredential(dto.email);
-      if (existingUser) {
+      if (existingUser && existingUser.id !== id) {
         throw new errorhandler(409, 'Este correo ya está vinculado a un usuario');
       }
       data.email= dto.email
@@ -104,6 +106,25 @@ class UserService implements IUserService {
     }
     await repository.updateByID(id, data)
     return await repository.findByID(id) as User
+  }
+
+  async setLocation(userId: number, cityId: number): Promise<User> {
+    if (!cityId || isNaN(cityId) || cityId <= 0) {
+      throw new errorhandler(400, 'cityId inválido');
+    }
+    const user = await repository.findByID(userId);
+    if (!user) throw new errorhandler(404, 'Usuario no encontrado');
+
+    const city = await cityRepository.findByPk(cityId);
+    if (!city) throw new errorhandler(404, 'Ciudad no encontrada');
+    if (!city.active) throw new errorhandler(422, 'Ciudad inactiva, no disponible para selección');
+
+    const activeCinemas = await cinemaRepository.countActiveByCityId(cityId);
+    if (activeCinemas === 0) throw new errorhandler(422, 'Ciudad sin cines activos, no disponible para selección');
+
+    await repository.updateByID(userId, { cityId } as Partial<UserAttributes>);
+    const updated = await repository.findByID(userId);
+    return updated as User;
   }
 }
 

@@ -21,14 +21,16 @@
     id: number;
     city: string;
     departmentId: number;
+    active: boolean;
   }
 
-  export interface CityCreationAttributes extends Optional<CityAttributes, "id"> {}
+  export interface CityCreationAttributes extends Optional<CityAttributes, "id" | "active"> {}
 
   class City extends Model<CityAttributes, CityCreationAttributes> implements CityAttributes {
     public id!: number;
     public city!: string;
     public departmentId!: number;
+    public active!: boolean;
   }
 
   City.init(
@@ -46,6 +48,11 @@
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "department_id",
+      },
+      active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       }
     },
     {

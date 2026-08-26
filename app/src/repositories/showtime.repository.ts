@@ -1,4 +1,6 @@
+import { Op } from 'sequelize';
 import Showtime, { ShowtimeCreationAttributes } from '../models/showtime.model';
+import Cinema from '../models/cinema.model';
 import { IShowtimeRepository } from './interfaces/showtime.repository.interface';
 
 class ShowtimeRepository implements IShowtimeRepository {
@@ -21,6 +23,31 @@ class ShowtimeRepository implements IShowtimeRepository {
   async findByCinemaAndMovie(cinemaId: number, movieId: number): Promise<Showtime | null> {
     return await Showtime.findOne({
       where: { cinemaId, movieId },
+    });
+  }
+
+  async findActiveByCinemaIds(cinemaIds: number[]): Promise<Showtime[]> {
+    if (!cinemaIds.length) return [];
+    return await Showtime.findAll({
+      where: {
+        cinemaId: { [Op.in]: cinemaIds },
+        showtime_status: 'ACTIVE',
+      },
+    });
+  }
+
+  async findActiveByCityId(cityId: number): Promise<Showtime[]> {
+    return await Showtime.findAll({
+      where: { showtime_status: 'ACTIVE' },
+      include: [
+        {
+          model: Cinema,
+          as: 'cinema',
+          where: { cityId, active: true },
+          required: true,
+          attributes: [],
+        },
+      ],
     });
   }
 

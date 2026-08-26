@@ -33,17 +33,58 @@ class MovieController {
 
     /**
      * GET /movies
-     * Obtiene la cartelera completa de películas.
+     * Obtiene la cartelera. Si recibe ?cityId filtra por ciudad activa.
      */
     async getCatalog(req: Request, res: Response): Promise<void> {
         try {
+            const rawCityId = req.query.cityId as string | undefined;
+            if (rawCityId !== undefined) {
+                const cityId = parseInt(rawCityId as string, 10);
+                if (isNaN(cityId) || cityId <= 0) {
+                    res.status(400).json({ error: 'cityId debe ser un número entero positivo' });
+                    return;
+                }
+                const result = await movieService.getCatalogByCity(cityId);
+                // Always return structured response for filtered catalog
+                res.status(200).json(result);
+                return;
+            }
             const catalog = await movieService.getCatalog();
             res.status(200).json(catalog);
-        } catch (error) {
+        } catch (error: any) {
+            if (error && error.estado) {
+                res.status(error.estado).json({ error: error.message });
+                return;
+            }
             res.status(500).json({
                 message: "Error al obtener la cartelera",
                 error: error instanceof Error ? error.message : error,
             });
+        }
+    }
+
+    /**
+     * GET /movies/catalog/:cityId - alias explícito para cartelera por ciudad
+     */
+    async getCatalogByCity(req: Request, res: Response): Promise<void> {
+        try {
+            const cityId = parseInt(req.params.cityId as string, 10);
+            if (isNaN(cityId) || cityId <= 0) {
+                res.status(400).json({ error: 'cityId debe ser un número entero positivo' });
+                return;
+            }
+            const result = await movieService.getCatalogByCity(cityId);
+            if (result.data.length === 0) {
+                res.status(200).json({ city: result.city, data: [], message: result.message });
+                return;
+            }
+            res.status(200).json(result);
+        } catch (error: any) {
+            if (error && error.estado) {
+                res.status(error.estado).json({ error: error.message });
+                return;
+            }
+            res.status(500).json({ error: error.message ?? 'Error desconocido' });
         }
     }
 

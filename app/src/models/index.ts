@@ -23,6 +23,7 @@
   import Cinema from "./cinema.model";
   import Movie from "./movie.model";
   import Showtime from "./showtime.model";
+  import User from "./user.model";
 
   /**
    * Relación 1:N: Country → Department
@@ -96,6 +97,44 @@
   });
 
   /**
-   * Exportar todos los modelos para su uso en servicios, controladores y rutas.
+   * Relación N:1 User -> City (ubicación seleccionada)
    */
-  export { Country, Department, City, Cinema, Movie, Showtime };
+  // @ts-ignore
+  User.belongsTo(City, {
+    as: "city",
+    foreignKey: "cityId",
+  });
+  // @ts-ignore
+  City.hasMany(User, {
+    as: "users",
+    foreignKey: "cityId",
+  });
+
+  /**
+   * Relación 1:N Showtime -> Cinema / Movie (para includes filtrados por ciudad)
+   */
+  // @ts-ignore
+  Showtime.belongsTo(Cinema, {
+    as: "cinema",
+    foreignKey: "cinemaId",
+  });
+  // @ts-ignore
+  Showtime.belongsTo(Movie, {
+    as: "movie",
+    foreignKey: "movieId",
+  });
+  // @ts-ignore
+  Cinema.hasMany(Showtime, {
+    as: "showtimes",
+    foreignKey: "cinemaId",
+  });
+  // @ts-ignore
+  Movie.hasMany(Showtime, {
+    as: "showtimes",
+    foreignKey: "movieId",
+  });
+
+  /**
+    * Exportar todos los modelos para su uso en servicios, controladores y rutas.
+    */
+  export { Country, Department, City, Cinema, Movie, Showtime, User };

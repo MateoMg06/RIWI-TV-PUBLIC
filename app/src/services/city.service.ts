@@ -10,6 +10,10 @@ class CityService implements ICityService {
     return await cityRepository.findByDepartmentId(departmentId);
   }
 
+  async findActiveByDepartmentId(departmentId: number): Promise<City[]> {
+    return await cityRepository.findActiveByDepartmentId(departmentId);
+  }
+
   async findByPk(id: number): Promise<City | null> {
     return await cityRepository.findByPk(id);
   }

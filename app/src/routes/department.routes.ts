@@ -11,6 +11,7 @@
 import { Router } from 'express';
 import {
   getDepartmentCities,
+  getDepartmentsByCountryId,
   createDepartment,
 } from '../controllers/department.controller';
 
@@ -41,6 +42,31 @@ const router = Router({ mergeParams: true });
  *         description: Error interno del servidor
  */
 router.get('/:id/cities', getDepartmentCities);
+
+/**
+ * @swagger
+ * /api/departments/{countryId}:
+ *   get:
+ *     summary: Obtener departamentos de un país (HU2)
+ *     tags: [Departments]
+ *     parameters:
+ *       - in: path
+ *         name: countryId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del país
+ *     responses:
+ *       200:
+ *         description: Lista de departamentos obtenida exitosamente
+ *       400:
+ *         description: countryId inválido
+ *       404:
+ *         description: País no encontrado
+ *       500:
+ *         description: Error interno
+ */
+router.get('/:countryId', getDepartmentsByCountryId);
 
 /**
  * @swagger

@@ -32,9 +32,10 @@
     fecha: string | Date;
     sala: string;
     precio: number;
+    showtime_status: string;
   }
 
-  export interface ShowtimeCreationAttributes extends Optional<ShowtimeAttributes, "id"> {}
+  export interface ShowtimeCreationAttributes extends Optional<ShowtimeAttributes, "id" | "showtime_status"> {}
 
   class Showtime extends Model<ShowtimeAttributes, ShowtimeCreationAttributes> implements ShowtimeAttributes {
     public id!: number;
@@ -44,6 +45,7 @@
     public fecha!: string | Date;
     public sala!: string;
     public precio!: number;
+    public showtime_status!: string;
   }
 
   Showtime.init(
@@ -78,6 +80,12 @@
       precio: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
+      },
+      showtime_status: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'ACTIVE',
+        field: 'showtime_status',
       }
     },
     {

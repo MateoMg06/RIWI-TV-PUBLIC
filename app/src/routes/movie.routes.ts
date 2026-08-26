@@ -49,25 +49,34 @@ router.get("/", movieController.getCatalog);
 
 /**
  * @swagger
- * /api/movies/{id}/cinemas:
+ * /api/movies/catalog/{cityId}:
  *   get:
- *     summary: Obtiene los cines donde se proyecta una película
+ *     summary: Obtiene cartelera filtrada por ciudad (HU2)
  *     tags: [Movies]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: cityId
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID de la película
+ *         description: ID de la ciudad activa
+ *       - in: query
+ *         name: cityId
+ *         schema:
+ *           type: integer
+ *         description: Alternativo por query ?cityId=
  *     responses:
  *       200:
- *         description: Lista de cines donde se proyecta la película
+ *         description: Cartelera filtrada o mensaje sin funciones
  *       400:
- *         description: ID inválido
+ *         description: cityId inválido
  *       404:
- *         description: Película no encontrada
+ *         description: Ciudad no encontrada
+ *       422:
+ *         description: Ciudad inactiva
  */
+router.get("/catalog/:cityId", movieController.getCatalogByCity);
+
 router.get("/:id/cinemas", movieController.getMovieCinemas);
 
 /**

@@ -14,6 +14,7 @@ import {
   logout,
   refresh,
   updateUser,
+  setLocation,
 } from '../controllers/user.controller';
 import { authToken } from '../middlewares/authToken';
 
@@ -220,6 +221,41 @@ router.post('/logout', logout);
  *       500:
  *         description: Error interno del servidor
  */
+/**
+ * @swagger
+ * /api/users/location:
+ *   post:
+ *     summary: Establecer o cambiar la ubicación del usuario (ciudad)
+ *     tags: [Users]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [cityId]
+ *             properties:
+ *               cityId:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Ubicación actualizada correctamente
+ *       400:
+ *         description: cityId inválido
+ *       401:
+ *         description: No autenticado o token sin identificación
+ *       404:
+ *         description: Usuario o ciudad no encontrada
+ *       422:
+ *         description: Ciudad inactiva o sin cines activos
+ *       500:
+ *         description: Error interno
+ */
+router.post('/location', authToken, setLocation);
+router.put('/location', authToken, setLocation);
 router.put('/:id', authToken, updateUser)
 router.post('/legacy-login', authUser);
 

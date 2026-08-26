@@ -32,4 +32,9 @@ export interface CreateCinemaDto {
    * ID de la ciudad.
    */
   cityId: number;
+
+  /**
+   * Estado activo del cine (opcional, default true).
+   */
+  active?: boolean;
 }

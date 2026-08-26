@@ -83,25 +83,50 @@ async function seed() {
 
     const barranquilla = await City.create({
       city: 'Barranquilla',
-      departmentId: atlantico.id
+      departmentId: atlantico.id,
+      active: true
     });
 
     const bogota = await City.create({
       city: 'Bogotá',
-      departmentId: cundinamarca.id
+      departmentId: cundinamarca.id,
+      active: true
     });
 
     const mexico_city = await City.create({
       city: 'Ciudad de México',
-      departmentId: mexico_state.id
+      departmentId: mexico_state.id,
+      active: true
     });
 
     const buenos_aires_city = await City.create({
       city: 'Buenos Aires',
-      departmentId: buenos_aires.id
+      departmentId: buenos_aires.id,
+      active: true
     });
 
-    console.log(`✓ 4 ciudades creadas`);
+    // Ciudad inactiva para pruebas (no seleccionable)
+    await City.create({
+      city: 'Ciudad Inactiva',
+      departmentId: atlantico.id,
+      active: false
+    });
+
+    // Ciudad sin cines activos (no seleccionable)
+    await City.create({
+      city: 'Ciudad Sin Cines',
+      departmentId: cundinamarca.id,
+      active: true
+    });
+
+    // Ciudad sin funciones activas (válida pero vacía)
+    const ciudadSinFunciones = await City.create({
+      city: 'Ciudad Sin Funciones',
+      departmentId: buenos_aires.id,
+      active: true
+    });
+
+    console.log(`✓ 7 ciudades creadas (incluye inactiva, sin cines, sin funciones)`);
 
     // ============================================================================
     // 4. CREAR CINES
@@ -110,25 +135,43 @@ async function seed() {
 
     const cinemark_barranquilla = await Cinema.create({
       name: 'Cinemark Barranquilla',
-      cityId: barranquilla.id
+      cityId: barranquilla.id,
+      active: true
     });
 
     const cinepolis_bogota = await Cinema.create({
       name: 'Cinépolis Bogotá',
-      cityId: bogota.id
+      cityId: bogota.id,
+      active: true
     });
 
     const cinemark_mexico = await Cinema.create({
       name: 'Cinemark México City',
-      cityId: mexico_city.id
+      cityId: mexico_city.id,
+      active: true
     });
 
     const cinemark_buenos_aires = await Cinema.create({
       name: 'Cinemark Buenos Aires',
-      cityId: buenos_aires_city.id
+      cityId: buenos_aires_city.id,
+      active: true
     });
 
-    console.log(`✓ 4 cines creados`);
+    // Cine inactivo en ciudadSinFunciones (no debe contar)
+    await Cinema.create({
+      name: 'Cine Inactivo Sin Funciones',
+      cityId: ciudadSinFunciones.id,
+      active: false
+    });
+
+    // Cine activo sin funciones en ciudadSinFunciones (ciudad sin funciones activas pero con cine activo)
+    await Cinema.create({
+      name: 'Cine Activo Sin Funciones',
+      cityId: ciudadSinFunciones.id,
+      active: true
+    });
+
+    console.log(`✓ 6 cines creados (incluye inactivo)`);
 
     // ============================================================================
     // 5. CREAR PELÍCULAS
@@ -170,7 +213,8 @@ async function seed() {
       horario: '19:30',
       fecha: '2026-08-20',
       sala: 'A-5',
-      precio: 15.99
+      precio: 15.99,
+      showtime_status: 'ACTIVE'
     });
 
     // Avatar en Cinépolis Bogotá
@@ -180,7 +224,8 @@ async function seed() {
       horario: '20:00',
       fecha: '2026-08-20',
       sala: 'B-3',
-      precio: 16.99
+      precio: 16.99,
+      showtime_status: 'ACTIVE'
     });
 
     // Spiderman en Cinépolis Bogotá
@@ -190,7 +235,8 @@ async function seed() {
       horario: '18:00',
       fecha: '2026-08-20',
       sala: 'A-1',
-      precio: 16.99
+      precio: 16.99,
+      showtime_status: 'ACTIVE'
     });
 
     // Spiderman en Cinemark México City
@@ -200,7 +246,8 @@ async function seed() {
       horario: '19:30',
       fecha: '2026-08-21',
       sala: 'C-2',
-      precio: 14.50
+      precio: 14.50,
+      showtime_status: 'ACTIVE'
     });
 
     // Inception en Cinemark Buenos Aires
@@ -210,7 +257,8 @@ async function seed() {
       horario: '20:30',
       fecha: '2026-08-22',
       sala: 'D-1',
-      precio: 13.00
+      precio: 13.00,
+      showtime_status: 'ACTIVE'
     });
 
     // Inception en Cinemark México City
@@ -220,19 +268,46 @@ async function seed() {
       horario: '21:00',
       fecha: '2026-08-22',
       sala: 'A-4',
-      precio: 14.50
+      precio: 14.50,
+      showtime_status: 'ACTIVE'
     });
 
-    console.log(`✓ 6 proyecciones creadas`);
+    // Función INACTIVA (no debe aparecer en cartelera filtrada)
+    await Showtime.create({
+      cinemaId: cinemark_barranquilla.id,
+      movieId: inception.id,
+      horario: '22:00',
+      fecha: '2026-08-23',
+      sala: 'A-5',
+      precio: 15.99,
+      showtime_status: 'INACTIVE'
+    });
+
+    // Función en cine inactivo (no debe aparecer) - usando cinema inactivo de ciudadSinFunciones
+    // Se crea cine inactivo temporal ya arriba; creamos función INACTIVE para prueba
+    const cineInactivo = await Cinema.findOne({ where: { name: 'Cine Inactivo Sin Funciones' } });
+    if (cineInactivo) {
+      await Showtime.create({
+        cinemaId: cineInactivo.id,
+        movieId: avatar.id,
+        horario: '19:00',
+        fecha: '2026-08-24',
+        sala: 'B-1',
+        precio: 12.00,
+        showtime_status: 'ACTIVE'
+      });
+    }
+
+    console.log(`✓ 8 proyecciones creadas (incluye inactivas)`);
 
     console.log('\n✅ Seeder completado exitosamente');
     console.log('\nDatos de prueba insertados:');
     console.log(`  - 3 Países`);
     console.log(`  - 4 Departamentos`);
-    console.log(`  - 4 Ciudades`);
-    console.log(`  - 4 Cines`);
+    console.log(`  - 7 Ciudades`);
+    console.log(`  - 6 Cines`);
     console.log(`  - 3 Películas`);
-    console.log(`  - 6 Proyecciones`);
+    console.log(`  - 8 Proyecciones`);
 
     process.exit(0);
   } catch (error) {

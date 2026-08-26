@@ -41,6 +41,13 @@ app.use('/api/departments/:departmentId/cities', cityRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/cinemas', cinemaRoutes);
 
+// Aliases sin prefijo /api para cumplir literal HU2 GET /countries, GET /departments/:countryId, GET /cities/:departmentId, POST /users/location
+app.use('/countries', countryRoutes);
+app.use('/departments', departmentRoutes);
+app.use('/cities', cityRoutes);
+app.use('/users', userRoutes);
+app.use('/movies', movieRoutes);
+
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

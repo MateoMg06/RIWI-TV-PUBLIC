@@ -24,14 +24,16 @@
     id: number;
     name: string;
     cityId: number;
+    active: boolean;
   }
 
-  export interface CinemaCreationAttributes extends Optional<CinemaAttributes, "id"> {}
+  export interface CinemaCreationAttributes extends Optional<CinemaAttributes, "id" | "active"> {}
 
   class Cinema extends Model<CinemaAttributes, CinemaCreationAttributes> implements CinemaAttributes {
     public id!: number;
     public name!: string;
     public cityId!: number;
+    public active!: boolean;
   }
 
   Cinema.init(
@@ -49,6 +51,11 @@
         type: DataTypes.INTEGER,
         allowNull: false,
         field: "city_id",
+      },
+      active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       }
     },
     {

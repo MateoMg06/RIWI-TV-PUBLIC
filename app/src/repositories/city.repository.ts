@@ -6,6 +6,10 @@ class CityRepository implements ICityRepository {
     return await City.findAll();
   }
 
+  async findAllActive(): Promise<City[]> {
+    return await City.findAll({ where: { active: true } });
+  }
+
   async findByPk(id: number): Promise<City | null> {
     return await City.findByPk(id);
   }
@@ -13,6 +17,12 @@ class CityRepository implements ICityRepository {
   async findByDepartmentId(departmentId: number): Promise<City[]> {
     return await City.findAll({
       where: { departmentId },
+    });
+  }
+
+  async findActiveByDepartmentId(departmentId: number): Promise<City[]> {
+    return await City.findAll({
+      where: { departmentId, active: true },
     });
   }
 

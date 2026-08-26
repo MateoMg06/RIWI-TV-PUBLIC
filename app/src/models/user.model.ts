@@ -11,9 +11,10 @@ export interface UserAttributes {
   failedLoginAttempts: number;
   lastLoginAttempt: Date | null;
   lockedUntil: Date | null;
+  cityId: number | null;
 }
 
-export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+export interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'cityId' | 'failedLoginAttempts' | 'lastLoginAttempt' | 'lockedUntil'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
@@ -25,6 +26,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public failedLoginAttempts!: number;
   public lastLoginAttempt!: Date | null;
   public lockedUntil!: Date | null;
+  public cityId!: number | null;
 
 }
 
@@ -72,6 +74,15 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null
+    },
+    cityId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+      field: 'city_id',
+      references: { model: 'cities', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
     }
   },
   {
