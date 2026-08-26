@@ -6,8 +6,8 @@ WORKDIR /usr/src/app
 # Copiar package.json y package-lock.json antes que el código
 COPY package*.json ./
 
-# Instalar dependencias (solo en la imagen base)
-RUN npm install
+# Instalar dependencias de forma reproducible
+RUN npm ci
 
 # Exponer el puerto
 EXPOSE 3000
