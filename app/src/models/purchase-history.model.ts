@@ -72,25 +72,4 @@ PurchaseHistory.init(
   }
 );
 
-// Relaciones
-User.hasMany(PurchaseHistory, {
-  as: 'purchaseHistories',
-  foreignKey: 'userId',
-});
-
-PurchaseHistory.belongsTo(User, {
-  as: 'user',
-  foreignKey: 'userId',
-});
-
-Membership.hasMany(PurchaseHistory, {
-  as: 'purchases',
-  foreignKey: 'membershipId',
-});
-
-PurchaseHistory.belongsTo(Membership, {
-  as: 'membership',
-  foreignKey: 'membershipId',
-});
-
 export default PurchaseHistory;

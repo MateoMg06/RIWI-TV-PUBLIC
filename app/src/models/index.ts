@@ -127,7 +127,7 @@ Profile.belongsTo(User, {
  */
 // @ts-ignore
 User.hasOne(Membership, {
-  as: "membership",
+  as: "userMembership",
   foreignKey: "userId",
 });
 

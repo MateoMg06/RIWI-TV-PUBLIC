@@ -89,15 +89,4 @@ Profile.init(
   }
 );
 
-// Relación 1:1 User -> Profile
-User.hasOne(Profile, {
-  as: 'profile',
-  foreignKey: 'userId',
-});
-
-Profile.belongsTo(User, {
-  as: 'user',
-  foreignKey: 'userId',
-});
-
 export default Profile;

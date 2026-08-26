@@ -73,15 +73,4 @@ Membership.init(
   }
 );
 
-// Relación 1:1 User -> Membership
-User.hasOne(Membership, {
-  as: 'membership',
-  foreignKey: 'userId',
-});
-
-Membership.belongsTo(User, {
-  as: 'user',
-  foreignKey: 'userId',
-});
-
 export default Membership;
