@@ -8,5 +8,9 @@ export interface IUserRepository {
   findUserCredential(email: string, password?: string): Promise<User | null>;
   findByID(id: number): Promise<User | null>;
   findByActivationToken(token: string): Promise<User | null>;
+  findByResetToken(token: string): Promise<User | null>;
   updateByID(id: number, data: Partial<UserAttributes>, transaction?: Transaction): Promise<void>;
+  saveAccessToken(id: number, accessToken: string): Promise<void>;
+  saveRefreshToken(id: number, refreshToken: string): Promise<void>;
+  clearTokens(id: number): Promise<void>;
 }

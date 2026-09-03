@@ -5,7 +5,7 @@
  */
 
 import { Router } from 'express';
-import { getCaptcha, register, activateAccount } from '../controllers/auth.controller';
+import { getCaptcha, register, activateAccount, forgotPassword, resetPassword } from '../controllers/auth.controller';
 
 const router = Router();
 
@@ -153,5 +153,72 @@ router.post('/register', register);
  *         description: Error interno del servidor
  */
 router.post('/activate', activateAccount);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Solicitar recuperación de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john.doe@example.com
+ *     responses:
+ *       200:
+ *         description: Si el correo está registrado, se enviará un enlace de recuperación
+ *       400:
+ *         description: La cuenta no está activada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/forgot-password', forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Restablecer la contraseña usando un token de recuperación
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *               - confirmPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: "abc123-reset-token"
+ *               password:
+ *                 type: string
+ *                 example: "NewSecurePass123!"
+ *               confirmPassword:
+ *                 type: string
+ *                 example: "NewSecurePass123!"
+ *     responses:
+ *       200:
+ *         description: Contraseña restablecida exitosamente
+ *       400:
+ *         description: Token inválido, expirado o usado; o contraseñas no coinciden
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/reset-password', resetPassword);
 
 export default router;

@@ -31,8 +31,24 @@ class UserRepository implements IUserRepository {
     return await User.findOne({ where: { activationToken: token } });
   }
 
+  async findByResetToken(token: string): Promise<User | null> {
+    return await User.findOne({ where: { resetToken: token } });
+  }
+
   async updateByID(id: number, data: Partial<UserAttributes>, transaction?: Transaction): Promise<void> {
     await User.update(data, { where: { id }, transaction });
+  }
+
+  async saveAccessToken(id: number, accessToken: string): Promise<void> {
+    await User.update({ accessToken }, { where: { id } });
+  }
+
+  async saveRefreshToken(id: number, refreshToken: string): Promise<void> {
+    await User.update({ refreshToken }, { where: { id } });
+  }
+
+  async clearTokens(id: number): Promise<void> {
+    await User.update({ accessToken: null, refreshToken: null }, { where: { id } });
   }
 }
 

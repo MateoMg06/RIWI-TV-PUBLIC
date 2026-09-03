@@ -20,10 +20,14 @@ export interface UserAttributes {
   acceptsDataProcessing: boolean;
   acceptsTerms: boolean;
   acceptsNotifications: boolean;
-  accountStatus: "active" | "inactive";
-  activationToken: string | null;
-  activationTokenExpires: Date | null;
-}
+   accountStatus: "active" | "inactive";
+   activationToken: string | null;
+   activationTokenExpires: Date | null;
+   accessToken: string | null;
+   refreshToken: string | null;
+   resetToken: string | null;
+   resetTokenExpires: Date | null;
+ }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
@@ -46,10 +50,14 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public acceptsDataProcessing!: boolean;
   public acceptsTerms!: boolean;
   public acceptsNotifications!: boolean;
-  public accountStatus!: "active" | "inactive";
-  public activationToken!: string | null;
-  public activationTokenExpires!: Date | null;
-}
+   public accountStatus!: "active" | "inactive";
+   public activationToken!: string | null;
+   public activationTokenExpires!: Date | null;
+   public accessToken!: string | null;
+   public refreshToken!: string | null;
+   public resetToken!: string | null;
+   public resetTokenExpires!: Date | null;
+ }
 
 User.init(
   {
@@ -145,6 +153,22 @@ User.init(
       allowNull: true,
     },
     activationTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    accessToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    refreshToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    resetToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    resetTokenExpires: {
       type: DataTypes.DATE,
       allowNull: true,
     }

@@ -31,6 +31,9 @@ import User from "./user.model";
 import Profile from "./profile.model";
 import Membership from "./membership.model";
 import PurchaseHistory from "./purchase-history.model";
+import RefreshToken from "./refresh-token.model";
+import AccessAudit from "./access-audit.model";
+import PasswordResetToken from "./password-reset-token.model";
 
 /**
  * Relación 1:N: Country → Department
@@ -172,6 +175,57 @@ PurchaseHistory.belongsTo(Membership, {
 });
 
 /**
+ * Relación 1:N: User → RefreshToken
+ * Un usuario puede tener muchos refresh tokens (uno por sesión/dispositivo).
+ * Un refresh token pertenece a un usuario.
+ */
+// @ts-ignore
+User.hasMany(RefreshToken, {
+  as: "refreshTokens",
+  foreignKey: "userId",
+});
+
+// @ts-ignore
+RefreshToken.belongsTo(User, {
+  as: "user",
+  foreignKey: "userId",
+});
+
+/**
+ * Relación 1:N: User → AccessAudit
+ * Un usuario puede tener muchos registros de auditoría.
+ * Un registro de auditoría pertenece a un usuario (opcional, para intentos fallidos).
+ */
+// @ts-ignore
+User.hasMany(AccessAudit, {
+  as: "accessAudits",
+  foreignKey: "userId",
+});
+
+// @ts-ignore
+AccessAudit.belongsTo(User, {
+  as: "user",
+  foreignKey: "userId",
+});
+
+/**
+ * Relación 1:N: User → PasswordResetToken
+ * Un usuario puede tener muchos tokens de recuperación de contraseña.
+ * Un token de recuperación pertenece a un usuario.
+ */
+// @ts-ignore
+User.hasMany(PasswordResetToken, {
+  as: "passwordResetTokens",
+  foreignKey: "userId",
+});
+
+// @ts-ignore
+PasswordResetToken.belongsTo(User, {
+  as: "user",
+  foreignKey: "userId",
+});
+
+/**
  * Exportar todos los modelos para su uso en servicios, controladores y rutas.
  */
-export { Country, Department, City, Cinema, Movie, Showtime, User, Profile, Membership, PurchaseHistory };
+export { Country, Department, City, Cinema, Movie, Showtime, User, Profile, Membership, PurchaseHistory, RefreshToken, AccessAudit, PasswordResetToken };

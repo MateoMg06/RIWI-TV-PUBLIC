@@ -53,6 +53,35 @@ class EmailService {
       return false;
     }
   }
+
+  async sendForgotPasswordEmail(email: string, token: string, userName: string): Promise<void> {
+    const resetUrl = `${process.env.APP_URL || 'http://localhost:5000'}/api/auth/reset-password?token=${token}`;
+
+    const mailOptions = {
+      from: `"Riwi Cine" <${process.env.SMTP_USER || 'noreply@riwicine.com'}>`,
+      to: email,
+      subject: 'Recuperación de contraseña - Riwi Cine',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #333; text-align: center;">Recuperación de contraseña</h1>
+          <p style="color: #666; font-size: 16px;">Hola <strong>${userName}</strong>,</p>
+          <p style="color: #666; font-size: 16px;">Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 16px;">Restablecer contraseña</a>
+          </div>
+          <p style="color: #666; font-size: 14px;">Este enlace expirará en 1 hora. Si no has solicitado este cambio, puedes ignorar este correo.</p>
+          <p style="color: #666; font-size: 14px;">Saludos,<br>El equipo de Riwi Cine</p>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending forgot password email:', error);
+      throw new Error('No se pudo enviar el correo de recuperación de contraseña');
+    }
+  }
 }
 
 export default new EmailService();
