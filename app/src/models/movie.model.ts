@@ -13,13 +13,8 @@
  * Este modelo es utilizado por los servicios y controladores para realizar operaciones CRUD.
  */
 
-import { DataTypes, Model, Optional } from "sequelize";
-import sequelize from "../config/database";
-
-<<<<<<< HEAD
   import { DataTypes, Model, Optional } from "sequelize";
   import sequelize from "../config/database";
-  
 
   export interface MovieAttributes {
     id: number;
@@ -36,29 +31,10 @@ import sequelize from "../config/database";
     release_date: Date;
     status: boolean;
     audience_rating: number;
-    
   }
-=======
-export interface MovieAttributes {
-  id: number;
-  name: string;
-  clasification: string;
-  duration: number;
-  gener: string;
-}
 
-export interface MovieCreationAttributes extends Optional<MovieAttributes, "id"> {}
->>>>>>> develop
+  export interface MovieCreationAttributes extends Optional<MovieAttributes, "id"> {}
 
-class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
-  public id!: number;
-  public name!: string;
-  public clasification!: string;
-  public duration!: number;
-  public gener!: string;
-}
-
-<<<<<<< HEAD
   class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
     public id!: number;
     public name!: string;
@@ -137,38 +113,13 @@ class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements M
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       }
-=======
-Movie.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
->>>>>>> develop
     },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    clasification: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    duration: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    gener: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
+    {
+      sequelize,
+      modelName: "Movie",
+      tableName: "movies",
+      timestamps: true,
     }
-  },
-  {
-    sequelize,
-    modelName: "Movie",
-    tableName: "movies",
-    timestamps: true,
-  }
-);
+  );
 
-export default Movie;
+  export default Movie;

@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import movieService from "../services/movie.service";
 import Movie from "../models/movie.model";
 import movieRepository from "../repositories/movie.repository";
+import errorhandler from "../error/errorHandler";
 
 /**
  * Controlador de Películas
@@ -94,11 +95,6 @@ import movieRepository from "../repositories/movie.repository";
         }
     }
 
-<<<<<<< HEAD
-
-
-
-    
     export const getWeeklyMovies = async (
   _req: Request,
   res: Response
@@ -115,11 +111,3 @@ import movieRepository from "../repositories/movie.repository";
     return res.status(500).json({ error: error.message });
   }
 };
-
-
-
-
-
-=======
-export default new MovieController();
->>>>>>> develop
