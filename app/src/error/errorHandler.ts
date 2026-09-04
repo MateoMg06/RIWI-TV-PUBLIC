@@ -1,12 +1,8 @@
+export default class ErrorHandler extends Error {
+  estado: number;
 
-export default class errorhandler extends Error {
-      estado:number
-     constructor (estado:number,mensaje:string) {
-      
-      super (mensaje)
-       this.estado = estado
-      
-    }
-
-    
+  constructor(estado: number, mensaje: string) {
+    super(mensaje);
+    this.estado = estado;
+  }
 }

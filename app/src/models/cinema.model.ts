@@ -3,7 +3,7 @@
   /**
    * Modelo de cine
    * -----------------
-   * Este archivo define el modelo `cinema` de Sequelize, que representa la tabla `cinema` en la base de datos.
+   * Este archivo define el modelo `cinemas` de Sequelize, que representa la tabla `cinemas` en la base de datos.
    * 
    * Contiene:
    *  - Atributos del modelo (`CinemaAttributes`).

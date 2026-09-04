@@ -17,8 +17,6 @@
    *  - Pertenece a un Cinema
    *  - Pertenece a una Movie
    * 
-   * Campos adicionales como horario, fecha, sala y precio pueden agregarse posteriormente
-   * según los requisitos del negocio.
    */
 
   import { DataTypes, Model, Optional } from "sequelize";
@@ -76,7 +74,7 @@
         allowNull: false,
       },
       precio: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.DECIMAL(12, 2),
         allowNull: false,
       }
     },
@@ -85,6 +83,12 @@
       modelName: "Showtime",
       tableName: "showtime",
       timestamps: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ["cinema_id", "movie_id"],
+        },
+      ],
     }
   );
 

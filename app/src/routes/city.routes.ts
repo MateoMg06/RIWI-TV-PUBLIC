@@ -42,7 +42,7 @@ const router = Router({ mergeParams: true });
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/cinemas', getCityCinemas, authToken, requireRole("admin"));
+router.get('/:id/cinemas', getCityCinemas);
 
 /**
  * @swagger
@@ -80,6 +80,6 @@ router.get('/:id/cinemas', getCityCinemas, authToken, requireRole("admin"));
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCity, authToken, requireRole("admin"));
+router.post('/', authToken, requireRole("admin"), createCity);
 
 export default router;

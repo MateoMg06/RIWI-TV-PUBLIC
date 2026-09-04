@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import membershipService from '../services/membership.service';
 import { CreateMembershipDto } from '../dto/create-membership.dto';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 
 export const createMembership = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -15,7 +15,7 @@ export const createMembership = async (req: Request, res: Response): Promise<Res
     const result = await membershipService.createMembership(dto);
     return res.status(201).json(result);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -30,7 +30,7 @@ export const getMembership = async (req: Request, res: Response): Promise<Respon
     const membership = await membershipService.getMembershipByUserId(req.user.id);
     return res.status(200).json(membership);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -45,7 +45,7 @@ export const getPurchaseHistory = async (req: Request, res: Response): Promise<R
     const history = await membershipService.getPurchaseHistory(req.user.id);
     return res.status(200).json(history);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });

@@ -1,10 +1,10 @@
 import { JwtPayload } from 'jsonwebtoken';
 
 export type AuthPayload = JwtPayload & {
-  role?: string;
-  id?: number,
-  name?: string,
-  membership?: string
+  role: string;
+  id: number;
+  name: string;
+  membership: string;
 };
 
 declare global {

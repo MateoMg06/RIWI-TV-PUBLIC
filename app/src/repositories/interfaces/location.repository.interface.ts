@@ -1,7 +1,7 @@
 
 import Country, { CountryCreationAttributes } from "../../models/country.model";
 import Department, { DepartmentCreationAttributes } from "../../models/department.model";
-import City, { CityCreationAttributes } from "../../models/cities.model";
+import City, { CityCreationAttributes } from "../../models/city.model";
 
 export interface ILocationRepository {
     getCountries(): Promise<Country[]>;

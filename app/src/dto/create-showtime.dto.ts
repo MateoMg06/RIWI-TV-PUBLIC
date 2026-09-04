@@ -12,8 +12,6 @@
 /**
  * Objeto de transferencia de datos para la creación de showtime
  *
- * @property {number} cinemaId - ID del cine.
- * @property {number} movieId - ID de la película.
  * @property {string} horario - Hora de proyección (formato HH:MM).
  * @property {string} fecha - Fecha de proyección (YYYY-MM-DD).
  * @property {string} sala - Número o nombre de la sala.
@@ -21,8 +19,6 @@
  *
  * @example
  * const dto: CreateShowtimeDto = {
- *   cinemaId: 1,
- *   movieId: 1,
  *   horario: "19:30",
  *   fecha: "2026-08-20",
  *   sala: "A-5",
@@ -31,16 +27,6 @@
  */
 
 export interface CreateShowtimeDto {
-  /**
-   * ID del cine.
-   */
-  cinemaId: number;
-
-  /**
-   * ID de la película.
-   */
-  movieId: number;
-
   /**
    * Hora de proyección.
    */

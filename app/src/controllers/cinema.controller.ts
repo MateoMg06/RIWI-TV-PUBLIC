@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import cinemaService from '../services/cinema.service';
 import { CreateCinemaDto } from '../dto/create-cinema.dto';
 import { CreateShowtimeDto } from '../dto/create-showtime.dto';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 
 export const getCinemaMovies = async (
   req: Request,
@@ -25,7 +25,7 @@ export const getCinemaMovies = async (
     const movies = await cinemaService.getMovies(cinemaId);
     return res.status(200).json(movies);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -51,7 +51,7 @@ export const createCinema = async (
     const cinema = await cinemaService.create(dto);
     return res.status(201).json(cinema);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -94,10 +94,10 @@ export const addMovieToCinema = async (
       return res.status(400).json({ error: 'El campo "precio" es requerido y debe ser un número positivo' });
     }
 
-    const showtime = await cinemaService.addMovie(cinemaId, parsedMovieId, { ...dto, cinemaId, movieId: parsedMovieId });
+    const showtime = await cinemaService.addMovie(cinemaId, parsedMovieId, dto);
     return res.status(201).json(showtime);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -125,7 +125,7 @@ export const removeMovieFromCinema = async (
     await cinemaService.removeMovie(cinemaId, parsedMovieId);
     return res.status(200).json({ message: 'Proyección eliminada exitosamente' });
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -153,7 +153,7 @@ export const getShowtimes = async (
     const showtimes = await cinemaService.getShowtimes(cinemaId);
     return res.status(200).json(showtimes);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });

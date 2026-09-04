@@ -56,20 +56,5 @@ export interface CreateMovieDto {
      * Género de la película.
      */
     gener: string;
-
-     /**
-     * pais de la película.
-     */
-    pais: string;
-
-     /**
-     * departamento de la película.
-     */
-    departamento: string;
-
-     /**
-     * ciudad de la película.
-     */
-    ciudad: string;
 }
 

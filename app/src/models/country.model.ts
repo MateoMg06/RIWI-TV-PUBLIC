@@ -2,13 +2,13 @@
 
 
   /**
-   * Modelo de pais
+   * Modelo de country
    * -----------------
-   * Este archivo define el modelo `pais` de Sequelize, que representa la tabla `pais` en la base de datos.
+   * Este archivo define el modelo `Country` de Sequelize, que representa la tabla `Country` en la base de datos.
    * 
    * Contiene:
-   *  - Atributos del modelo (`PaiseAttributes`).
-   *  - Atributos requeridos para la creación (`PaisCreationAttributes`).
+   *  - Atributos del modelo (`CountryAttributes`).
+   *  - Atributos requeridos para la creación (`CountryCreationAttributes`).
    *  - Definición del modelo con sus columnas y restricciones.
    * 
    * Este modelo es utilizado por los servicios y controladores para realizar operaciones CRUD.

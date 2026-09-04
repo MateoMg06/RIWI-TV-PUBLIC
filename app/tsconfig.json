@@ -10,6 +10,6 @@
     "outDir": "./dist",
     "types": ["node", "jest"]
   },
-  "include": ["src", "src/types", "src/middlewares", "src/models/RIWI-T"],
+  "include": ["src", "src/types", "src/middlewares"],
   "exclude": ["node_modules", "dist"]
 }

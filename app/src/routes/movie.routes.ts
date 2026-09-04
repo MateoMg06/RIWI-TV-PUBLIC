@@ -47,7 +47,7 @@ const router = Router();
  *       500:
  *         description: Error al obtener la cartelera
  */
-router.get("/", authToken, requireRole("admin", "usuario"), movieController.getCatalog);
+router.get("/", movieController.getCatalog);
 
 /**
  * @swagger
@@ -70,7 +70,7 @@ router.get("/", authToken, requireRole("admin", "usuario"), movieController.getC
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:id/cinemas", authToken, requireRole("admin", "usuario"), movieController.getMovieCinemas);
+router.get("/:id/cinemas", movieController.getMovieCinemas);
 
 /**
  * @swagger
@@ -91,7 +91,7 @@ router.get("/:id/cinemas", authToken, requireRole("admin", "usuario"), movieCont
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:name", authToken, requireRole("admin", "usuario"), movieController.getByName);
+router.get("/:name", movieController.getByName);
 
 /**
  * @swagger

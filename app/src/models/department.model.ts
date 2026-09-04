@@ -1,14 +1,14 @@
- // app/src/models/country.model.ts
+ // app/src/models/department.model.ts
 
 
   /**
-   * Modelo de pais
+   * Modelo de Department
    * -----------------
-   * Este archivo define el modelo `pais` de Sequelize, que representa la tabla `pais` en la base de datos.
+   * Este archivo define el modelo `Department` de Sequelize, que representa la tabla `Department` en la base de datos.
    * 
    * Contiene:
-   *  - Atributos del modelo (`PaiseAttributes`).
-   *  - Atributos requeridos para la creación (`PaisCreationAttributes`).
+   *  - Atributos del modelo (`DepartmenteAttributes`).
+   *  - Atributos requeridos para la creación (`DepartmentCreationAttributes`).
    *  - Definición del modelo con sus columnas y restricciones.
    * 
    * Este modelo es utilizado por los servicios y controladores para realizar operaciones CRUD.

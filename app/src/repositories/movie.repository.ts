@@ -43,7 +43,15 @@ class MovieRepository implements IMovieRepository {
         return await Movie.findByPk(id);
     }
 
-
+    /**
+     * Obtiene los cines donde se proyecta una película.
+     */
+    async findCinemasByMovieId(movieId: number): Promise<any[]> {
+        const movie = await Movie.findByPk(movieId, {
+            include: [{ association: 'cinemas', through: { attributes: [] } }]
+        });
+        return (movie as any)?.['cinemas'] || [];
+    }
 }
 
 export default new MovieRepository();

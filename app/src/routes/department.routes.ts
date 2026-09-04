@@ -42,7 +42,7 @@ const router = Router({ mergeParams: true });
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/cities', getDepartmentCities, authToken, requireRole("admin"));
+router.get('/:id/cities', getDepartmentCities);
 
 /**
  * @swagger
@@ -80,6 +80,6 @@ router.get('/:id/cities', getDepartmentCities, authToken, requireRole("admin"));
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createDepartment, authToken, requireRole("admin"));
+router.post('/', authToken, requireRole("admin"), createDepartment);
 
 export default router;

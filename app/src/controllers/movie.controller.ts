@@ -2,7 +2,6 @@
 
 import { Request, Response } from "express";
 import movieService from "../services/movie.service";
-import Movie from "../models/movie.model";
 import movieRepository from "../repositories/movie.repository";
 
 /**
@@ -84,11 +83,9 @@ class MovieController {
                 return;
             }
 
-            const cinemas = await Movie.findByPk(movieId, {
-                include: [{ association: 'cinemas', through: { attributes: [] } }]
-            });
+            const cinemas = await movieRepository.findCinemasByMovieId(movieId);
 
-            res.status(200).json((cinemas as any)?.['cinemas'] || []);
+            res.status(200).json(cinemas);
         } catch (error) {
             res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
         }

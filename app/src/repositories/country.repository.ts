@@ -13,6 +13,12 @@ class CountryRepository implements ICountryRepository {
   async create(data: CountryCreationAttributes): Promise<Country> {
     return await Country.create(data);
   }
+
+  async findWithDepartments(countryId: number): Promise<any> {
+    return await Country.findByPk(countryId, {
+      include: [{ association: 'departments' }]
+    });
+  }
 }
 
 export default new CountryRepository();

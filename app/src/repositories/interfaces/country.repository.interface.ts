@@ -4,4 +4,5 @@ export interface ICountryRepository {
   findAll(): Promise<Country[]>;
   findByPk(id: number): Promise<Country | null>;
   create(data: CountryCreationAttributes): Promise<Country>;
+  findWithDepartments(countryId: number): Promise<any>;
 }

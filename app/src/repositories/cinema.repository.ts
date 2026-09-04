@@ -19,6 +19,12 @@ class CinemaRepository implements ICinemaRepository {
   async create(data: CinemaCreationAttributes): Promise<Cinema> {
     return await Cinema.create(data);
   }
+
+  async findWithMovies(cinemaId: number): Promise<any> {
+    return await Cinema.findByPk(cinemaId, {
+      include: [{ association: 'movies', through: { attributes: [] } }]
+    });
+  }
 }
 
 export default new CinemaRepository();

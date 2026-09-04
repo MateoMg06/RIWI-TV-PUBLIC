@@ -30,4 +30,9 @@ export interface IMovieRepository {
      * Obtiene una película por ID.
      */
     findByPk(id: number): Promise<Movie | null>;
+
+    /**
+     * Obtiene los cines donde se proyecta una película.
+     */
+    findCinemasByMovieId(movieId: number): Promise<any[]>;
 }

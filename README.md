@@ -35,6 +35,9 @@ API REST para administrar usuarios, autenticación, ubicaciones, películas, cin
 - Consulta de horarios, fechas, salas y precios.
 - Documentación Swagger y colección de Postman.
 - Datos de prueba mediante un seeder.
+- Sistema de membresías con roles de usuario.
+- Recuperación de contraseña por correo electrónico.
+- CAPTCHA para registro de usuarios.
 
 ## Tecnologías
 
@@ -114,86 +117,79 @@ User (entidad independiente)
 
 ## Endpoints
 
-La URL local predeterminada es `http://localhost:3000`.
+La URL local predeterminada es `http://localhost:5001`.
 
 ### Sistema
 
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| `GET` | `/api/v1/health` | Comprueba la API y la conexión con PostgreSQL |
-| `GET` | `/api/test` | Comprueba que Express está respondiendo |
-| `GET` | `/api/docs` | Abre Swagger UI |
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/health` | Comprueba la API y la conexión con PostgreSQL | No |
+| `GET` | `/api/test` | Comprueba que Express está respondiendo | No |
+| `GET` | `/api/docs` | Abre Swagger UI | No |
 
-### Usuarios y autenticación
+### Autenticación y registro
+
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `GET` | `/api/auth/captcha` | Obtiene un CAPTCHA para el registro | No |
+| `POST` | `/api/auth/register` | Registra un nuevo usuario con perfil y membresía inicial | No |
+| `POST` | `/api/auth/activate` | Activa la cuenta del usuario mediante token de correo | No |
+| `POST` | `/api/auth/forgot-password` | Solicita recuperación de contraseña | No |
+| `POST` | `/api/auth/reset-password` | Restablece la contraseña con un token de recuperación | No |
+
+### Usuarios
 
 | Método | Ruta | Descripción | Autenticación |
 | --- | --- | --- | --- |
 | `POST` | `/api/users` | Crea un usuario | No |
-| `GET` | `/api/users` | Lista usuarios | No |
+| `POST` | `/api/users/register` | Alias de `/api/users` | No |
+| `GET` | `/api/users` | Lista usuarios | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/users/getUsers` | Alias de `/api/users` | Cookie `accessToken` + rol `admin` |
 | `POST` | `/api/users/auth` | Valida email y contraseña sin generar JWT | No |
 | `POST` | `/api/users/login` | Inicia sesión y genera tokens | No |
-| `POST` | `/api/users/refresh` | Genera un access token nuevo | Refresh token |
+| `POST` | `/api/users/legacy-login` | Alias de `/api/users/auth` | No |
+| `POST` | `/api/users/refresh` | Genera un access token nuevo | Cookie `accessToken` |
 | `POST` | `/api/users/logout` | Elimina la cookie de sesión | No |
-| `PUT` | `/api/users/:id` | Actualiza nombre, email o contraseña | Cookie `accessToken` |
+| `PUT` | `/api/users/:id` | Actualiza nombre, email o contraseña | Cookie `accessToken` + rol `admin` o `usuario` |
 
-Aliases conservados por compatibilidad:
+### Membresías
 
-- `POST /api/users/register`
-- `GET /api/users/getUsers`
-- `POST /api/users/legacy-login`
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `POST` | `/api/membership/create` | Crea una membresía para el usuario autenticado | Cookie `accessToken` + rol `admin` o `usuario` |
+| `GET` | `/api/membership/me` | Obtiene la membresía del usuario autenticado | Cookie `accessToken` + rol `admin` o `usuario` |
+| `GET` | `/api/membership/purchase-history` | Obtiene el historial de compras del usuario autenticado | Cookie `accessToken` + rol `admin` o `usuario` |
 
 ### Países, departamentos y ciudades
 
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| `GET` | `/api/countries` | Lista países |
-| `POST` | `/api/countries` | Crea un país |
-| `GET` | `/api/countries/:id/departments` | Lista departamentos de un país |
-| `POST` | `/api/countries/:countryId/departments` | Crea un departamento |
-| `GET` | `/api/departments/:id/cities` | Lista ciudades de un departamento |
-| `POST` | `/api/departments/:departmentId/cities` | Crea una ciudad |
-| `GET` | `/api/cities/:id/cinemas` | Lista cines de una ciudad |
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `GET` | `/api/countries` | Lista países | No |
+| `POST` | `/api/countries` | Crea un país | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/countries/:id/departments` | Lista departamentos de un país | No |
+| `POST` | `/api/countries/:countryId/departments` | Crea un departamento | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/departments/:id/cities` | Lista ciudades de un departamento | No |
+| `POST` | `/api/departments/:departmentId/cities` | Crea una ciudad | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/cities/:id/cinemas` | Lista cines de una ciudad | No |
 
 ### Películas
 
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| `GET` | `/api/movies` | Obtiene la cartelera |
-| `POST` | `/api/movies` | Crea una película |
-| `GET` | `/api/movies/:name` | Busca una película por nombre |
-| `GET` | `/api/movies/:id/cinemas` | Lista cines que proyectan una película |
-
-Ejemplo de creación:
-
-```json
-{
-  "name": "Spiderman",
-  "clasification": "PG-13",
-  "duration": 120,
-  "gener": "Acción"
-}
-```
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `GET` | `/api/movies` | Obtiene la cartelera | No |
+| `POST` | `/api/movies` | Crea una película | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/movies/:name` | Busca una película por nombre | No |
+| `GET` | `/api/movies/:id/cinemas` | Lista cines que proyectan una película | No |
 
 ### Cines y proyecciones
 
-| Método | Ruta | Descripción |
-| --- | --- | --- |
-| `POST` | `/api/cinemas` | Crea un cine |
-| `GET` | `/api/cinemas/:id/movies` | Lista películas de un cine |
-| `POST` | `/api/cinemas/:id/movies/:movieId` | Asigna una película y crea su proyección |
-| `DELETE` | `/api/cinemas/:id/movies/:movieId` | Elimina la proyección |
-| `GET` | `/api/cinemas/:id/showtimes` | Lista proyecciones del cine |
-
-Ejemplo de creación de una proyección:
-
-```json
-{
-  "horario": "19:30",
-  "fecha": "2026-08-30",
-  "sala": "A-5",
-  "precio": 15990
-}
-```
+| Método | Ruta | Descripción | Autenticación |
+| --- | --- | --- | --- |
+| `POST` | `/api/cinemas` | Crea un cine | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/cinemas/:id/movies` | Lista películas de un cine | Cookie `accessToken` + rol `admin` |
+| `POST` | `/api/cinemas/:id/movies/:movieId` | Asigna una película y crea su proyección | Cookie `accessToken` + rol `admin` |
+| `DELETE` | `/api/cinemas/:id/movies/:movieId` | Elimina la proyección | Cookie `accessToken` + rol `admin` |
+| `GET` | `/api/cinemas/:id/showtimes` | Lista proyecciones del cine | Cookie `accessToken` + rol `admin` |
 
 ## Autenticación
 
@@ -242,21 +238,19 @@ Después de varios intentos fallidos consecutivos, la cuenta se bloquea durante 
 cp .env.example .env
 ```
 
-2. Asegurarse de agregar `POSTGRES_HOST_PORT` al `.env`, ya que Docker Compose utiliza esa variable para publicar PostgreSQL.
-
-3. Construir e iniciar los servicios:
+2. Construir e iniciar los servicios:
 
 ```bash
 docker compose up --build
 ```
 
-4. Ver logs:
+3. Ver logs:
 
 ```bash
 docker compose logs -f
 ```
 
-5. Detener los contenedores:
+4. Detener los contenedores:
 
 ```bash
 docker compose down
@@ -302,6 +296,7 @@ Antes de `npm run dev` o `npm start`, el script correspondiente ejecuta automát
 | --- | --- |
 | `APP_PORT` | Puerto HTTP de Express |
 | `APP_CONTAINER_NAME` | Nombre del contenedor de la API |
+| `APP_URL` | URL base de la aplicación |
 | `POSTGRES_DB` | Nombre de la base de datos |
 | `POSTGRES_USER` | Usuario de PostgreSQL |
 | `POSTGRES_PASSWORD` | Contraseña de PostgreSQL |
@@ -311,11 +306,18 @@ Antes de `npm run dev` o `npm start`, el script correspondiente ejecuta automát
 | `DB_CONTAINER_NAME` | Nombre del contenedor de PostgreSQL |
 | `JWT_SECRET` | Firma del access token |
 | `JWT_REFRESH_SECRET` | Firma del refresh token |
+| `JWT_ACCESS_EXPIRES_IN` | Duración del access token |
+| `JWT_REFRESH_EXPIRES_IN` | Duración del refresh token |
+| `RESET_TOKEN_EXPIRES_IN` | Duración del token de recuperación de contraseña |
 | `SALT_ROUNDS` | Rondas utilizadas por bcrypt |
 | `MAX_FAILED_ATTEMPTS` | Intentos permitidos antes del bloqueo |
 | `NODE_ENV` | Entorno de ejecución y seguridad de cookies |
 | `APP_CPU_LIMIT`, `APP_MEM_LIMIT` | Límites del contenedor de la API |
 | `DB_CPU_LIMIT`, `DB_MEM_LIMIT` | Límites del contenedor de PostgreSQL |
+| `SMTP_HOST` | Servidor SMTP para envío de correos |
+| `SMTP_PORT` | Puerto del servidor SMTP |
+| `SMTP_USER` | Usuario del servidor SMTP |
+| `SMTP_PASS` | Contraseña del servidor SMTP |
 
 No se deben versionar valores reales de contraseñas ni secretos JWT.
 
@@ -356,7 +358,7 @@ El seeder no crea usuarios. Para probar el login se debe registrar uno primero.
 Con la API ejecutándose:
 
 ```text
-http://localhost:3000/api/docs
+http://localhost:5001/api/docs
 ```
 
 ### Postman
@@ -366,7 +368,7 @@ Importar estos dos archivos:
 - [`docs/postman/RIWI-TV.postman_collection.json`](docs/postman/RIWI-TV.postman_collection.json)
 - [`docs/postman/RIWI-TV.postman_environment.example.json`](docs/postman/RIWI-TV.postman_environment.example.json)
 
-Seleccionar el entorno `RIWI-TV - Local (Example)` antes de ejecutar la colección. La colección contiene las 29 rutas actuales y guarda automáticamente IDs y tokens obtenidos durante el flujo.
+Seleccionar el entorno `RIWI-TV - Local (Example)` antes de ejecutar la colección. La colección contiene las rutas actuales y guarda automáticamente IDs y tokens obtenidos durante el flujo.
 
 ## Estado actual
 
@@ -377,9 +379,10 @@ Seleccionar el entorno `RIWI-TV - Local (Example)` antes de ejecutar la colecci�
 - `GET /api/v1/health` informa disponibilidad de la API y PostgreSQL.
 - Docker Compose ejecuta migraciones automáticamente antes de levantar la API.
 - Las validaciones se realizan manualmente en los controladores; los DTO son interfaces TypeScript y no validan datos en tiempo de ejecución.
-- El middleware de roles existe, pero actualmente no está conectado a ninguna ruta.
-- Solo la actualización de usuario exige autenticación.
-- Los endpoints de usuarios deben revisarse antes de producción para evitar exponer campos sensibles como hashes de contraseñas.
+- El middleware de roles está conectado a múltiples rutas que requieren nivel de acceso.
+- Varios endpoints de consulta pública (países, departamentos, ciudades, cartelera) no requieren autenticación.
+- Los endpoints de creación y modificación (películas, cines, proyecciones, ubicaciones) requieren rol `admin`.
+- Los endpoints de usuarios deben revisarse antes de producción para evitar exponer campos sensibles como hashes de contraseñas, tokens de activación y tokens de sesión.
 - El servicio limita a una sola proyección por combinación de cine y película.
 
 ## Equipo

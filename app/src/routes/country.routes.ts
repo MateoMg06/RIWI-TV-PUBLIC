@@ -33,7 +33,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/', getCountries, authToken, requireRole("admin"));
+router.get('/', getCountries);
 
 /**
  * @swagger
@@ -59,7 +59,7 @@ router.get('/', getCountries, authToken, requireRole("admin"));
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/departments', getCountryDepartments, authToken, requireRole("admin"));
+router.get('/:id/departments', getCountryDepartments);
 
 /**
  * @swagger
@@ -88,6 +88,6 @@ router.get('/:id/departments', getCountryDepartments, authToken, requireRole("ad
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCountry, authToken, requireRole("admin"));
+router.post('/', authToken, requireRole("admin"), createCountry);
 
 export default router;

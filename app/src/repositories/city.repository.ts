@@ -1,4 +1,4 @@
-import City, { CityCreationAttributes } from '../models/cities.model';
+import City, { CityCreationAttributes } from '../models/city.model';
 import { ICityRepository } from './interfaces/city.repository.interface';
 
 class CityRepository implements ICityRepository {
@@ -13,6 +13,16 @@ class CityRepository implements ICityRepository {
   async findByDepartmentId(departmentId: number): Promise<City[]> {
     return await City.findAll({
       where: { departmentId },
+    });
+  }
+
+  async findWithCinemas(cityId: number): Promise<any> {
+    return await City.findByPk(cityId, {
+      include: [
+        {
+          association: 'cinemas',
+        },
+      ],
     });
   }
 

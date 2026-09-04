@@ -205,7 +205,7 @@ router.post('/login', login);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/refresh', authToken, refresh);
+router.post('/refresh', refresh);
 
 /**
  * @swagger

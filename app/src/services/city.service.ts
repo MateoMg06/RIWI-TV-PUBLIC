@@ -1,31 +1,28 @@
-import City from '../models/cities.model';
 import { CreateCityDto } from '../dto/create-city.dto';
 import cityRepository from '../repositories/city.repository';
 import departmentRepository from '../repositories/department.repository';
 import { ICityService } from './interfaces/city.service.interface';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 
 class CityService implements ICityService {
-  async findByDepartmentId(departmentId: number): Promise<City[]> {
+  async findByDepartmentId(departmentId: number): Promise<any[]> {
     return await cityRepository.findByDepartmentId(departmentId);
   }
 
-  async findByPk(id: number): Promise<City | null> {
+  async findByPk(id: number): Promise<any | null> {
     return await cityRepository.findByPk(id);
   }
 
   async getCinemas(cityId: number): Promise<any[]> {
-    const city = await City.findByPk(cityId, {
-      include: [{ association: 'cinemas' }]
-    });
+    const city = await cityRepository.findWithCinemas(cityId);
     return (city as any)?.['cinemas'] || [];
   }
 
-  async create(dto: CreateCityDto, departmentId: number): Promise<City> {
+  async create(dto: CreateCityDto, departmentId: number): Promise<any> {
     // Validar que el departamento exista
     const department = await departmentRepository.findByPk(departmentId);
     if (!department) {
-      throw new errorhandler(404, `Departamento con ID ${departmentId} no encontrado`);
+      throw new ErrorHandler(404, `Departamento con ID ${departmentId} no encontrado`);
     }
 
     return await cityRepository.create({ ...dto, departmentId });

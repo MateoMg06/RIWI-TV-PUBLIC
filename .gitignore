@@ -16,12 +16,18 @@ env/
 
 # Logs
 *.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # IDEs y editores
 .vscode/
 .idea/
 *.sublime-workspace
 *.sublime-project
+*.swp
 
 # MacOS
 .DS_Store
@@ -33,20 +39,20 @@ desktop.ini
 # Coverage reports
 .coverage
 *.cover
+coverage.xml
+*.hypothesis/
 
 # Test and CI folders
 .tox/
 .nox/
-*.coverage
 nosetests.xml
-coverage.xml
-*.hypothesis/
+.junit/
+reports/
 
 # AWS, GCP or cloud-specific files
 *.pem
 *.key
 *.crt
-*.env
 
 # Dependencias
 **/node_modules/
@@ -59,37 +65,16 @@ build/
 out/
 *.tsbuildinfo
 
-# Archivos de logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Configuración de sistema/IDE
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.swp
-
 # Cachés
 .cache/
 .npm/
 .yarn/
 .pnpm-store/
-coverage/
 .tmp/
 
 # Docker
 docker-data/
 *.pid
-
-# Archivos de pruebas
-coverage/
-.junit/
-reports/
 
 # Archivos de sistema
 *.bak

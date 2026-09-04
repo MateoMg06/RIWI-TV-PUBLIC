@@ -21,11 +21,11 @@ import { Country, Department, City, Cinema, Movie, Showtime } from '../models/in
 
 async function seed() {
   try {
-    console.log('Iniciando sincronización de la base de datos...');
+    console.log('Iniciando inserción de datos de prueba...');
     
-    // Sincronizar modelos con la BD (crea las tablas si no existen)
-    await sequelize.sync({ alter: true });
-    console.log('✓ Base de datos sincronizada');
+    // Nota: No usar sequelize.sync({ alter: true }) porque conflictúa con migraciones versionadas.
+    // Las tablas deben ser creadas/actualizadas mediante migraciones, no por el seeder.
+    console.log('✓ Base de datos lista (usar migraciones para crear/actualizar tablas)');
 
     // ============================================================================
     // 1. CREAR PAÍSES
@@ -168,7 +168,7 @@ async function seed() {
       cinemaId: cinemark_barranquilla.id,
       movieId: avatar.id,
       horario: '19:30',
-      fecha: '2026-08-20',
+      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
       sala: 'A-5',
       precio: 15.99
     });
@@ -178,7 +178,7 @@ async function seed() {
       cinemaId: cinepolis_bogota.id,
       movieId: avatar.id,
       horario: '20:00',
-      fecha: '2026-08-20',
+      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
       sala: 'B-3',
       precio: 16.99
     });
@@ -188,7 +188,7 @@ async function seed() {
       cinemaId: cinepolis_bogota.id,
       movieId: spiderman.id,
       horario: '18:00',
-      fecha: '2026-08-20',
+      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
       sala: 'A-1',
       precio: 16.99
     });
@@ -198,7 +198,7 @@ async function seed() {
       cinemaId: cinemark_mexico.id,
       movieId: spiderman.id,
       horario: '19:30',
-      fecha: '2026-08-21',
+      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
       sala: 'C-2',
       precio: 14.50
     });
@@ -208,7 +208,7 @@ async function seed() {
       cinemaId: cinemark_buenos_aires.id,
       movieId: inception.id,
       horario: '20:30',
-      fecha: '2026-08-22',
+      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
       sala: 'D-1',
       precio: 13.00
     });
@@ -218,7 +218,7 @@ async function seed() {
       cinemaId: cinemark_mexico.id,
       movieId: inception.id,
       horario: '21:00',
-      fecha: '2026-08-22',
+      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
       sala: 'A-4',
       precio: 14.50
     });

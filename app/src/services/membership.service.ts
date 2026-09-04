@@ -3,7 +3,7 @@ import membershipRepository from '../repositories/membership.repository';
 import purchaseHistoryRepository from '../repositories/purchase-history.repository';
 import userRepository from '../repositories/user.repository';
 import { CreateMembershipDto } from '../dto/create-membership.dto';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 import { Transaction } from 'sequelize';
 
 class MembershipService {
@@ -11,13 +11,13 @@ class MembershipService {
     // Verificar que el usuario existe
     const user = await userRepository.findByID(dto.userId);
     if (!user) {
-      throw new errorhandler(404, 'Usuario no encontrado');
+      throw new ErrorHandler(404, 'Usuario no encontrado');
     }
 
     // Verificar que el usuario no tenga ya una membresía
     const existingMembership = await membershipRepository.findByUserId(dto.userId);
     if (existingMembership) {
-      throw new errorhandler(400, 'El usuario ya tiene una membresía activa');
+      throw new ErrorHandler(400, 'El usuario ya tiene una membresía activa');
     }
 
     // Generar código único de membresía
@@ -70,7 +70,7 @@ class MembershipService {
   async getMembershipByUserId(userId: number) {
     const membership = await membershipRepository.findByUserId(userId);
     if (!membership) {
-      throw new errorhandler(404, 'Membresía no encontrada');
+      throw new ErrorHandler(404, 'Membresía no encontrada');
     }
     return membership;
   }
@@ -78,7 +78,7 @@ class MembershipService {
   async getPurchaseHistory(userId: number) {
     const user = await userRepository.findByID(userId);
     if (!user) {
-      throw new errorhandler(404, 'Usuario no encontrado');
+      throw new ErrorHandler(404, 'Usuario no encontrado');
     }
 
     const history = await purchaseHistoryRepository.findByUserId(userId);

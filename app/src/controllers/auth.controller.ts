@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import authService from '../services/auth.service';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 
 export const getCaptcha = async (_req: Request, res: Response): Promise<Response> => {
   try {
@@ -17,7 +17,7 @@ export const register = async (req: Request, res: Response): Promise<Response> =
     const result = await authService.register(dto);
     return res.status(201).json(result);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -30,7 +30,7 @@ export const activateAccount = async (req: Request, res: Response): Promise<Resp
     const result = await authService.activateAccount(token);
     return res.status(200).json(result);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -43,7 +43,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
     const result = await authService.forgotPassword(dto, req);
     return res.status(200).json(result);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -56,7 +56,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
     const result = await authService.resetPassword(dto, req);
     return res.status(200).json(result);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import userService from '../services/user.service';
 import authService from '../services/auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 import { cookieOptions } from '../config/cookie';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -17,7 +17,7 @@ export const createUser = async (
 
     return res.status(201).json(user);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -31,7 +31,9 @@ export const getUsers = async (
 ): Promise<Response> => {
   try {
     const users = await userService.findAll();
-    return res.status(200).json(users);
+    // Excluir campos sensibles de la respuesta
+    const safeUsers = users.map(({ password, activationToken, accessToken, refreshToken, resetToken, resetTokenExpires, ...user }) => user);
+    return res.status(200).json(safeUsers);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }
@@ -45,9 +47,11 @@ export const authUser = async (
     const { email, password } = req.body;
     const user = await userService.findCredential(email, password);
 
-    return res.status(200).json(user);
+    // Excluir campos sensibles de la respuesta
+    const { password: _, activationToken, accessToken, refreshToken, resetToken, resetTokenExpires, ...safeUser } = user as any;
+    return res.status(200).json(safeUser);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -75,7 +79,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         user: result.user,
       });
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -102,7 +106,7 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
         refreshToken: result.refreshToken,
       });
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -120,7 +124,7 @@ export const logout = async (req: Request, res: Response): Promise<Response> => 
       .clearCookie('accessToken', cookieOptions)
       .json({ message: 'Sesión cerrada correctamente' });
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });

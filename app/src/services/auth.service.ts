@@ -15,7 +15,7 @@ import { hashPassword, comparePassword } from '../utils/bcrypt';
 import { generateCaptcha, verifyCaptcha } from '../utils/captcha';
 import { createToken, verifyToken } from '../utils/jwt';
 import emailService from './email.service';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 import { v4 as uuidv4 } from 'uuid';
 import { Transaction } from 'sequelize';
 import type { Request } from 'express';
@@ -35,39 +35,39 @@ class AuthService implements IAuthService {
 
   async register(dto: RegisterDto): Promise<{ message: string; userId: number }> {
     if (!verifyCaptcha(dto.captchaToken, dto.captchaAnswer)) {
-      throw new errorhandler(400, 'Respuesta de CAPTCHA incorrecta');
+      throw new ErrorHandler(400, 'Respuesta de CAPTCHA incorrecta');
     }
 
     if (dto.email !== dto.confirmEmail) {
-      throw new errorhandler(400, 'El correo y su confirmación no coinciden');
+      throw new ErrorHandler(400, 'El correo y su confirmación no coinciden');
     }
 
     if (dto.password !== dto.confirmPassword) {
-      throw new errorhandler(400, 'La contraseña y su confirmación no coinciden');
+      throw new ErrorHandler(400, 'La contraseña y su confirmación no coinciden');
     }
 
     const validPassword = await validatePassword(dto.password);
     if (!validPassword) {
-      throw new errorhandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
+      throw new ErrorHandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
     }
 
     // Validar teléfono (10 dígitos exactos)
     if (!/^\d{10}$/.test(dto.phone)) {
-      throw new errorhandler(400, 'El número de teléfono debe contener exactamente 10 dígitos');
+      throw new ErrorHandler(400, 'El número de teléfono debe contener exactamente 10 dígitos');
     }
 
     if (!dto.acceptsDataProcessing) {
-      throw new errorhandler(400, 'Debe aceptar el tratamiento de datos personales para continuar');
+      throw new ErrorHandler(400, 'Debe aceptar el tratamiento de datos personales para continuar');
     }
 
     if (!dto.acceptsTerms) {
-      throw new errorhandler(400, 'Debe aceptar los términos y condiciones para continuar');
+      throw new ErrorHandler(400, 'Debe aceptar los términos y condiciones para continuar');
     }
 
     // Verificar si el usuario ya existe
     const existingUser = await userRepository.findUserCredential(dto.email);
     if (existingUser) {
-      throw new errorhandler(409, 'El usuario ya existe');
+      throw new ErrorHandler(409, 'El usuario ya existe');
     }
 
     // Generar token de activación (válido por 24 horas)
@@ -164,15 +164,15 @@ class AuthService implements IAuthService {
     const userToActivate = await userRepository.findByActivationToken(token);
 
     if (!userToActivate) {
-      throw new errorhandler(400, 'Token de activación inválido');
+      throw new ErrorHandler(400, 'Token de activación inválido');
     }
 
     if (userToActivate.activationTokenExpires && userToActivate.activationTokenExpires < new Date()) {
-      throw new errorhandler(400, 'El token de activación ha expirado');
+      throw new ErrorHandler(400, 'El token de activación ha expirado');
     }
 
     if (userToActivate.accountStatus === 'active') {
-      throw new errorhandler(400, 'La cuenta ya está activada');
+      throw new ErrorHandler(400, 'La cuenta ya está activada');
     }
 
     // Activar cuenta
@@ -199,7 +199,7 @@ class AuthService implements IAuthService {
     }
 
     if (user.accountStatus === 'inactive') {
-      throw new errorhandler(400, 'La cuenta no está activada. Por favor active su cuenta desde el correo enviado.');
+      throw new ErrorHandler(400, 'La cuenta no está activada. Por favor active su cuenta desde el correo enviado.');
     }
 
     // Generar token de recuperación (válido según RESET_TOKEN_EXPIRES_IN)
@@ -247,32 +247,32 @@ class AuthService implements IAuthService {
 
   async resetPassword(dto: ResetPasswordDto, req: Request): Promise<{ message: string }> {
     if (dto.password !== dto.confirmPassword) {
-      throw new errorhandler(400, 'La contraseña y su confirmación no coinciden');
+      throw new ErrorHandler(400, 'La contraseña y su confirmación no coinciden');
     }
 
     const validPassword = await validatePassword(dto.password);
     if (!validPassword) {
-      throw new errorhandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
+      throw new ErrorHandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
     }
 
     // Buscar token de recuperación
     const resetTokenRecord = await passwordResetTokenRepository.findByToken(dto.token);
 
     if (!resetTokenRecord) {
-      throw new errorhandler(400, 'Token de recuperación inválido');
+      throw new ErrorHandler(400, 'Token de recuperación inválido');
     }
 
     if (resetTokenRecord.used) {
-      throw new errorhandler(400, 'El token de recuperación ya ha sido utilizado');
+      throw new ErrorHandler(400, 'El token de recuperación ya ha sido utilizado');
     }
 
     if (resetTokenRecord.expiresAt < new Date()) {
-      throw new errorhandler(400, 'El token de recuperación ha expirado');
+      throw new ErrorHandler(400, 'El token de recuperación ha expirado');
     }
 
     const user = await userRepository.findByID(resetTokenRecord.userId);
     if (!user) {
-      throw new errorhandler(404, 'Usuario no encontrado');
+      throw new ErrorHandler(404, 'Usuario no encontrado');
     }
 
     // Hashear la nueva contraseña
@@ -348,7 +348,7 @@ class AuthService implements IAuthService {
         req,
         details: `Intento de login con email no registrado: ${email}`,
       });
-      throw new errorhandler(401, 'Credenciales inválidas');
+      throw new ErrorHandler(401, 'Credenciales inválidas');
     }
 
     if (user.accountStatus === 'inactive') {
@@ -359,7 +359,7 @@ class AuthService implements IAuthService {
         req,
         details: 'Cuenta inactiva',
       });
-      throw new errorhandler(401, 'Cuenta no activada. Por favor active su cuenta desde el correo enviado.');
+      throw new ErrorHandler(401, 'Cuenta no activada. Por favor active su cuenta desde el correo enviado.');
     }
 
     if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
@@ -370,7 +370,7 @@ class AuthService implements IAuthService {
         req,
         details: 'Cuenta bloqueada temporalmente',
       });
-      throw new errorhandler(401, 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos');
+      throw new ErrorHandler(401, 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos');
     }
 
     const passwordMatches = await comparePassword(password, user.password);
@@ -383,7 +383,7 @@ class AuthService implements IAuthService {
         req,
         details: 'Contraseña incorrecta',
       });
-      throw new errorhandler(401, 'Credenciales inválidas');
+      throw new ErrorHandler(401, 'Credenciales inválidas');
     }
 
     // Limpiar intentos fallidos
@@ -454,22 +454,22 @@ class AuthService implements IAuthService {
     const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as AuthPayload;
 
     if (!payload) {
-      throw new errorhandler(401, 'Token inválido');
+      throw new ErrorHandler(401, 'Token inválido');
     }
 
     // Verificar que el refresh token no esté revocado
     const storedToken = await refreshTokenRepository.findByToken(refreshToken);
     if (!storedToken || storedToken.revoked) {
-      throw new errorhandler(401, 'Refresh token inválido o revocado');
+      throw new ErrorHandler(401, 'Refresh token inválido o revocado');
     }
 
     if (storedToken.expiresAt < new Date()) {
-      throw new errorhandler(401, 'Refresh token expirado');
+      throw new ErrorHandler(401, 'Refresh token expirado');
     }
 
     const user = await userRepository.findByID(storedToken.userId);
     if (!user) {
-      throw new errorhandler(401, 'Usuario no encontrado');
+      throw new ErrorHandler(401, 'Usuario no encontrado');
     }
 
     const newPayload = {

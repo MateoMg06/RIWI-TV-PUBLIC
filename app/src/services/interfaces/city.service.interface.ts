@@ -1,4 +1,4 @@
-import City from '../../models/cities.model';
+import City from '../../models/city.model';
 import { CreateCityDto } from '../../dto/create-city.dto';
 
 export interface ICityService {

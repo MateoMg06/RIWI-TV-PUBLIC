@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import departmentService from '../services/department.service';
 import { CreateDepartmentDto } from '../dto/create-department.dto';
-import errorhandler from '../error/errorHandler';
+import ErrorHandler from '../error/errorHandler';
 
 export const getDepartmentCities = async (
   req: Request,
@@ -24,7 +24,7 @@ export const getDepartmentCities = async (
     const cities = await departmentService.getCities(departmentId);
     return res.status(200).json(cities);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });
@@ -53,7 +53,7 @@ export const createDepartment = async (
     const department = await departmentService.create(dto, parsedCountryId);
     return res.status(201).json(department);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
     return res.status(500).json({ error: error.message });

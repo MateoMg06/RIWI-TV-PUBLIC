@@ -23,7 +23,7 @@
 
 import Country from "./country.model";
 import Department from "./department.model";
-import City from "./cities.model";
+import City from "./city.model";
 import Cinema from "./cinema.model";
 import Movie from "./movie.model";
 import Showtime from "./showtime.model";

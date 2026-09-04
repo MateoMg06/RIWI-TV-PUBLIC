@@ -11,6 +11,8 @@ export interface UpdateUserDto {
   documentNumber?: string;
   birthDate?: string;
   city?: string;
+  address?: string;
+  avatar?: string;
   acceptsDataProcessing?: boolean;
   acceptsTerms?: boolean;
   acceptsNotifications?: boolean;
