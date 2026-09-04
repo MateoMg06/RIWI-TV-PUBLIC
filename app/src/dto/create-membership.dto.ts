@@ -1,5 +1,3 @@
-// app/src/dto/create-membership.dto.ts
-
 /**
  * DTO - Creación de Membresía
  * ---------------------------
@@ -14,12 +12,15 @@
  *
  * @property {string} membershipType - Tipo de membresía.
  * @property {number} userId - ID del usuario al que pertenece la membresía.
-
+ * @property {number} durationMonths - Duración en meses de la membresía.
+ * @property {number} [initialBonus] - Bonificación inicial opcional.
  *
  * @example
  * const dto: CreateMembershipDto = {
  *   membershipType: "Premium",
- *   userId: 1
+ *   userId: 1,
+ *   durationMonths: 12,
+ *   initialBonus: 100
  * };
  */
 
@@ -33,4 +34,14 @@ export interface CreateMembershipDto {
    * ID del usuario.
    */
   userId: number;
+
+  /**
+   * Duración en meses de la membresía.
+   */
+  durationMonths: number;
+
+  /**
+   * Bonificación inicial (opcional).
+   */
+  initialBonus?: number;
 }

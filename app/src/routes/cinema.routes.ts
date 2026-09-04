@@ -19,6 +19,8 @@ import {
   removeMovieFromCinema,
   getShowtimes,
 } from '../controllers/cinema.controller';
+import requireRole from '../middlewares/requireRole';
+import { authToken } from '../middlewares/authToken';
 
 const router = Router();
 
@@ -55,7 +57,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCinema);
+router.post('/', createCinema, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -81,7 +83,7 @@ router.post('/', createCinema);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/movies', getCinemaMovies);
+router.get('/:id/movies', getCinemaMovies, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -139,7 +141,7 @@ router.get('/:id/movies', getCinemaMovies);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/:id/movies/:movieId', addMovieToCinema);
+router.post('/:id/movies/:movieId', addMovieToCinema, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -171,7 +173,7 @@ router.post('/:id/movies/:movieId', addMovieToCinema);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete('/:id/movies/:movieId', removeMovieFromCinema);
+router.delete('/:id/movies/:movieId', removeMovieFromCinema, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -197,6 +199,6 @@ router.delete('/:id/movies/:movieId', removeMovieFromCinema);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/showtimes', getShowtimes);
+router.get('/:id/showtimes', getShowtimes, authToken, requireRole("admin"));
 
 export default router;

@@ -4,6 +4,7 @@ import sequelize from '../config/database';
 export interface UserAttributes {
   id: number;
   name: string;
+  lastName: string;
   email: string;
   password: string;
   role: "admin" | "usuario";
@@ -11,13 +12,29 @@ export interface UserAttributes {
   failedLoginAttempts: number;
   lastLoginAttempt: Date | null;
   lockedUntil: Date | null;
-}
+  phone: string;
+  documentType: string;
+  documentNumber: string;
+  birthDate: Date;
+  city: string;
+  acceptsDataProcessing: boolean;
+  acceptsTerms: boolean;
+  acceptsNotifications: boolean;
+  accountStatus: "active" | "inactive";
+  activationToken: string | null;
+  activationTokenExpires: Date | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  resetToken: string | null;
+  resetTokenExpires: Date | null;
+ }
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
   public name!: string;
+  public lastName!: string;
   public email!: string;
   public password!: string;
   public role!: "admin" | "usuario";
@@ -25,8 +42,22 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public failedLoginAttempts!: number;
   public lastLoginAttempt!: Date | null;
   public lockedUntil!: Date | null;
-
-}
+  public phone!: string;
+  public documentType!: string;
+  public documentNumber!: string;
+  public birthDate!: Date;
+  public city!: string;
+  public acceptsDataProcessing!: boolean;
+  public acceptsTerms!: boolean;
+  public acceptsNotifications!: boolean;
+  public accountStatus!: "active" | "inactive";
+  public activationToken!: string | null;
+  public activationTokenExpires!: Date | null;
+  public accessToken!: string | null;
+  public refreshToken!: string | null;
+  public resetToken!: string | null;
+  public resetTokenExpires!: Date | null;
+ }
 
 User.init(
   {
@@ -36,6 +67,10 @@ User.init(
       primaryKey: true,
     },
     name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    lastName: {
       type: DataTypes.STRING(100),
       allowNull: false,
     },
@@ -72,6 +107,70 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null
+    },
+    phone: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
+    documentType: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    documentNumber: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    birthDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    city: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    acceptsDataProcessing: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    acceptsTerms: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    acceptsNotifications: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    accountStatus: {
+      type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
+      defaultValue: 'inactive',
+    },
+    activationToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    activationTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    accessToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    refreshToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    resetToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    resetTokenExpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     }
   },
   {

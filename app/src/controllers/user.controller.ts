@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
 
 import userService from '../services/user.service';
+import authService from '../services/auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import errorhandler from '../error/errorHandler';
-import { createToken, verifyToken } from '../utils/jwt';
 import { cookieOptions } from '../config/cookie';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
@@ -64,42 +63,16 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    const user = await userService.findOne(email);
-
-    if (!user) {
-      return res.status(401).json({error: 'Credenciales inválidas'});
-    }
-
-    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
-      return res.status(401).json({error: 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos'});
-    }
-
-    const validatedUser = await userService.findCredential(email, password);
-    if (!validatedUser) {
-      return res.status(401).json({error: 'Credenciales inválidas'})
-    }
-
-    await userService.clearAttempts(validatedUser)
-    
-    const payload = {
-      name: user?.name,
-      membership: user?.membership
-    };
-
-    const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: '15m'});
-    const refreshToken = createToken(payload, String(process.env.JWT_REFRESH_SECRET), { expiresIn: '7d' });
+    const result = await authService.login(email, password, req);
 
     return res
       .status(201)
-      .cookie('accessToken', accessToken, cookieOptions)
+      .cookie('accessToken', result.accessToken, cookieOptions)
       .json({
         message: 'Login exitoso',
-        accessToken,
-        refreshToken,
-        user: {
-          name: payload.name,
-          membership: payload.membership
-        },
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: result.user,
       });
   } catch (error: any) {
     if (error instanceof errorhandler) {
@@ -118,46 +91,50 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
       return res.status(401).json({ error: 'Usuario sin token' });
     }
 
-    const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as JwtPayload;
-
-    if (!payload) {
-      return res.status(401).json({ error: 'Token inválido' });
-    }
-
-    const newToken = createToken(
-      {
-        name: payload.name,
-        membership: payload.membership
-      },
-      String(process.env.JWT_SECRET),
-      { expiresIn: '15m' }
-    );
+    const result = await authService.refresh(refreshToken, req);
 
     return res
       .status(201)
-      .cookie('accessToken', newToken, cookieOptions)
-      .json({ newToken });
+      .cookie('accessToken', result.accessToken, cookieOptions)
+      .json({
+        message: 'Token refrescado exitosamente',
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
   } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
     return res.status(500).json({ error: error.message });
   }
 };
 
-export const logout = async (_req: Request, res: Response): Promise<Response> => {
+export const logout = async (req: Request, res: Response): Promise<Response> => {
   try {
+    const userId = req.user?.id || null;
+
+    await authService.logout(userId, req);
+
     return res
       .status(200)
       .clearCookie('accessToken', cookieOptions)
       .json({ message: 'Sesión cerrada correctamente' });
   } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
     return res.status(500).json({ error: error.message });
   }
 };
 
 export const updateUser= async (req: Request, res: Response): Promise<Response> => {
   try {
-    const id = Number(req.params.id)
-    const dto: UpdateUserDto = req.body;
-    const updatedUser= await userService.updateUser(id, dto)
+    if (!req.user || !req.user.id){
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
+    const userID: number= req.user.id
+    const dto: UpdateUserDto= req.body
+    const updatedUser= await userService.updateUser(userID, dto)
     return res
       .status(200)
       .json({

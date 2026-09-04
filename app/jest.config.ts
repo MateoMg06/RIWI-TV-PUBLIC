@@ -10,6 +10,9 @@ const config: Config = {
   moduleFileExtensions: ["ts", "js", "json", "node"],
   clearMocks: true,
   coverageDirectory: "../coverage",
+  transform: {
+    "^.+\\.ts$": ["ts-jest", { diagnostics: false }],
+  },
 };
 
 export default config;

@@ -4,7 +4,8 @@ import { Request, Response } from "express";
 import membershipService from "../services/membership.service";
 import Membership from "../models/membership.model";
 import MembershipRepository from "../repositories/membership.repository";
-;
+import { CreateMembershipDto } from "../dto/create-membership.dto";
+import errorhandler from "../error/errorHandler";
 
 /**
  * Controlador de Membresías
@@ -75,5 +76,72 @@ import MembershipRepository from "../repositories/membership.repository";
         }
     }
 
-   
+export const createMembership = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+    const dto: CreateMembershipDto = {
+      ...req.body,
+      userId: req.user.id,
+    };
+    const result = await membershipService.createMembership(dto);
+    return res.status(201).json(result);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};
 
+export const getMembership = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+    const membership = await membershipService.getMembershipByUserId(req.user.id);
+    return res.status(200).json(membership);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const getPurchaseHistory = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+    const history = await membershipService.getPurchaseHistory(req.user.id);
+    return res.status(200).json(history);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// GET /membership/benefits
+// Devuelve los beneficios vigentes, el nivel, el descuento y el QR visible
+// Esto es lo que el usuario ve en su perfil antes de comprar
+export const getBenefits = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    // reviso que venga el usuario del token
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
+    const userId = req.user.id;
+    const benefits = await membershipService.getBenefits(userId);
+    return res.status(200).json(benefits);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};
