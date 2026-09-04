@@ -219,18 +219,9 @@ export const setLocation = async (req: Request, res: Response): Promise<Response
     const updatedUser = await userService.setLocation(userId, parsedCityId);
     const catalog = await movieService.getCatalogByCity(parsedCityId);
 
-    res.cookie('selected_city_id', String(parsedCityId), {
-      httpOnly: false,
-      sameSite: 'lax',
-    });
-
     return res.status(200).json({
       message: 'Ubicación actualizada correctamente',
       user: updatedUser,
-      selectedCity: {
-        id: parsedCityId,
-        storageKey: 'selected_city_id',
-      },
       catalog,
     });
   } catch (error: any) {

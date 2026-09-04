@@ -72,17 +72,6 @@ class MovieController {
                         targetCityId = user.cityId;
                     }
                 }
-
-                // 2. Fallback de cabecera / cookie sincronizada desde Local Storage si no se resolvió por usuario
-                if (!targetCityId) {
-                    const clientCityHeader = req.headers['x-city-id'] || req.cookies?.selected_city_id || req.cookies?.cityId;
-                    if (clientCityHeader) {
-                        const parsed = parseInt(String(clientCityHeader), 10);
-                        if (!isNaN(parsed) && parsed > 0) {
-                            targetCityId = parsed;
-                        }
-                    }
-                }
             }
 
             if (targetCityId !== undefined) {

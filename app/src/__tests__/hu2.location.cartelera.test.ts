@@ -234,7 +234,7 @@ describe('HU2 - Validaciones de departamentos y ciudades', () => {
   });
 });
 
-describe('HU2 - Requerimientos de Cines Activos y Local Storage', () => {
+describe('HU2 - Requerimientos de Cines Activos y Ubicación en PostgreSQL', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -250,75 +250,80 @@ describe('HU2 - Requerimientos de Cines Activos y Local Storage', () => {
     expect(cinemaRepository.findActiveByCityId).toHaveBeenCalledWith(1);
   });
 
-  it('locationStorage helper: guardar, recuperar y limpiar ubicación en localStorage', () => {
-    const mockStorage: Record<string, string> = {};
-    const storageMock = {
-      getItem: jest.fn((key: string) => mockStorage[key] || null),
-      setItem: jest.fn((key: string, value: string) => {
-        mockStorage[key] = value;
-      }),
-      removeItem: jest.fn((key: string) => {
-        delete mockStorage[key];
-      }),
-      clear: jest.fn(() => {
-        Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
-      }),
+  it('movieController.getCatalog: utiliza automáticamente el cityId guardado del usuario en PostgreSQL', async () => {
+    const movieController = require('../controllers/movie.controller').default;
+    (userRepository.findByID as jest.Mock).mockResolvedValue({
+      id: 10,
+      name: 'Test User',
+      cityId: 1,
+    });
+    (cityRepository.findByPk as jest.Mock).mockResolvedValue({ id: 1, active: true, city: 'Barranquilla' });
+    (cinemaRepository.countActiveByCityId as jest.Mock).mockResolvedValue(1);
+    (showtimeRepository.findActiveByCityId as jest.Mock).mockResolvedValue([
+      { movieId: 1, showtime_status: 'ACTIVE' },
+    ]);
+    (Movie.findAll as jest.Mock).mockResolvedValue([
+      { id: 1, name: 'Avatar', clasification: 'PG-13', duration: 192, gener: 'Ciencia Ficción' },
+    ]);
+
+    const mockReq: any = {
+      query: {},
+      user: { id: 10 },
+      cookies: {},
+      headers: {},
+    };
+    const mockRes: any = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
     };
 
-    (global as any).window = { localStorage: storageMock };
-
-    const {
-      saveLocationToLocalStorage,
-      getLocationFromLocalStorage,
-      clearLocationFromLocalStorage,
-    } = require('../helpers/locationStorage.helper');
-
-    saveLocationToLocalStorage(5, { id: 5, name: 'Medellín' });
-    expect(storageMock.setItem).toHaveBeenCalledWith('selected_city_id', '5');
-
-    const retrieved = getLocationFromLocalStorage();
-    expect(retrieved).toBe(5);
-
-    clearLocationFromLocalStorage();
-    expect(storageMock.removeItem).toHaveBeenCalledWith('selected_city_id');
+    await movieController.getCatalog(mockReq, mockRes);
+    expect(userRepository.findByID).toHaveBeenCalledWith(10);
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        city: expect.objectContaining({ id: 1 }),
+        data: expect.arrayContaining([expect.objectContaining({ id: 1, name: 'Avatar' })]),
+      })
+    );
   });
 
-  it('changeCityFlow: ejecuta actualización, guarda en localStorage y actualiza cartelera', async () => {
-    const mockStorage: Record<string, string> = {};
-    (global as any).window = {
-      localStorage: {
-        getItem: jest.fn((key: string) => mockStorage[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
-          mockStorage[key] = value;
-        }),
-        removeItem: jest.fn((key: string) => {
-          delete mockStorage[key];
-        }),
-      },
+  it('userController.setLocation: persiste en PostgreSQL y retorna la cartelera actualizada', async () => {
+    const { setLocation } = require('../controllers/user.controller');
+    (userRepository.findByID as jest.Mock)
+      .mockResolvedValueOnce({ id: 10, name: 'User' })
+      .mockResolvedValueOnce({ id: 10, name: 'User', cityId: 4 });
+    (cityRepository.findByPk as jest.Mock).mockResolvedValue({ id: 4, active: true, city: 'Medellín' });
+    (cinemaRepository.countActiveByCityId as jest.Mock).mockResolvedValue(1);
+    (userRepository.updateByID as jest.Mock).mockResolvedValue(undefined);
+    (showtimeRepository.findActiveByCityId as jest.Mock).mockResolvedValue([
+      { movieId: 2, showtime_status: 'ACTIVE' },
+    ]);
+    (Movie.findAll as jest.Mock).mockResolvedValue([
+      { id: 2, name: 'Inception', clasification: 'PG-13', duration: 148, gener: 'Ciencia Ficción' },
+    ]);
+
+    const mockReq: any = {
+      user: { id: 10 },
+      body: { cityId: 4 },
+      cookies: {},
+      headers: {},
+    };
+    const mockRes: any = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
     };
 
-    const mockFetch = jest.fn().mockResolvedValue({
-      ok: true,
-      json: jest.fn().mockResolvedValue({
-        message: 'Ubicación actualizada correctamente',
-        user: { id: 10, cityId: 3 },
-        catalog: {
-          city: { id: 3, city: 'Cali' },
-          data: [{ id: 1, name: 'Avatar' }],
-        },
-      }),
-    });
-
-    const { changeCityFlow } = require('../helpers/locationStorage.helper');
-    const result = await changeCityFlow(3, { fetchFn: mockFetch as any });
-
-    expect(result.cityId).toBe(3);
-    expect(result.catalog.data).toHaveLength(1);
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/users/location'),
+    await setLocation(mockReq, mockRes);
+    expect(userRepository.updateByID).toHaveBeenCalledWith(10, { cityId: 4 });
+    expect(mockRes.status).toHaveBeenCalledWith(200);
+    expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ cityId: 3 }),
+        message: 'Ubicación actualizada correctamente',
+        user: expect.objectContaining({ id: 10, cityId: 4 }),
+        catalog: expect.objectContaining({
+          city: expect.objectContaining({ id: 4 }),
+        }),
       })
     );
   });
