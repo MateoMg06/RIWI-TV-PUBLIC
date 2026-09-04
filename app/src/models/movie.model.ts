@@ -16,15 +16,24 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/database";
 
+export type MovieStatus = "proximo_estreno" | "en_cartelera" | "fuera_cartelera";
+
 export interface MovieAttributes {
   id: number;
   name: string;
   clasification: string;
   duration: number;
   gener: string;
+  synopsis: string | null;
+  posterUrl: string | null;
+  trailerUrl: string | null;
+  status: MovieStatus;
+  classificationId: number | null;
+  languageId: number | null;
 }
 
-export interface MovieCreationAttributes extends Optional<MovieAttributes, "id"> {}
+export interface MovieCreationAttributes
+  extends Optional<MovieAttributes, "id" | "synopsis" | "posterUrl" | "trailerUrl" | "status" | "classificationId" | "languageId"> {}
 
 class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
   public id!: number;
@@ -32,6 +41,12 @@ class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements M
   public clasification!: string;
   public duration!: number;
   public gener!: string;
+  public synopsis!: string | null;
+  public posterUrl!: string | null;
+  public trailerUrl!: string | null;
+  public status!: MovieStatus;
+  public classificationId!: number | null;
+  public languageId!: number | null;
 }
 
 Movie.init(
@@ -56,7 +71,36 @@ Movie.init(
     gener: {
       type: DataTypes.STRING(100),
       allowNull: false,
-    }
+    },
+    synopsis: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    posterUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: "poster_url",
+    },
+    trailerUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: "trailer_url",
+    },
+    status: {
+      type: DataTypes.ENUM("proximo_estreno", "en_cartelera", "fuera_cartelera"),
+      allowNull: false,
+      defaultValue: "en_cartelera",
+    },
+    classificationId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "classification_id",
+    },
+    languageId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "language_id",
+    },
   },
   {
     sequelize,

@@ -46,4 +46,11 @@ export interface GetMovieCatalogDto {
      * Género de la película.
      */
     gener: string;
+
+    synopsis: string | null;
+    posterUrl: string | null;
+    trailerUrl: string | null;
+    status: "proximo_estreno" | "en_cartelera" | "fuera_cartelera";
+    classificationId: number | null;
+    languageId: number | null;
 }

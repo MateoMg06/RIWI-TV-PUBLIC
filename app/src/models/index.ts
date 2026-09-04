@@ -23,6 +23,11 @@
   import Cinema from "./cinema.model";
   import Movie from "./movie.model";
   import Showtime from "./showtime.model";
+  import Genre from "./genre.model";
+  import Classification from "./classification.model";
+  import Language from "./language.model";
+  import User from "./user.model";
+  import ReleaseNotification from "./release-notification.model";
 
   /**
    * Relación 1:N: Country → Department
@@ -95,7 +100,61 @@
     foreignKey: "movieId",
   });
 
+  Movie.belongsToMany(Genre, {
+    through: "movie_genres",
+    as: "genres",
+    foreignKey: "movie_id",
+    otherKey: "genre_id",
+  });
+
+  Genre.belongsToMany(Movie, {
+    through: "movie_genres",
+    as: "movies",
+    foreignKey: "genre_id",
+    otherKey: "movie_id",
+  });
+
+  Movie.belongsTo(Classification, {
+    as: "classification",
+    foreignKey: "classificationId",
+  });
+
+  Classification.hasMany(Movie, {
+    as: "movies",
+    foreignKey: "classificationId",
+  });
+
+  Movie.belongsTo(Language, {
+    as: "language",
+    foreignKey: "languageId",
+  });
+
+  Language.hasMany(Movie, {
+    as: "movies",
+    foreignKey: "languageId",
+  });
+
+  User.hasMany(ReleaseNotification, {
+    as: "releaseNotifications",
+    foreignKey: "userId",
+  });
+
+  ReleaseNotification.belongsTo(User, {
+    as: "user",
+    foreignKey: "userId",
+  });
+
+  Movie.hasMany(ReleaseNotification, {
+    as: "releaseNotifications",
+    foreignKey: "movieId",
+  });
+
+  ReleaseNotification.belongsTo(Movie, {
+    as: "movie",
+    foreignKey: "movieId",
+  });
+
   /**
    * Exportar todos los modelos para su uso en servicios, controladores y rutas.
    */
-  export { Country, Department, City, Cinema, Movie, Showtime };
+  export { Country, Department, City, Cinema, Movie, Showtime, Genre, Classification, Language, User, ReleaseNotification };

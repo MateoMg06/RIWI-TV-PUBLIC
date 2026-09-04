@@ -71,5 +71,12 @@ export interface CreateMovieDto {
      * ciudad de la película.
      */
     ciudad: string;
+
+    synopsis?: string;
+    posterUrl?: string;
+    trailerUrl?: string;
+    status?: "proximo_estreno" | "en_cartelera" | "fuera_cartelera";
+    classificationId?: number;
+    languageId?: number;
 }
 

@@ -48,13 +48,31 @@ class MovieService implements IMovieService {
     /**
      * Mapea una instancia de Movie al DTO de salida.
      */
-    private toDto(movie: { id: number; name: string; clasification: string; duration: number; gener: string }): GetMovieCatalogDto {
+    private toDto(movie: {
+        id: number;
+        name: string;
+        clasification: string;
+        duration: number;
+        gener: string;
+        synopsis: string | null;
+        posterUrl: string | null;
+        trailerUrl: string | null;
+        status: GetMovieCatalogDto["status"];
+        classificationId: number | null;
+        languageId: number | null;
+    }): GetMovieCatalogDto {
         return {
             id: movie.id,
             name: movie.name,
             clasification: movie.clasification,
             duration: movie.duration,
             gener: movie.gener,
+            synopsis: movie.synopsis,
+            posterUrl: movie.posterUrl,
+            trailerUrl: movie.trailerUrl,
+            status: movie.status,
+            classificationId: movie.classificationId,
+            languageId: movie.languageId,
         };
     }
 }
