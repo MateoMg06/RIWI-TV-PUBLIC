@@ -95,19 +95,60 @@ import errorhandler from "../error/errorHandler";
         }
     }
 
-    export const getWeeklyMovies = async (
-  _req: Request,
-  res: Response
-): Promise<Response> => {
-  try {
-    const movies = await movieService.getWeeklyMovies();
 
-    return res.status(200).json(movies);
-  } catch (error: any) {
-    if (error instanceof errorhandler) {
-      return res.status(error.estado).json({ error: error.message });
+      /**
+     * GET /movies/week
+     * Obtiene las películas que estrenan en la semana.
+     */
+    export const getWeeklyMovies = async (_req: Request, res: Response): Promise<Response> => {
+      try {
+        const movies = await movieService.getWeeklyMovies();
+
+        return res.status(200).json(movies);
+      } catch (error: any) {
+        if (error instanceof errorhandler) {
+          return res.status(error.estado).json({ error: error.message });
+        }
+
+        return res.status(500).json({ error: error.message });
+      }
+    };
+
+    /**
+     * GET /movies/today
+     * Obtiene las películas que estrenan hoy.
+     */
+    export const getTodayMovies = async (_req: Request, res: Response): Promise<void> => {
+        try {
+            const movies = await movieService.getTodayMovies();
+            res.status(200).json(movies);
+        } catch (error) {
+            res.status(500).json({
+                message: "Error al obtener las películas de hoy",
+                error: error instanceof Error ? error.message : error,
+            });
+        }
     }
 
-    return res.status(500).json({ error: error.message });
-  }
-};
+    /**
+     * GET /movies/filter
+     * Obtiene películas aplicando filtros por género y/o estado.
+     */
+    export const getFilteredMovies = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const genre = typeof req.query.genre === 'string' ? req.query.genre : undefined;
+
+            let status: boolean | undefined;
+            if (typeof req.query.status === 'string') {
+                status = req.query.status === 'true';
+            }
+
+            const movies = await movieService.getFilteredMovies({ genre, status });
+            res.status(200).json(movies);
+        } catch (error) {
+            res.status(500).json({
+                message: "Error al filtrar películas",
+                error: error instanceof Error ? error.message : error,
+            });
+        }
+    }

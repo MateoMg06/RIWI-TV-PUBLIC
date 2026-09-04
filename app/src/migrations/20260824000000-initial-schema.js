@@ -79,9 +79,18 @@ module.exports = {
     await createTableIfMissing(queryInterface, 'movies', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
       name: { allowNull: false, type: Sequelize.STRING(100) },
-      clasification: { allowNull: false, type: Sequelize.STRING(50) },
+      synopsis: { allowNull: false, type: Sequelize.STRING(500) },
+      classification: { allowNull: false, type: Sequelize.STRING(50) },
       duration: { allowNull: false, type: Sequelize.INTEGER },
-      gener: { allowNull: false, type: Sequelize.STRING(100) },
+      genre: { allowNull: false, type: Sequelize.STRING(100) },
+      director: { allowNull: false, type: Sequelize.STRING(100) },
+      cast: { allowNull: false, type: Sequelize.STRING(255) },
+      poster_url: { allowNull: true, type: Sequelize.STRING(255) },
+      banner_url: { allowNull: true, type: Sequelize.STRING(255) },
+      trailer_url: { allowNull: true, type: Sequelize.STRING(255) },
+      release_date: { allowNull: false, type: Sequelize.DATE },
+      status: { allowNull: false, type: Sequelize.BOOLEAN },
+      audience_rating: { allowNull: false, type: Sequelize.DECIMAL(10, 2) },
       ...timestamps(Sequelize),
     });
 

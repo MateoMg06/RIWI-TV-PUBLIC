@@ -2,6 +2,7 @@
 
 import { MovieCreationAttributes } from "../../models/movie.model";
 import { GetMovieCatalogDto } from "../../dto/get-movie-catalog.dto";
+import { MovieFilters } from "../../repositories/interfaces/movie.repository.interface";
 
 /**
  * Contrato del Servicio de Películas
@@ -32,4 +33,14 @@ export interface IMovieService {
      * Obtiene las películas de la semana.
      */
     getWeeklyMovies(): Promise<GetMovieCatalogDto[]>;
+
+    /**
+     * Obtiene las películas que estrenan hoy.
+     */
+    getTodayMovies(): Promise<GetMovieCatalogDto[]>;
+
+    /**
+     * Obtiene las películas según los filtros aplicados.
+     */
+    getFilteredMovies(filters: MovieFilters): Promise<GetMovieCatalogDto[]>;
 }

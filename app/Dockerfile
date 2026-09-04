@@ -13,4 +13,5 @@ RUN npm ci
 EXPOSE 3000
 
 # Comando por defecto
-CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/index.ts"]
+# Usar npm run dev ejecuta el hook "predev", que corre las migraciones antes de arrancar la API
+CMD ["npm", "run", "dev"]

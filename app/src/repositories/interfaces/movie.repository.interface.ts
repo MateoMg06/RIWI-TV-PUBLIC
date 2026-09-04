@@ -3,6 +3,14 @@
 import Movie, { MovieCreationAttributes } from "../../models/movie.model";
 
 /**
+ * Filtros disponibles para la consulta de películas.
+ */
+export interface MovieFilters {
+  genre?: string;
+  status?: boolean;
+}
+
+/**
  * Contrato del Repositorio de Películas
  * -----------------------------------
  * Define las operaciones de persistencia disponibles para la entidad Movie.
@@ -32,7 +40,17 @@ export interface IMovieRepository {
     findByPk(id: number): Promise<Movie | null>;
 
     /**
-     * Obtiene las películas de la semana.
+     * Obtiene las películas de la semana (por fecha de estreno).
      */
     findWeeklyMovies(): Promise<Movie[]>;
+
+    /**
+     * Obtiene las películas que estrenan hoy.
+     */
+    findTodayMovies(): Promise<Movie[]>;
+
+    /**
+     * Obtiene las películas según los filtros aplicados.
+     */
+    findFilteredMovies(filters: MovieFilters): Promise<Movie[]>;
 }

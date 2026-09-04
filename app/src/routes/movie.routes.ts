@@ -6,7 +6,9 @@ import {
   getCatalog,
   getByName,
   getMovieCinemas,
-  getWeeklyMovies
+  getWeeklyMovies,
+  getTodayMovies,
+  getFilteredMovies
 } from "../controllers/movie.controller";
 
 /**
@@ -49,6 +51,59 @@ const router = Router();
  *         description: Error al obtener la cartelera
  */
 router.get("/", getCatalog);
+
+/**
+ * @swagger
+ * /api/movies/weekly:
+ *   get:
+ *     summary: Obtiene las películas que estrenan durante la semana
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Lista de películas de la semana
+ *       500:
+ *         description: Error al obtener las películas de la semana
+ */
+router.get("/weekly", getWeeklyMovies);
+
+/**
+ * @swagger
+ * /api/movies/today:
+ *   get:
+ *     summary: Obtiene las películas que estrenan hoy
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Lista de películas de hoy
+ *       500:
+ *         description: Error al obtener las películas de hoy
+ */
+router.get("/today", getTodayMovies);
+
+/**
+ * @swagger
+ * /api/movies/filter:
+ *   get:
+ *     summary: Obtiene las películas aplicando filtros
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: query
+ *         name: genre
+ *         schema:
+ *           type: string
+ *         description: Género de la película
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: boolean
+ *         description: Estado de la película (activa/inactiva)
+ *     responses:
+ *       200:
+ *         description: Lista de películas filtradas
+ *       500:
+ *         description: Error al filtrar las películas
+ */
+router.get("/filter", getFilteredMovies);
 
 /**
  * @swagger

@@ -5,6 +5,7 @@ import movieRepository from "../repositories/movie.repository";
 import { MovieCreationAttributes } from "../models/movie.model";
 import Movie from "../models/movie.model";
 import { GetMovieCatalogDto } from "../dto/get-movie-catalog.dto";
+import { MovieFilters } from "../repositories/interfaces/movie.repository.interface";
 
 /**
  * Servicio de Películas
@@ -62,6 +63,16 @@ class MovieService implements IMovieService {
     async getWeeklyMovies(): Promise<GetMovieCatalogDto[]> {
         const weeklyMovies = await movieRepository.findWeeklyMovies();
         return weeklyMovies.map((movie) => this.toDto(movie));
+    }
+
+    async getTodayMovies(): Promise<GetMovieCatalogDto[]> {
+        const todayMovies = await movieRepository.findTodayMovies();
+        return todayMovies.map((movie) => this.toDto(movie));
+    }
+
+    async getFilteredMovies(filters: MovieFilters): Promise<GetMovieCatalogDto[]> {
+        const filteredMovies = await movieRepository.findFilteredMovies(filters);
+        return filteredMovies.map((movie) => this.toDto(movie));
     }
         
 }
