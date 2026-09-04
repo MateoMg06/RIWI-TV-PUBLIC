@@ -25,6 +25,27 @@ class ReleaseNotificationService implements IReleaseNotificationService {
     await emailNotificationService.sendUpcomingReleaseNotification(userId, movieId);
     return notification;
   }
+
+  /**
+   * Invoke this method from the Movie status transition to `en_cartelera`.
+   * The future status-update service should call:
+   * `releaseNotificationService.notifyUpcomingMovieRelease(movieId)`.
+   */
+  async notifyUpcomingMovieRelease(movieId: number): Promise<void> {
+    const pendingNotifications = await releaseNotificationRepository.findPendingByMovie(movieId);
+
+    for (const notification of pendingNotifications) {
+      try {
+        await emailNotificationService.sendUpcomingReleaseNotification(
+          notification.userId,
+          notification.movieId
+        );
+        await releaseNotificationRepository.updateStatus(notification.id, 'enviada');
+      } catch {
+        // Keep the request pending and continue with the remaining recipients.
+      }
+    }
+  }
 }
 
 export default new ReleaseNotificationService();

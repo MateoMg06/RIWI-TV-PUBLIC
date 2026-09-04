@@ -8,6 +8,14 @@ class ReleaseNotificationRepository implements IReleaseNotificationRepository {
     return await ReleaseNotification.findOne({ where: { userId, movieId } });
   }
 
+  async findPendingByMovie(movieId: number): Promise<ReleaseNotification[]> {
+    return await ReleaseNotification.findAll({ where: { movieId, status: 'pendiente' } });
+  }
+
+  async updateStatus(id: number, status: 'pendiente' | 'enviada'): Promise<void> {
+    await ReleaseNotification.update({ status }, { where: { id } });
+  }
+
   async create(data: ReleaseNotificationCreationAttributes): Promise<ReleaseNotification> {
     return await ReleaseNotification.create(data);
   }
