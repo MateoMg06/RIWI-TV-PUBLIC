@@ -1,30 +1,27 @@
-// ruta_avanzada/proyecto_incremental/app/src/index.ts
-
-/**
- * Es el entrypoint real de la aplicación.
- * Se encarga de:
- * - Levantar la base de datos (sequelize.authenticate + sequelize.sync).
- * - Arrancar el servidor (app.listen).
- * - Es el que realmente ejecutas cuando corres npm run dev o docker-compose up.
- */
-
+import 'dotenv/config';
 import app from './server';
 import sequelize from './config/database';
+import { validateEnvironment } from './config/environment';
+import logger from './utils/logger';
 
 const PORT = process.env.APP_PORT || 3000;
 
 const start = async () => {
   try {
+    validateEnvironment();
     await sequelize.authenticate();
-    console.log('Conexión a la BD establecida...');
-
-    await sequelize.sync(); // crea tablas si no existen
+    logger.info('Conexión a la base de datos establecida');
 
     app.listen(PORT, () => {
-      console.log(`Servidor escuchando en puerto ${PORT}`);
+      logger.info('Servidor iniciado', {
+        port: Number(PORT),
+        environment: process.env.NODE_ENV || 'development',
+      });
     });
   } catch (error) {
-    console.error('Error al conectar a la BD :', error);
+    logger.error('No fue posible iniciar la aplicación', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   }
 };

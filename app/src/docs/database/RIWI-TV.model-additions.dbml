@@ -1,0 +1,702 @@
+// RIWI-TV - Extensiones del modelo de datos
+// Formato: DBML compatible con https://dbdiagram.io
+// Uso: pegar este bloque DESPUES del DBML original exportado en el PDF.
+// Estas tablas completan los faltantes encontrados frente a HU-002..HU-029.
+
+// -----------------------------------------------------------------------------
+// MULTIPAIS: MONEDA, ZONA HORARIA E IMPUESTOS
+// -----------------------------------------------------------------------------
+
+Table currencies {
+  code char(3) [pk, note: 'Codigo ISO 4217, por ejemplo COP o USD']
+  name varchar(80) [not null]
+  symbol varchar(10) [not null]
+  decimal_places smallint [not null, default: 2]
+  active boolean [not null, default: true]
+}
+
+Table cinema_settings {
+  cinema_id integer [pk]
+  currency_code char(3) [not null]
+  timezone varchar(80) [not null, note: 'Zona IANA, por ejemplo America/Bogota']
+  locale varchar(20) [not null, default: 'es-CO']
+  tax_percent decimal(5,2) [not null, default: 0]
+  updated_at timestamp [not null]
+}
+
+Ref: cinema_settings.cinema_id > cinemas.id
+Ref: cinema_settings.currency_code > currencies.code
+
+// -----------------------------------------------------------------------------
+// PELICULAS NORMALIZADAS Y PREFERENCIAS
+// -----------------------------------------------------------------------------
+
+Table genres {
+  id integer [pk, increment]
+  name varchar(80) [not null, unique]
+  active boolean [not null, default: true]
+}
+
+Table actors {
+  id bigint [pk, increment]
+  name varchar(150) [not null]
+  active boolean [not null, default: true]
+
+  indexes {
+    name
+  }
+}
+
+Table movie_genres {
+  movie_id integer [not null]
+  genre_id integer [not null]
+
+  indexes {
+    (movie_id, genre_id) [pk]
+  }
+}
+
+Table movie_cast {
+  movie_id integer [not null]
+  actor_id bigint [not null]
+  character_name varchar(150)
+  billing_order smallint
+
+  indexes {
+    (movie_id, actor_id) [pk]
+  }
+}
+
+Table user_genre_preferences {
+  user_id integer [not null]
+  genre_id integer [not null]
+  weight decimal(5,2) [not null, default: 1]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, genre_id) [pk]
+  }
+}
+
+Table user_language_preferences {
+  user_id integer [not null]
+  language_id integer [not null]
+  weight decimal(5,2) [not null, default: 1]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, language_id) [pk]
+  }
+}
+
+Table user_format_preferences {
+  user_id integer [not null]
+  format_id integer [not null]
+  weight decimal(5,2) [not null, default: 1]
+  updated_at timestamp [not null]
+
+  indexes {
+    (user_id, format_id) [pk]
+  }
+}
+
+Ref: movie_genres.movie_id > movies.id
+Ref: movie_genres.genre_id > genres.id
+Ref: movie_cast.movie_id > movies.id
+Ref: movie_cast.actor_id > actors.id
+Ref: user_genre_preferences.user_id > users.id
+Ref: user_genre_preferences.genre_id > genres.id
+Ref: user_language_preferences.user_id > users.id
+Ref: user_language_preferences.language_id > languages.id
+Ref: user_format_preferences.user_id > users.id
+Ref: user_format_preferences.format_id > formats.id
+
+// -----------------------------------------------------------------------------
+// PRECIOS, DISPONIBILIDAD Y BLOQUEO CONCURRENTE DE SILLAS
+// -----------------------------------------------------------------------------
+
+Table showtime_prices {
+  id bigint [pk, increment]
+  showtime_id integer [not null]
+  ticket_type varchar(30) [not null, note: 'ADULT, CHILD, SENIOR, MEMBER']
+  seat_type varchar(30) [not null, default: 'STANDARD']
+  amount decimal(12,2) [not null]
+  currency_code char(3) [not null]
+  starts_at timestamp
+  ends_at timestamp
+  active boolean [not null, default: true]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (showtime_id, ticket_type, seat_type, starts_at) [unique]
+    (showtime_id, active)
+  }
+}
+
+Table showtime_seats {
+  id bigint [pk, increment]
+  showtime_id integer [not null]
+  seat_id integer [not null]
+  reservation_id bigint
+  cart_id bigint
+  locked_by_user_id integer
+  status varchar(30) [not null, note: 'AVAILABLE, LOCKED, RESERVED, SOLD, DISABLED']
+  unit_price decimal(12,2)
+  currency_code char(3)
+  locked_at timestamp
+  expires_at timestamp
+  sold_at timestamp
+  version integer [not null, default: 0, note: 'Bloqueo optimista']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (showtime_id, seat_id) [unique]
+    (status, expires_at)
+    reservation_id
+    cart_id
+  }
+}
+
+Table seat_lock_events {
+  id bigint [pk, increment]
+  showtime_seat_id bigint [not null]
+  user_id integer
+  reservation_id bigint
+  action varchar(30) [not null, note: 'LOCK, EXTEND, RELEASE, EXPIRE, SELL']
+  previous_status varchar(30)
+  new_status varchar(30) [not null]
+  ip_address varchar(45)
+  device varchar(255)
+  created_at timestamp [not null]
+}
+
+Ref: showtime_prices.showtime_id > showtime.id
+Ref: showtime_prices.currency_code > currencies.code
+Ref: showtime_seats.showtime_id > showtime.id
+Ref: showtime_seats.seat_id > seats.id
+Ref: showtime_seats.reservation_id > reservations.id
+Ref: showtime_seats.cart_id > carts.id
+Ref: showtime_seats.locked_by_user_id > users.id
+Ref: showtime_seats.currency_code > currencies.code
+Ref: seat_lock_events.showtime_seat_id > showtime_seats.id
+Ref: seat_lock_events.user_id > users.id
+Ref: seat_lock_events.reservation_id > reservations.id
+
+// -----------------------------------------------------------------------------
+// CARRITO, BONOS Y COMBOS DE CONFITERIA
+// -----------------------------------------------------------------------------
+
+Table cart_giftcards {
+  id bigint [pk, increment]
+  cart_id bigint [not null]
+  giftcard_id bigint [not null]
+  reserved_amount decimal(12,2) [not null]
+  status varchar(30) [not null, note: 'HELD, APPLIED, RELEASED, EXPIRED']
+  expires_at timestamp [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (cart_id, giftcard_id) [unique]
+    (status, expires_at)
+  }
+}
+
+Table snack_combos {
+  id bigint [pk, increment]
+  snack_id integer [not null, unique, note: 'Producto que representa el combo']
+  active boolean [not null, default: true]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table snack_combo_items {
+  combo_id bigint [not null]
+  component_snack_id integer [not null]
+  quantity integer [not null]
+
+  indexes {
+    (combo_id, component_snack_id) [pk]
+  }
+}
+
+Ref: cart_giftcards.cart_id > carts.id
+Ref: cart_giftcards.giftcard_id > giftcards.id
+Ref: snack_combos.snack_id > snacks.id
+Ref: snack_combo_items.combo_id > snack_combos.id
+Ref: snack_combo_items.component_snack_id > snacks.id
+
+// -----------------------------------------------------------------------------
+// PAGOS: IDEMPOTENCIA, INTENTOS Y WEBHOOKS
+// -----------------------------------------------------------------------------
+
+Table payment_attempts {
+  id bigint [pk, increment]
+  order_id bigint [not null]
+  payment_id bigint
+  idempotency_key varchar(120) [not null, unique]
+  provider varchar(60) [not null]
+  provider_transaction_id varchar(150)
+  method varchar(30) [not null]
+  amount decimal(12,2) [not null]
+  currency_code char(3) [not null]
+  status varchar(30) [not null]
+  failure_code varchar(80)
+  failure_reason varchar(255)
+  started_at timestamp [not null]
+  completed_at timestamp
+
+  indexes {
+    (provider, provider_transaction_id) [unique]
+    (order_id, status)
+  }
+}
+
+Table payment_webhook_events {
+  id bigint [pk, increment]
+  payment_id bigint
+  payment_attempt_id bigint
+  provider varchar(60) [not null]
+  provider_event_id varchar(150) [not null]
+  event_type varchar(80) [not null]
+  signature_valid boolean [not null]
+  payload text [not null, note: 'Payload saneado; nunca almacenar datos de tarjeta']
+  status varchar(30) [not null, note: 'RECEIVED, PROCESSED, FAILED, IGNORED']
+  error_message text
+  received_at timestamp [not null]
+  processed_at timestamp
+
+  indexes {
+    (provider, provider_event_id) [unique]
+    (status, received_at)
+  }
+}
+
+Ref: payment_attempts.order_id > orders.id
+Ref: payment_attempts.payment_id > payments.id
+Ref: payment_attempts.currency_code > currencies.code
+Ref: payment_webhook_events.payment_id > payments.id
+Ref: payment_webhook_events.payment_attempt_id > payment_attempts.id
+
+// -----------------------------------------------------------------------------
+// DOCUMENTOS Y NOTIFICACIONES PROGRAMADAS
+// -----------------------------------------------------------------------------
+
+Table ticket_documents {
+  id bigint [pk, increment]
+  ticket_id bigint [not null]
+  version integer [not null, default: 1]
+  pdf_url varchar(500) [not null]
+  file_hash varchar(128) [not null]
+  valid boolean [not null, default: true]
+  invalidated_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (ticket_id, version) [unique]
+  }
+}
+
+Table notification_templates {
+  id integer [pk, increment]
+  code varchar(80) [not null, unique]
+  channel varchar(20) [not null]
+  subject_template varchar(250)
+  body_template text [not null]
+  version integer [not null, default: 1]
+  active boolean [not null, default: true]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table notification_schedules {
+  id bigint [pk, increment]
+  notification_id bigint
+  template_id integer [not null]
+  user_id integer [not null]
+  event_type varchar(80) [not null]
+  entity_type varchar(80)
+  entity_id varchar(80)
+  payload text
+  scheduled_at timestamp [not null]
+  next_retry_at timestamp
+  attempts integer [not null, default: 0]
+  max_attempts integer [not null, default: 3]
+  status varchar(30) [not null, note: 'PENDING, PROCESSING, SENT, FAILED, CANCELLED']
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    (status, scheduled_at)
+    (entity_type, entity_id)
+  }
+}
+
+Ref: ticket_documents.ticket_id > tickets.id
+Ref: notification_schedules.notification_id > notifications.id
+Ref: notification_schedules.template_id > notification_templates.id
+Ref: notification_schedules.user_id > users.id
+
+// -----------------------------------------------------------------------------
+// REPROGRAMACION, SALDOS A FAVOR Y TRAZABILIDAD FINANCIERA
+// -----------------------------------------------------------------------------
+
+Table reservation_changes {
+  id bigint [pk, increment]
+  order_id bigint [not null]
+  old_reservation_id bigint [not null]
+  new_reservation_id bigint
+  requested_by integer [not null]
+  status varchar(30) [not null, note: 'REQUESTED, APPROVED, REJECTED, COMPLETED, CANCELLED']
+  old_amount decimal(12,2) [not null]
+  new_amount decimal(12,2) [not null]
+  difference_amount decimal(12,2) [not null]
+  currency_code char(3) [not null]
+  additional_payment_id bigint
+  refund_id bigint
+  reason varchar(255)
+  requested_at timestamp [not null]
+  completed_at timestamp
+
+  indexes {
+    old_reservation_id
+    new_reservation_id
+    (order_id, status)
+  }
+}
+
+Table account_credits {
+  id bigint [pk, increment]
+  user_id integer [not null]
+  reservation_change_id bigint
+  order_id bigint
+  currency_code char(3) [not null]
+  initial_amount decimal(12,2) [not null]
+  balance decimal(12,2) [not null]
+  status varchar(30) [not null, note: 'ACTIVE, USED, EXPIRED, CANCELLED']
+  expires_at timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Ref: reservation_changes.order_id > orders.id
+Ref: reservation_changes.old_reservation_id > reservations.id
+Ref: reservation_changes.new_reservation_id > reservations.id
+Ref: reservation_changes.requested_by > users.id
+Ref: reservation_changes.currency_code > currencies.code
+Ref: reservation_changes.additional_payment_id > payments.id
+Ref: reservation_changes.refund_id > refunds.id
+Ref: account_credits.user_id > users.id
+Ref: account_credits.reservation_change_id > reservation_changes.id
+Ref: account_credits.order_id > orders.id
+Ref: account_credits.currency_code > currencies.code
+
+// -----------------------------------------------------------------------------
+// BONOS, CUPONES Y REGLAS DE PROMOCION
+// -----------------------------------------------------------------------------
+
+Table giftcard_ownerships {
+  id bigint [pk, increment]
+  giftcard_id bigint [not null]
+  user_id integer [not null]
+  status varchar(30) [not null, note: 'PENDING, ACTIVE, TRANSFERRED, REVOKED']
+  claimed_at timestamp
+  ended_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (giftcard_id, user_id, created_at) [unique]
+    (user_id, status)
+  }
+}
+
+Table coupon_redemptions {
+  id bigint [pk, increment]
+  coupon_id integer [not null]
+  user_id integer [not null]
+  cart_id bigint
+  order_id bigint
+  amount decimal(12,2) [not null]
+  status varchar(30) [not null, note: 'RESERVED, APPLIED, RELEASED, REVERSED']
+  redeemed_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (coupon_id, order_id) [unique]
+    (coupon_id, user_id, status)
+  }
+}
+
+Table promotion_rules {
+  id bigint [pk, increment]
+  promotion_id integer [not null]
+  membership_level_id integer
+  currency_code char(3)
+  minimum_purchase decimal(12,2)
+  day_of_week smallint
+  start_time time
+  end_time time
+  occupancy_threshold decimal(5,2)
+  minutes_before_showtime integer
+  max_tickets_per_order integer
+  active boolean [not null, default: true]
+}
+
+Table cineflash_runs {
+  id bigint [pk, increment]
+  showtime_id integer [not null]
+  promotion_id integer
+  seats_sold integer [not null]
+  room_capacity integer [not null]
+  occupancy_percent decimal(5,2) [not null]
+  action varchar(30) [not null, note: 'ACTIVATE, KEEP, DEACTIVATE, SKIP']
+  status varchar(30) [not null]
+  error_message text
+  executed_at timestamp [not null]
+
+  indexes {
+    (showtime_id, executed_at)
+  }
+}
+
+Ref: giftcard_ownerships.giftcard_id > giftcards.id
+Ref: giftcard_ownerships.user_id > users.id
+Ref: coupon_redemptions.coupon_id > coupons.id
+Ref: coupon_redemptions.user_id > users.id
+Ref: coupon_redemptions.cart_id > carts.id
+Ref: coupon_redemptions.order_id > orders.id
+Ref: promotion_rules.promotion_id > promotions.id
+Ref: promotion_rules.membership_level_id > membership_levels.id
+Ref: promotion_rules.currency_code > currencies.code
+Ref: cineflash_runs.showtime_id > showtime.id
+Ref: cineflash_runs.promotion_id > promotions.id
+
+// -----------------------------------------------------------------------------
+// CONSENTIMIENTOS, IA Y SOPORTE HUMANO
+// -----------------------------------------------------------------------------
+
+Table consent_records {
+  id bigint [pk, increment]
+  user_id integer [not null]
+  consent_type varchar(50) [not null, note: 'PERSONAL_DATA, TERMS, COMMERCIAL, PROFILING']
+  document_version varchar(30) [not null]
+  accepted boolean [not null]
+  ip_address varchar(45)
+  device varchar(255)
+  recorded_at timestamp [not null]
+
+  indexes {
+    (user_id, consent_type, document_version) [unique]
+  }
+}
+
+Table support_handoffs {
+  id bigint [pk, increment]
+  conversation_id bigint [not null]
+  requested_by_user_id integer
+  assigned_to_user_id integer
+  pqrs_id bigint
+  reason varchar(255)
+  status varchar(30) [not null, note: 'REQUESTED, ASSIGNED, RESOLVED, CANCELLED']
+  requested_at timestamp [not null]
+  assigned_at timestamp
+  resolved_at timestamp
+}
+
+Ref: consent_records.user_id > users.id
+Ref: support_handoffs.conversation_id > ai_conversations.id
+Ref: support_handoffs.requested_by_user_id > users.id
+Ref: support_handoffs.assigned_to_user_id > users.id
+Ref: support_handoffs.pqrs_id > pqrs.id
+
+// -----------------------------------------------------------------------------
+// ANALITICA PARA CONVERSION Y DASHBOARD GERENCIAL
+// -----------------------------------------------------------------------------
+
+Table analytics_sessions {
+  id bigint [pk, increment]
+  session_key varchar(120) [not null, unique]
+  user_id integer
+  city_id integer
+  cinema_id integer
+  source varchar(80)
+  device varchar(255)
+  ip_address varchar(45)
+  started_at timestamp [not null]
+  ended_at timestamp
+}
+
+Table analytics_events {
+  id bigint [pk, increment]
+  session_id bigint [not null]
+  user_id integer
+  event_type varchar(80) [not null, note: 'VIEW_MOVIE, SELECT_SHOWTIME, ADD_CART, START_PAYMENT, PURCHASE']
+  entity_type varchar(80)
+  entity_id varchar(80)
+  properties text
+  occurred_at timestamp [not null]
+
+  indexes {
+    (event_type, occurred_at)
+    (entity_type, entity_id)
+  }
+}
+
+Ref: analytics_sessions.user_id > users.id
+Ref: analytics_sessions.city_id > cities.id
+Ref: analytics_sessions.cinema_id > cinemas.id
+Ref: analytics_events.session_id > analytics_sessions.id
+Ref: analytics_events.user_id > users.id
+
+// -----------------------------------------------------------------------------
+// PQRS: ADJUNTOS E HISTORIAL DE ESTADOS
+// -----------------------------------------------------------------------------
+
+Table pqrs_attachments {
+  id bigint [pk, increment]
+  pqrs_id bigint [not null]
+  comment_id bigint
+  uploaded_by integer
+  file_name varchar(255) [not null]
+  file_url varchar(500) [not null]
+  mime_type varchar(100) [not null]
+  size_bytes bigint [not null]
+  file_hash varchar(128)
+  created_at timestamp [not null]
+}
+
+Table pqrs_status_history {
+  id bigint [pk, increment]
+  pqrs_id bigint [not null]
+  previous_status varchar(30)
+  new_status varchar(30) [not null]
+  changed_by integer
+  assigned_to integer
+  comment text
+  changed_at timestamp [not null]
+
+  indexes {
+    (pqrs_id, changed_at)
+  }
+}
+
+Ref: pqrs_attachments.pqrs_id > pqrs.id
+Ref: pqrs_attachments.comment_id > pqrs_comments.id
+Ref: pqrs_attachments.uploaded_by > users.id
+Ref: pqrs_status_history.pqrs_id > pqrs.id
+Ref: pqrs_status_history.changed_by > users.id
+Ref: pqrs_status_history.assigned_to > users.id
+
+// -----------------------------------------------------------------------------
+// VALIDACION DE ENTRADAS Y AUDITORIA DE ESCANEOS
+// -----------------------------------------------------------------------------
+
+Table ticket_validation_events {
+  id bigint [pk, increment]
+  ticket_id bigint [not null]
+  validated_by integer
+  result varchar(30) [not null, note: 'VALID, ALREADY_USED, EXPIRED, WRONG_SHOWTIME, INVALID']
+  cinema_id integer
+  room_id integer
+  gate varchar(50)
+  ip_address varchar(45)
+  device varchar(255)
+  validated_at timestamp [not null]
+
+  indexes {
+    (ticket_id, validated_at)
+  }
+}
+
+Ref: ticket_validation_events.ticket_id > tickets.id
+Ref: ticket_validation_events.validated_by > users.id
+Ref: ticket_validation_events.cinema_id > cinemas.id
+Ref: ticket_validation_events.room_id > rooms.id
+
+// -----------------------------------------------------------------------------
+// API PUBLICA: ROTACION DE CREDENCIALES Y TRAZABILIDAD
+// -----------------------------------------------------------------------------
+
+Table api_client_keys {
+  id bigint [pk, increment]
+  api_client_id integer [not null]
+  key_prefix varchar(20) [not null]
+  key_hash varchar(255) [not null, unique]
+  status varchar(30) [not null, note: 'ACTIVE, ROTATED, REVOKED, EXPIRED']
+  expires_at timestamp
+  last_used_at timestamp
+  revoked_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (api_client_id, status)
+  }
+}
+
+Table api_request_logs {
+  id bigint [pk, increment]
+  request_id varchar(80) [not null, unique]
+  api_client_id integer [not null]
+  api_client_key_id bigint
+  user_id integer
+  method varchar(10) [not null]
+  path varchar(500) [not null]
+  status_code integer [not null]
+  latency_ms integer [not null]
+  ip_address varchar(45)
+  request_hash varchar(128)
+  response_hash varchar(128)
+  error_code varchar(80)
+  created_at timestamp [not null]
+
+  indexes {
+    (api_client_id, created_at)
+    (path, status_code, created_at)
+  }
+}
+
+Ref: api_client_keys.api_client_id > api_clients.id
+Ref: api_request_logs.api_client_id > api_clients.id
+Ref: api_request_logs.api_client_key_id > api_client_keys.id
+Ref: api_request_logs.user_id > users.id
+
+// -----------------------------------------------------------------------------
+// CAMBIOS QUE DEBEN HACERSE DENTRO DE LAS TABLAS ORIGINALES
+// -----------------------------------------------------------------------------
+
+// 1. upcoming_notifications:
+//    agregar indice UNIQUE (user_id, movie_id, city_id).
+//
+// 2. carts:
+//    garantizar un solo carrito ACTIVE por user_id mediante indice parcial en PostgreSQL.
+//
+// 3. ticket_transfers:
+//    UNIQUE (ticket_id) para cumplir que cada entrada solo se transfiera una vez.
+//
+// 4. surveys:
+//    UNIQUE (order_id) para permitir una sola encuesta por compra.
+//
+// 5. users:
+//    UNIQUE (email), UNIQUE (document_type, document_number), y guardar los
+//    consentimientos historicos en consent_records.
+//
+// 6. memberships:
+//    UNIQUE (user_id), UNIQUE (code), UNIQUE (qr_code).
+//
+// 7. orders, invoices, tickets, giftcards, coupons y pqrs:
+//    declarar unicos order_number, invoice_number, ticket.code, ticket.qr_code,
+//    giftcards.code, giftcards.qr_code, coupons.code y pqrs.case_number.
+//
+// 8. upcoming_notifications, reservations y notification_schedules:
+//    usar timestamp con zona horaria (timestamptz en PostgreSQL).
+//
+// 9. valores monetarios y cantidades:
+//    agregar CHECK amount >= 0, quantity > 0, balance >= 0 y ends_at > starts_at.
+//
+// 10. claves foraneas:
+//     definir explicitamente ON DELETE RESTRICT/CASCADE segun el historial requerido.
+//
+// Nota: los indices parciales y algunos CHECK avanzados se agregan en migraciones SQL;
+// dbdiagram.io sirve para documentarlos, pero no expresa todos los detalles de PostgreSQL.
