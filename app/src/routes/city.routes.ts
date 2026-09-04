@@ -13,6 +13,8 @@ import {
   getCityCinemas,
   createCity,
 } from '../controllers/city.controller';
+import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router({ mergeParams: true });
 
@@ -40,7 +42,7 @@ const router = Router({ mergeParams: true });
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/cinemas', getCityCinemas);
+router.get('/:id/cinemas', getCityCinemas, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -78,6 +80,6 @@ router.get('/:id/cinemas', getCityCinemas);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCity);
+router.post('/', createCity, authToken, requireRole("admin"));
 
 export default router;

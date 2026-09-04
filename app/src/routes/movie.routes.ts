@@ -2,6 +2,8 @@
 
 import { Router } from "express";
 import movieController from "../controllers/movie.controller";
+import { authToken } from "../middlewares/authToken";
+import requireRole from "../middlewares/requireRole";
 
 /**
  * Rutas de Películas
@@ -45,7 +47,7 @@ const router = Router();
  *       500:
  *         description: Error al obtener la cartelera
  */
-router.get("/", movieController.getCatalog);
+router.get("/", authToken, requireRole("admin", "usuario"), movieController.getCatalog);
 
 /**
  * @swagger
@@ -68,7 +70,7 @@ router.get("/", movieController.getCatalog);
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:id/cinemas", movieController.getMovieCinemas);
+router.get("/:id/cinemas", authToken, requireRole("admin", "usuario"), movieController.getMovieCinemas);
 
 /**
  * @swagger
@@ -89,7 +91,7 @@ router.get("/:id/cinemas", movieController.getMovieCinemas);
  *       404:
  *         description: Película no encontrada
  */
-router.get("/:name", movieController.getByName);
+router.get("/:name", authToken, requireRole("admin", "usuario"), movieController.getByName);
 
 /**
  * @swagger
@@ -127,6 +129,6 @@ router.get("/:name", movieController.getByName);
  *       500:
  *         description: Error al crear la película
  */
-router.post("/", movieController.create);
+router.post("/", authToken, requireRole("admin"), movieController.create);
 
 export default router;

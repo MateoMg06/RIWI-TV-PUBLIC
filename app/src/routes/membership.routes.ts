@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import { createMembership, getMembership, getPurchaseHistory } from '../controllers/membership.controller';
 import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -45,7 +46,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/create', authToken, createMembership);
+router.post('/create', authToken, requireRole("admin", "usuario"), createMembership);
 
 /**
  * @swagger
@@ -65,7 +66,7 @@ router.post('/create', authToken, createMembership);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/me', authToken, getMembership);
+router.get('/me', authToken, authToken, requireRole("admin", "usuario"), getMembership);
 
 /**
  * @swagger
@@ -85,6 +86,6 @@ router.get('/me', authToken, getMembership);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/purchase-history', authToken, getPurchaseHistory);
+router.get('/purchase-history', authToken, requireRole("admin", "usuario"), getPurchaseHistory);
 
 export default router;

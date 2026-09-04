@@ -15,6 +15,8 @@ import {
   getCountryDepartments,
   createCountry,
 } from '../controllers/country.controller';
+import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -31,7 +33,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/', getCountries);
+router.get('/', getCountries, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -57,7 +59,7 @@ router.get('/', getCountries);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/departments', getCountryDepartments);
+router.get('/:id/departments', getCountryDepartments, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -86,6 +88,6 @@ router.get('/:id/departments', getCountryDepartments);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCountry);
+router.post('/', createCountry, authToken, requireRole("admin"));
 
 export default router;

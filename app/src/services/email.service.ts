@@ -16,7 +16,7 @@ class EmailService {
   }
 
   async sendActivationEmail(email: string, token: string, userName: string): Promise<void> {
-    const activationUrl = `${process.env.APP_URL || 'http://localhost:5000'}/api/auth/activate?token=${token}`;
+    const activationUrl = `${process.env.APP_URL || 'http://localhost:5001'}/api/auth/activate?token=${token}`;
 
     const mailOptions = {
       from: `"Riwi Cine" <${process.env.SMTP_USER || 'noreply@riwicine.com'}>`,
@@ -55,7 +55,7 @@ class EmailService {
   }
 
   async sendForgotPasswordEmail(email: string, token: string, userName: string): Promise<void> {
-    const resetUrl = `${process.env.APP_URL || 'http://localhost:5000'}/api/auth/reset-password?token=${token}`;
+    const resetUrl = `${process.env.APP_URL || 'http://localhost:5001'}/api/auth/reset-password?token=${token}`;
 
     const mailOptions = {
       from: `"Riwi Cine" <${process.env.SMTP_USER || 'noreply@riwicine.com'}>`,

@@ -13,6 +13,8 @@ import {
   getDepartmentCities,
   createDepartment,
 } from '../controllers/department.controller';
+import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router({ mergeParams: true });
 
@@ -40,7 +42,7 @@ const router = Router({ mergeParams: true });
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/cities', getDepartmentCities);
+router.get('/:id/cities', getDepartmentCities, authToken, requireRole("admin"));
 
 /**
  * @swagger
@@ -78,6 +80,6 @@ router.get('/:id/cities', getDepartmentCities);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createDepartment);
+router.post('/', createDepartment, authToken, requireRole("admin"));
 
 export default router;

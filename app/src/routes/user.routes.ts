@@ -16,6 +16,7 @@ import {
   updateUser,
 } from '../controllers/user.controller';
 import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -112,8 +113,8 @@ router.post('/register', createUser);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/', getUsers);
-router.get('/getUsers', getUsers);
+router.get('/', authToken, requireRole("admin"), getUsers);
+router.get('/getUsers', authToken, requireRole("admin"), getUsers);
 
 /**
  * @swagger
@@ -204,7 +205,7 @@ router.post('/login', login);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/refresh', refresh);
+router.post('/refresh', authToken, refresh);
 
 /**
  * @swagger
@@ -279,7 +280,7 @@ router.post('/logout', logout);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', authToken, updateUser)
+router.put('/:id', authToken, requireRole("admin", "usuario"), updateUser)
 router.post('/legacy-login', authUser);
 
 export default router;
