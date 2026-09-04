@@ -3,7 +3,9 @@ import { ICinemaRepository } from './interfaces/cinema.repository.interface';
 
 class CinemaRepository implements ICinemaRepository {
   async findAll(): Promise<Cinema[]> {
-    return await Cinema.findAll();
+    return await Cinema.findAll({
+      where: { active: true },
+    });
   }
 
   async findByPk(id: number): Promise<Cinema | null> {
@@ -12,7 +14,7 @@ class CinemaRepository implements ICinemaRepository {
 
   async findByCityId(cityId: number): Promise<Cinema[]> {
     return await Cinema.findAll({
-      where: { cityId },
+      where: { cityId, active: true },
     });
   }
 

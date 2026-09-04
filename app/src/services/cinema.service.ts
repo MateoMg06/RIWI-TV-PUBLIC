@@ -11,8 +11,16 @@ import { ICinemaService } from './interfaces/cinema.service.interface';
 import errorhandler from '../error/errorHandler';
 
 class CinemaService implements ICinemaService {
+  async findAll(): Promise<Cinema[]> {
+    return await cinemaRepository.findAll();
+  }
+
   async findByCityId(cityId: number): Promise<Cinema[]> {
-    return await cinemaRepository.findByCityId(cityId);
+    return await cinemaRepository.findActiveByCityId(cityId);
+  }
+
+  async findActiveByCityId(cityId: number): Promise<Cinema[]> {
+    return await cinemaRepository.findActiveByCityId(cityId);
   }
 
   async findByPk(id: number): Promise<Cinema | null> {

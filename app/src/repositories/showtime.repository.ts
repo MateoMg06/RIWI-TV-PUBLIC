@@ -26,19 +26,35 @@ class ShowtimeRepository implements IShowtimeRepository {
     });
   }
 
-  async findActiveByCinemaIds(cinemaIds: number[]): Promise<Showtime[]> {
+  async findActiveByCinemaIds(cinemaIds: number[], startDate?: string, endDate?: string): Promise<Showtime[]> {
     if (!cinemaIds.length) return [];
+    const now = new Date();
+    const start = startDate || now.toISOString().slice(0, 10);
+    const end = endDate || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
     return await Showtime.findAll({
       where: {
         cinemaId: { [Op.in]: cinemaIds },
         showtime_status: 'ACTIVE',
+        fecha: {
+          [Op.between]: [start, end],
+        },
       },
     });
   }
 
-  async findActiveByCityId(cityId: number): Promise<Showtime[]> {
+  async findActiveByCityId(cityId: number, startDate?: string, endDate?: string): Promise<Showtime[]> {
+    const now = new Date();
+    const start = startDate || now.toISOString().slice(0, 10);
+    const end = endDate || new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
     return await Showtime.findAll({
-      where: { showtime_status: 'ACTIVE' },
+      where: {
+        showtime_status: 'ACTIVE',
+        fecha: {
+          [Op.between]: [start, end],
+        },
+      },
       include: [
         {
           model: Cinema,

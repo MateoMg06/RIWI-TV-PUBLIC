@@ -1,6 +1,7 @@
 import City from '../models/cities.model';
 import { CreateCityDto } from '../dto/create-city.dto';
 import cityRepository from '../repositories/city.repository';
+import cinemaRepository from '../repositories/cinema.repository';
 import departmentRepository from '../repositories/department.repository';
 import { ICityService } from './interfaces/city.service.interface';
 import errorhandler from '../error/errorHandler';
@@ -19,10 +20,7 @@ class CityService implements ICityService {
   }
 
   async getCinemas(cityId: number): Promise<any[]> {
-    const city = await City.findByPk(cityId, {
-      include: [{ association: 'cinemas' }]
-    });
-    return (city as any)?.['cinemas'] || [];
+    return await cinemaRepository.findActiveByCityId(cityId);
   }
 
   async create(dto: CreateCityDto, departmentId: number): Promise<City> {

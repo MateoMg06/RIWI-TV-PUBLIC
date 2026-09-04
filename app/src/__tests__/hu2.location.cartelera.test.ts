@@ -233,3 +233,94 @@ describe('HU2 - Validaciones de departamentos y ciudades', () => {
     expect(result).toEqual([]);
   });
 });
+
+describe('HU2 - Requerimientos de Cines Activos y Local Storage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('cityService.getCinemas debe consultar únicamente cines activos', async () => {
+    (cinemaRepository.findActiveByCityId as jest.Mock).mockResolvedValue([
+      { id: 1, name: 'Cine Activo 1', cityId: 1, active: true },
+    ]);
+
+    const cinemas = await cityService.getCinemas(1);
+    expect(cinemas).toHaveLength(1);
+    expect(cinemas[0].active).toBe(true);
+    expect(cinemaRepository.findActiveByCityId).toHaveBeenCalledWith(1);
+  });
+
+  it('locationStorage helper: guardar, recuperar y limpiar ubicación en localStorage', () => {
+    const mockStorage: Record<string, string> = {};
+    const storageMock = {
+      getItem: jest.fn((key: string) => mockStorage[key] || null),
+      setItem: jest.fn((key: string, value: string) => {
+        mockStorage[key] = value;
+      }),
+      removeItem: jest.fn((key: string) => {
+        delete mockStorage[key];
+      }),
+      clear: jest.fn(() => {
+        Object.keys(mockStorage).forEach((key) => delete mockStorage[key]);
+      }),
+    };
+
+    (global as any).window = { localStorage: storageMock };
+
+    const {
+      saveLocationToLocalStorage,
+      getLocationFromLocalStorage,
+      clearLocationFromLocalStorage,
+    } = require('../helpers/locationStorage.helper');
+
+    saveLocationToLocalStorage(5, { id: 5, name: 'Medellín' });
+    expect(storageMock.setItem).toHaveBeenCalledWith('selected_city_id', '5');
+
+    const retrieved = getLocationFromLocalStorage();
+    expect(retrieved).toBe(5);
+
+    clearLocationFromLocalStorage();
+    expect(storageMock.removeItem).toHaveBeenCalledWith('selected_city_id');
+  });
+
+  it('changeCityFlow: ejecuta actualización, guarda en localStorage y actualiza cartelera', async () => {
+    const mockStorage: Record<string, string> = {};
+    (global as any).window = {
+      localStorage: {
+        getItem: jest.fn((key: string) => mockStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockStorage[key];
+        }),
+      },
+    };
+
+    const mockFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        message: 'Ubicación actualizada correctamente',
+        user: { id: 10, cityId: 3 },
+        catalog: {
+          city: { id: 3, city: 'Cali' },
+          data: [{ id: 1, name: 'Avatar' }],
+        },
+      }),
+    });
+
+    const { changeCityFlow } = require('../helpers/locationStorage.helper');
+    const result = await changeCityFlow(3, { fetchFn: mockFetch as any });
+
+    expect(result.cityId).toBe(3);
+    expect(result.catalog.data).toHaveLength(1);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/users/location'),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ cityId: 3 }),
+      })
+    );
+  });
+});
+

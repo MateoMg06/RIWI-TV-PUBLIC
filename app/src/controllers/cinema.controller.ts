@@ -4,6 +4,30 @@ import { CreateCinemaDto } from '../dto/create-cinema.dto';
 import { CreateShowtimeDto } from '../dto/create-showtime.dto';
 import errorhandler from '../error/errorHandler';
 
+export const getCinemas = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const rawCityId = req.query.cityId as string | undefined;
+    if (rawCityId !== undefined) {
+      const cityId = parseInt(rawCityId, 10);
+      if (isNaN(cityId) || cityId <= 0) {
+        return res.status(400).json({ error: 'cityId debe ser un número entero positivo' });
+      }
+      const cinemas = await cinemaService.findActiveByCityId(cityId);
+      return res.status(200).json(cinemas);
+    }
+    const cinemas = await cinemaService.findAll();
+    return res.status(200).json(cinemas);
+  } catch (error: any) {
+    if (error instanceof errorhandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 export const getCinemaMovies = async (
   req: Request,
   res: Response

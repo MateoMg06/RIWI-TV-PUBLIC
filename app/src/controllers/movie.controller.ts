@@ -1,9 +1,11 @@
 // app/src/controllers/movie.controller.ts
 
 import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import movieService from "../services/movie.service";
 import Movie from "../models/movie.model";
 import movieRepository from "../repositories/movie.repository";
+import userRepository from "../repositories/user.repository";
 
 /**
  * Controlador de Películas
@@ -34,21 +36,61 @@ class MovieController {
     /**
      * GET /movies
      * Obtiene la cartelera. Si recibe ?cityId filtra por ciudad activa.
+     * Si no se envía cityId, utiliza automáticamente la ciudad guardada del usuario (user.cityId).
      */
     async getCatalog(req: Request, res: Response): Promise<void> {
         try {
             const rawCityId = req.query.cityId as string | undefined;
+            let targetCityId: number | undefined;
+
             if (rawCityId !== undefined) {
                 const cityId = parseInt(rawCityId as string, 10);
                 if (isNaN(cityId) || cityId <= 0) {
                     res.status(400).json({ error: 'cityId debe ser un número entero positivo' });
                     return;
                 }
-                const result = await movieService.getCatalogByCity(cityId);
-                // Always return structured response for filtered catalog
+                targetCityId = cityId;
+            } else {
+                // 1. Verificar si el usuario está autenticado y tiene una ciudad guardada
+                let userId: number | undefined = (req as any).user?.id ?? (req as any).user?.userId;
+
+                if (!userId) {
+                    const token = req.cookies?.accessToken || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : undefined);
+                    if (token) {
+                        try {
+                            const decoded = jwt.verify(token, String(process.env.JWT_SECRET)) as any;
+                            userId = decoded?.id ?? decoded?.userId;
+                        } catch {
+                            // Token no válido o expirado, continuar sin usuario autenticado
+                        }
+                    }
+                }
+
+                if (userId) {
+                    const user = await userRepository.findByID(userId);
+                    if (user && user.cityId) {
+                        targetCityId = user.cityId;
+                    }
+                }
+
+                // 2. Fallback de cabecera / cookie sincronizada desde Local Storage si no se resolvió por usuario
+                if (!targetCityId) {
+                    const clientCityHeader = req.headers['x-city-id'] || req.cookies?.selected_city_id || req.cookies?.cityId;
+                    if (clientCityHeader) {
+                        const parsed = parseInt(String(clientCityHeader), 10);
+                        if (!isNaN(parsed) && parsed > 0) {
+                            targetCityId = parsed;
+                        }
+                    }
+                }
+            }
+
+            if (targetCityId !== undefined) {
+                const result = await movieService.getCatalogByCity(targetCityId);
                 res.status(200).json(result);
                 return;
             }
+
             const catalog = await movieService.getCatalog();
             res.status(200).json(catalog);
         } catch (error: any) {
@@ -126,7 +168,7 @@ class MovieController {
             }
 
             const cinemas = await Movie.findByPk(movieId, {
-                include: [{ association: 'cinemas', through: { attributes: [] } }]
+                include: [{ association: 'cinemas', where: { active: true }, required: false, through: { attributes: [] } }]
             });
 
             res.status(200).json((cinemas as any)?.['cinemas'] || []);

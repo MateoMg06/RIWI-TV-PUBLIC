@@ -13,6 +13,7 @@
 
 import { Router } from 'express';
 import {
+  getCinemas,
   getCinemaMovies,
   createCinema,
   addMovieToCinema,
@@ -21,6 +22,29 @@ import {
 } from '../controllers/cinema.controller';
 
 const router = Router();
+
+/**
+ * @swagger
+ * /api/cinemas:
+ *   get:
+ *     summary: Obtener todos los cines activos
+ *     tags:
+ *       - Cinemas
+ *     parameters:
+ *       - in: query
+ *         name: cityId
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de la ciudad activa (opcional)
+ *     responses:
+ *       200:
+ *         description: Lista de cines activos obtenida exitosamente
+ *       400:
+ *         description: cityId inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/', getCinemas);
 
 /**
  * @swagger
