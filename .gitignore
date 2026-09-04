@@ -6,6 +6,8 @@ venv.*
 ENV/
 env/
 .env.*.local
+!.env.example
+!**/.env.example
 
 # MySQL
 *.mysql
@@ -45,7 +47,6 @@ coverage.xml
 *.key
 *.crt
 *.env
-
 
 # Dependencias
 **/node_modules/
@@ -93,6 +94,3 @@ reports/
 # Archivos de sistema
 *.bak
 *.orig
-
-# Package
-package-lock.json
