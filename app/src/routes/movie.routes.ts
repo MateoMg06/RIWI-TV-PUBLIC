@@ -11,6 +11,9 @@ import movieController from "../controllers/movie.controller";
  */
 const router = Router();
 
+router.get("/upcoming", movieController.getUpcoming);
+router.get("/upcoming/:id", movieController.getUpcomingById);
+
 /**
  * @swagger
  * /api/movies:

@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import movieService from "../services/movie.service";
 import Movie from "../models/movie.model";
 import movieRepository from "../repositories/movie.repository";
+import errorhandler from "../error/errorHandler";
 
 /**
  * Controlador de Películas
@@ -44,6 +45,36 @@ class MovieController {
                 message: "Error al obtener la cartelera",
                 error: error instanceof Error ? error.message : error,
             });
+        }
+    }
+
+    async getUpcoming(req: Request, res: Response): Promise<void> {
+        try {
+            const cityId = typeof req.query.city_id === 'string' ? req.query.city_id : undefined;
+            const upcoming = await movieService.getUpcoming(cityId);
+            res.status(200).json(upcoming);
+        } catch (error) {
+            res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
+        }
+    }
+
+    async getUpcomingById(req: Request, res: Response): Promise<void> {
+        try {
+            const movieId = Number(req.params.id);
+            if (!Number.isInteger(movieId) || movieId <= 0) {
+                res.status(400).json({ error: 'El ID debe ser un número entero positivo' });
+                return;
+            }
+
+            const movie = await movieService.getUpcomingById(movieId);
+            res.status(200).json(movie);
+        } catch (error) {
+            if (error instanceof errorhandler) {
+                res.status(error.estado).json({ error: error.message });
+                return;
+            }
+
+            res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
         }
     }
 

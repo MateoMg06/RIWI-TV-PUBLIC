@@ -82,6 +82,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     await userService.clearAttempts(validatedUser)
     
     const payload = {
+      id: user.id,
       name: user?.name,
       membership: user?.membership
     };
@@ -97,6 +98,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         accessToken,
         refreshToken,
         user: {
+          id: payload.id,
           name: payload.name,
           membership: payload.membership
         },

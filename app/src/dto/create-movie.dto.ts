@@ -75,6 +75,7 @@ export interface CreateMovieDto {
     synopsis?: string;
     posterUrl?: string;
     trailerUrl?: string;
+    releaseDate?: string;
     status?: "proximo_estreno" | "en_cartelera" | "fuera_cartelera";
     classificationId?: number;
     languageId?: number;

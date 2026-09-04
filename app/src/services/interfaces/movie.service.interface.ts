@@ -26,4 +26,8 @@ export interface IMovieService {
      * Obtiene una película por nombre.
      */
     getByName(name: string): Promise<GetMovieCatalogDto>;
+
+    getUpcoming(cityId?: string): Promise<GetMovieCatalogDto[]>;
+
+    getUpcomingById(id: number): Promise<GetMovieCatalogDto>;
 }

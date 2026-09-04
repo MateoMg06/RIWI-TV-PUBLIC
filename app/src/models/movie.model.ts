@@ -27,13 +27,14 @@ export interface MovieAttributes {
   synopsis: string | null;
   posterUrl: string | null;
   trailerUrl: string | null;
+  releaseDate: string | Date | null;
   status: MovieStatus;
   classificationId: number | null;
   languageId: number | null;
 }
 
 export interface MovieCreationAttributes
-  extends Optional<MovieAttributes, "id" | "synopsis" | "posterUrl" | "trailerUrl" | "status" | "classificationId" | "languageId"> {}
+  extends Optional<MovieAttributes, "id" | "synopsis" | "posterUrl" | "trailerUrl" | "releaseDate" | "status" | "classificationId" | "languageId"> {}
 
 class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements MovieAttributes {
   public id!: number;
@@ -44,6 +45,7 @@ class Movie extends Model<MovieAttributes, MovieCreationAttributes> implements M
   public synopsis!: string | null;
   public posterUrl!: string | null;
   public trailerUrl!: string | null;
+  public releaseDate!: string | Date | null;
   public status!: MovieStatus;
   public classificationId!: number | null;
   public languageId!: number | null;
@@ -85,6 +87,11 @@ Movie.init(
       type: DataTypes.STRING(500),
       allowNull: true,
       field: "trailer_url",
+    },
+    releaseDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: "release_date",
     },
     status: {
       type: DataTypes.ENUM("proximo_estreno", "en_cartelera", "fuera_cartelera"),

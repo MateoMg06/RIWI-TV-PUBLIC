@@ -17,6 +17,7 @@ import departmentRoutes from './routes/department.routes';
 import cityRoutes from './routes/city.routes';
 import cinemaRoutes from './routes/cinema.routes';
 import v1Routes from './routes/v1.routes';
+import releaseNotificationRoutes from './routes/release-notification.routes';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.get('/api/test', (_req, res) => {
 app.use('/api/v1', v1Routes);
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/notifications', releaseNotificationRoutes);
 app.use('/api/countries', countryRoutes);
 app.use('/api/countries/:countryId/departments', departmentRoutes);
 app.use('/api/departments', departmentRoutes);

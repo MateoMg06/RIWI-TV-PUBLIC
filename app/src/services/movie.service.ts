@@ -4,6 +4,7 @@ import { IMovieService } from "./interfaces/movie.service.interface";
 import movieRepository from "../repositories/movie.repository";
 import { MovieCreationAttributes } from "../models/movie.model";
 import { GetMovieCatalogDto } from "../dto/get-movie-catalog.dto";
+import errorhandler from "../error/errorHandler";
 
 /**
  * Servicio de Películas
@@ -45,6 +46,22 @@ class MovieService implements IMovieService {
         return this.toDto(movie);
     }
 
+    async getUpcoming(cityId?: string): Promise<GetMovieCatalogDto[]> {
+        // TODO: Filter by city through Showtime -> Cinema -> City when that flow is integrated.
+        void cityId;
+        const movies = await movieRepository.findUpcoming();
+        return movies.map((movie) => this.toDto(movie));
+    }
+
+    async getUpcomingById(id: number): Promise<GetMovieCatalogDto> {
+        const movie = await movieRepository.findUpcomingById(id);
+        if (!movie) {
+            throw new errorhandler(404, 'Película próxima no encontrada');
+        }
+
+        return this.toDto(movie);
+    }
+
     /**
      * Mapea una instancia de Movie al DTO de salida.
      */
@@ -57,6 +74,7 @@ class MovieService implements IMovieService {
         synopsis: string | null;
         posterUrl: string | null;
         trailerUrl: string | null;
+        releaseDate: string | Date | null;
         status: GetMovieCatalogDto["status"];
         classificationId: number | null;
         languageId: number | null;
@@ -70,6 +88,7 @@ class MovieService implements IMovieService {
             synopsis: movie.synopsis,
             posterUrl: movie.posterUrl,
             trailerUrl: movie.trailerUrl,
+            releaseDate: movie.releaseDate,
             status: movie.status,
             classificationId: movie.classificationId,
             languageId: movie.languageId,

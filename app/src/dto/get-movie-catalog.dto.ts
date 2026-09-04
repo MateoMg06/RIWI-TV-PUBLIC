@@ -50,6 +50,7 @@ export interface GetMovieCatalogDto {
     synopsis: string | null;
     posterUrl: string | null;
     trailerUrl: string | null;
+    releaseDate: string | Date | null;
     status: "proximo_estreno" | "en_cartelera" | "fuera_cartelera";
     classificationId: number | null;
     languageId: number | null;

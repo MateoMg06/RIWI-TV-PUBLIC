@@ -1,6 +1,7 @@
 import { JwtPayload } from 'jsonwebtoken';
 
 type RolePayload = JwtPayload & {
+  id?: number;
   role?: string;
 };
 

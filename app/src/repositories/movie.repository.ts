@@ -43,6 +43,19 @@ class MovieRepository implements IMovieRepository {
         return await Movie.findByPk(id);
     }
 
+    async findUpcoming(): Promise<Movie[]> {
+        return await Movie.findAll({
+            where: { status: 'proximo_estreno' },
+            order: [['releaseDate', 'ASC']],
+        });
+    }
+
+    async findUpcomingById(id: number): Promise<Movie | null> {
+        return await Movie.findOne({
+            where: { id, status: 'proximo_estreno' },
+        });
+    }
+
 
 }
 

@@ -30,4 +30,8 @@ export interface IMovieRepository {
      * Obtiene una película por ID.
      */
     findByPk(id: number): Promise<Movie | null>;
+
+    findUpcoming(): Promise<Movie[]>;
+
+    findUpcomingById(id: number): Promise<Movie | null>;
 }
