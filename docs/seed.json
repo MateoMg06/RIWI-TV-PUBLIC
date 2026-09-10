@@ -1,0 +1,413 @@
+{
+  "location": {
+    "country": "Colombia",
+    "department": "Antioquia",
+    "city": "Medellín",
+    "cinema": "Multicine Riwi Centro"
+  },
+  "movies": [
+    {
+      "name": "Horizonte Rojo",
+      "synopsis": "Sinopsis de Horizonte Rojo",
+      "genre": "Acción",
+      "classification": "PG-13",
+      "duration": 128,
+      "director": "Ana Torres",
+      "cast": [
+        "Intérprete Uno",
+        "Intérprete Dos"
+      ],
+      "releaseDate": "2026-08-27T05:00:00.000Z",
+      "status": "ACTIVE",
+      "audienceRating": 8.4,
+      "showtime": {
+        "startsAt": "2026-09-11T23:00:00.000Z",
+        "room": "Sala 1",
+        "roomType": "STANDARD",
+        "format": "2D",
+        "language": "Español",
+        "audioType": "DUBBED",
+        "price": 18000,
+        "seats": [
+          {
+            "code": "A1",
+            "row": "A",
+            "number": 1,
+            "type": "ACCESSIBLE",
+            "priceModifier": 0
+          },
+          {
+            "code": "A2",
+            "row": "A",
+            "number": 2,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A3",
+            "row": "A",
+            "number": 3,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A4",
+            "row": "A",
+            "number": 4,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A5",
+            "row": "A",
+            "number": 5,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A6",
+            "row": "A",
+            "number": 6,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A7",
+            "row": "A",
+            "number": 7,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A8",
+            "row": "A",
+            "number": 8,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B1",
+            "row": "B",
+            "number": 1,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B2",
+            "row": "B",
+            "number": 2,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B3",
+            "row": "B",
+            "number": 3,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B4",
+            "row": "B",
+            "number": 4,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B5",
+            "row": "B",
+            "number": 5,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B6",
+            "row": "B",
+            "number": 6,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B7",
+            "row": "B",
+            "number": 7,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B8",
+            "row": "B",
+            "number": 8,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "C1",
+            "row": "C",
+            "number": 1,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C2",
+            "row": "C",
+            "number": 2,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C3",
+            "row": "C",
+            "number": 3,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C4",
+            "row": "C",
+            "number": 4,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C5",
+            "row": "C",
+            "number": 5,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C6",
+            "row": "C",
+            "number": 6,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C7",
+            "row": "C",
+            "number": 7,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C8",
+            "row": "C",
+            "number": 8,
+            "type": "VIP",
+            "priceModifier": 8000
+          }
+        ]
+      }
+    },
+    {
+      "name": "El Jardín de Luz",
+      "synopsis": "Sinopsis de El Jardín de Luz",
+      "genre": "Drama",
+      "classification": "PG",
+      "duration": 112,
+      "director": "Luis Vega",
+      "cast": [
+        "Intérprete Uno",
+        "Intérprete Dos"
+      ],
+      "releaseDate": "2026-08-27T05:00:00.000Z",
+      "status": "ACTIVE",
+      "audienceRating": 8.1,
+      "showtime": {
+        "startsAt": "2026-09-13T00:00:00.000Z",
+        "room": "Sala 2",
+        "roomType": "VIP",
+        "format": "IMAX",
+        "language": "Español",
+        "audioType": "DUBBED",
+        "price": 26000,
+        "seats": [
+          {
+            "code": "A1",
+            "row": "A",
+            "number": 1,
+            "type": "ACCESSIBLE",
+            "priceModifier": 0
+          },
+          {
+            "code": "A2",
+            "row": "A",
+            "number": 2,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A3",
+            "row": "A",
+            "number": 3,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A4",
+            "row": "A",
+            "number": 4,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A5",
+            "row": "A",
+            "number": 5,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A6",
+            "row": "A",
+            "number": 6,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A7",
+            "row": "A",
+            "number": 7,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "A8",
+            "row": "A",
+            "number": 8,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B1",
+            "row": "B",
+            "number": 1,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B2",
+            "row": "B",
+            "number": 2,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B3",
+            "row": "B",
+            "number": 3,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B4",
+            "row": "B",
+            "number": 4,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B5",
+            "row": "B",
+            "number": 5,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B6",
+            "row": "B",
+            "number": 6,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B7",
+            "row": "B",
+            "number": 7,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "B8",
+            "row": "B",
+            "number": 8,
+            "type": "STANDARD",
+            "priceModifier": 0
+          },
+          {
+            "code": "C1",
+            "row": "C",
+            "number": 1,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C2",
+            "row": "C",
+            "number": 2,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C3",
+            "row": "C",
+            "number": 3,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C4",
+            "row": "C",
+            "number": 4,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C5",
+            "row": "C",
+            "number": 5,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C6",
+            "row": "C",
+            "number": 6,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C7",
+            "row": "C",
+            "number": 7,
+            "type": "VIP",
+            "priceModifier": 8000
+          },
+          {
+            "code": "C8",
+            "row": "C",
+            "number": 8,
+            "type": "VIP",
+            "priceModifier": 8000
+          }
+        ]
+      }
+    },
+    {
+      "name": "Órbita Final",
+      "synopsis": "Una expedición debe regresar antes de que su órbita colapse.",
+      "classification": "PG-13",
+      "duration": 135,
+      "genre": "Ciencia ficción",
+      "director": "María León",
+      "cast": [
+        "Sofía Ríos",
+        "Mateo Cruz"
+      ],
+      "releaseDate": "2026-10-10T05:00:00.000Z",
+      "status": "UPCOMING",
+      "audienceRating": 0
+    }
+  ]
+}
