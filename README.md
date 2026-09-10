@@ -67,6 +67,8 @@ Todos los endpoints funcionales también están disponibles bajo `/api/v1`. Los 
 
 El JWT puede enviarse como cookie `accessToken` o como `Authorization: Bearer <token>`.
 
+Las rutas de registro `/api/auth/register`, `/api/users` y `/api/users/register` comparten el mismo contrato: requieren CAPTCHA y crean usuario, perfil y membresía pendientes de activación. El registro público siempre asigna el rol `usuario`. `PUT /api/users/:id` permite actualizar únicamente al usuario autenticado; el ID debe coincidir con su sesión.
+
 ## Variables principales
 
 | Variable                    | Uso                                             |

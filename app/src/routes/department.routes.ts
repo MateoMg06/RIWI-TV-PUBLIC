@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Departamentos
  * ----------------------
@@ -9,14 +10,12 @@
  */
 
 import { Router } from 'express';
-import {
-  getDepartmentCities,
-  createDepartment,
-} from '../controllers/department.controller';
+import { getDepartmentCities, createDepartment } from '../controllers/department.controller';
 import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router({ mergeParams: true });
+router.use(validateJsonBody);
 
 /**
  * @swagger
@@ -48,6 +47,7 @@ router.get('/:id/cities', getDepartmentCities);
  * @swagger
  * /api/countries/{countryId}/departments:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Crear un nuevo departamento
  *     tags:
  *       - Departments
@@ -80,6 +80,6 @@ router.get('/:id/cities', getDepartmentCities);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', authToken, requireRole("admin"), createDepartment);
+router.post('/', authToken, requireRole('admin'), createDepartment);
 
 export default router;

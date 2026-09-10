@@ -1,5 +1,4 @@
 import User, { UserAttributes } from '../models/user.model';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import repository from '../repositories/user.repository';
 import { IUserService } from './interfaces/user.service.interface';
@@ -11,70 +10,6 @@ import cinemaRepository from '../repositories/cinema.repository';
 import { randomUUID } from 'crypto';
 
 class UserService implements IUserService {
-  async create(dto: CreateUserDto): Promise<User> {
-    const existingUser = await repository.findUserCredential(dto.email);
-    if (existingUser) {
-      throw new ErrorHandler(409, 'El usuario ya existe');
-    }
-
-    // Validar confirmación de correo
-    if (dto.email !== dto.confirmEmail) {
-      throw new ErrorHandler(400, 'El correo y su confirmación no coinciden');
-    }
-
-    // Validar confirmación de contraseña
-    if (dto.password !== dto.confirmPassword) {
-      throw new ErrorHandler(400, 'La contraseña y su confirmación no coinciden');
-    }
-
-    const validPassword = await validatePassword(dto.password);
-    if (!validPassword) {
-      throw new ErrorHandler(
-        400,
-        'Contraseña inválida, aségurese de que cumpla con los requerimientos de contraseña',
-      );
-    }
-
-    // Validar número de teléfono (10 caracteres exactos)
-    if (!/^\d{10}$/.test(dto.phone)) {
-      throw new ErrorHandler(400, 'El número de teléfono debe contener exactamente 10 dígitos');
-    }
-
-    // Validar aceptación de términos y tratamiento de datos
-    if (!dto.acceptsDataProcessing) {
-      throw new ErrorHandler(400, 'Debe aceptar el tratamiento de datos personales para continuar');
-    }
-
-    if (!dto.acceptsTerms) {
-      throw new ErrorHandler(400, 'Debe aceptar los términos y condiciones para continuar');
-    }
-
-    // Validar fecha de nacimiento
-    const birthDate = new Date(dto.birthDate);
-    if (isNaN(birthDate.getTime())) {
-      throw new ErrorHandler(400, 'La fecha de nacimiento no es válida');
-    }
-
-    const saltRounds = Number(process.env.SALT_ROUNDS || 10);
-    const userPayload = {
-      name: dto.name,
-      lastName: dto.lastName,
-      email: dto.email,
-      phone: dto.phone,
-      documentType: dto.documentType,
-      documentNumber: dto.documentNumber,
-      city: dto.city,
-      acceptsDataProcessing: dto.acceptsDataProcessing,
-      acceptsTerms: dto.acceptsTerms,
-      acceptsNotifications: dto.acceptsNotifications,
-      birthDate,
-      password: await hashPassword(dto.password, saltRounds),
-      role: dto.role || 'usuario',
-    } as any;
-
-    return await repository.create(userPayload);
-  }
-
   async findAll(): Promise<User[]> {
     return await repository.findAll();
   }
@@ -88,6 +23,9 @@ class UserService implements IUserService {
   }
 
   async findCredential(email: string, password: string): Promise<User | null> {
+    if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
+      throw new ErrorHandler(400, 'Correo y contraseña son requeridos');
+    }
     const user = await repository.findUserCredential(email);
 
     if (!user) {
@@ -101,12 +39,16 @@ class UserService implements IUserService {
       );
     }
 
+    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+      throw new ErrorHandler(401, 'Cuenta bloqueada temporalmente por múltiples intentos fallidos');
+    }
     const passwordMatches = await comparePassword(password, user.password);
     if (!passwordMatches) {
       await this.registerFailedAttempt(user);
       throw new ErrorHandler(401, 'Contraseña incorrecta');
     }
 
+    await this.clearAttempts(user);
     return user;
   }
 

@@ -79,6 +79,17 @@ app.use('/reservations', reservationRoutes);
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.use((error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'El cuerpo no contiene JSON válido' });
+    return;
+  }
+  const status = error.status === 413 ? 413 : 500;
+  res
+    .status(status)
+    .json({ error: status === 413 ? 'Petición demasiado grande' : 'Error interno del servidor' });
+});
+
 startSeatLockCleanup();
 
 export default app;

@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Membresía
  * ------------------
@@ -15,6 +16,7 @@ import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
@@ -38,8 +40,7 @@ const router = Router();
  *   post:
  *     summary: Crear una membresía para el usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     requestBody:
  *       required: true
  *       content:
@@ -50,10 +51,13 @@ const router = Router();
  *               - durationMonths
  *             properties:
  *               durationMonths:
- *                 type: number
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 120
  *                 example: 12
  *               initialBonus:
  *                 type: number
+ *                 minimum: 0
  *                 example: 100
  *     responses:
  *       201:
@@ -75,8 +79,7 @@ router.post('/create', authToken, requireRole('admin', 'usuario'), createMembers
  *   get:
  *     summary: Obtener la membresía del usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     responses:
  *       200:
  *         description: Membresía obtenida exitosamente
@@ -96,8 +99,7 @@ router.get('/', authToken, requireRole('admin', 'usuario'), getMembership);
  *   get:
  *     summary: Obtener el historial de compras del usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     responses:
  *       200:
  *         description: Historial de compras obtenido exitosamente

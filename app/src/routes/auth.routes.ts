@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Autenticación
  * ----------------------
@@ -16,6 +17,7 @@ import { login, logout, refresh } from '../controllers/user.controller';
 import { authToken } from '../middlewares/authToken';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
@@ -41,11 +43,30 @@ const router = Router();
  *         description: Token ausente, inválido o expirado
  * /api/auth/login:
  *   post:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string, format: password }
  *     tags: [Auth]
  *     summary: Iniciar sesión y emitir access y refresh token
  *     responses: { 201: { description: Login exitoso }, 401: { description: Credenciales inválidas } }
  * /api/auth/refresh:
  *   post:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
  *     tags: [Auth]
  *     summary: Rotar el refresh token y renovar la sesión
  *     responses: { 201: { description: Tokens renovados }, 401: { description: Token inválido } }

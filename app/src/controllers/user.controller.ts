@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import userService from '../services/user.service';
 import authService from '../services/auth.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { register } from './auth.controller';
 import ErrorHandler from '../error/errorHandler';
 import { cookieOptions } from '../config/cookie';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -22,20 +22,8 @@ const sanitizeUser = (user: any) => {
   return safe;
 };
 
-export const createUser = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const dto: CreateUserDto = req.body;
-    const user = await userService.create(dto);
-
-    return res.status(201).json(user);
-  } catch (error: any) {
-    if (error instanceof ErrorHandler) {
-      return res.status(error.estado).json({ error: error.message });
-    }
-
-    return res.status(500).json({ error: error.message });
-  }
-};
+// All public registration aliases enforce the same CAPTCHA and activation flow.
+export const createUser = register;
 
 export const getUsers = async (_req: Request, res: Response): Promise<Response> => {
   try {
@@ -50,7 +38,7 @@ export const getUsers = async (_req: Request, res: Response): Promise<Response> 
 
 export const authUser = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
     const user = await userService.findCredential(email, password);
 
     // Excluir campos sensibles de la respuesta
@@ -65,9 +53,9 @@ export const authUser = async (req: Request, res: Response): Promise<Response> =
 };
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
-  const { email, password } = req.body;
+  const { email, password } = req.body ?? {};
 
-  if (!email || !password) {
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
     return res.status(400).json({ error: 'Correo y contraseña son requeridos' });
   }
 
@@ -91,9 +79,9 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
 export const refresh = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.body ?? {};
 
-    if (!refreshToken) {
+    if (typeof refreshToken !== 'string' || !refreshToken) {
       return res.status(401).json({ error: 'Usuario sin token' });
     }
 
@@ -135,12 +123,18 @@ export const updateUser = async (req: Request, res: Response): Promise<Response>
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'Usuario no autenticado' });
     }
-    const userID: number = req.user.id;
+    const userID = Number(req.params.id);
+    if (!Number.isInteger(userID) || userID <= 0) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
+    if (userID !== req.user.id) {
+      return res.status(403).json({ error: 'Solo puedes actualizar tu propio usuario' });
+    }
     const dto: UpdateUserDto = req.body;
     const updatedUser = await userService.updateUser(userID, dto);
     return res.status(200).json({
       message: 'Usuario actualizado correctamente',
-      updatedUser,
+      updatedUser: sanitizeUser(updatedUser),
     });
   } catch (error: any) {
     if (error instanceof ErrorHandler)
@@ -157,7 +151,7 @@ export const setLocation = async (req: Request, res: Response): Promise<Response
       return res.status(400).json({ error: 'cityId debe ser un entero positivo' });
     return res.status(200).json({
       message: 'Ubicación actualizada correctamente',
-      user: await userService.setLocation(req.user.id, cityId),
+      user: sanitizeUser(await userService.setLocation(req.user.id, cityId)),
     });
   } catch (error) {
     if (error instanceof ErrorHandler)

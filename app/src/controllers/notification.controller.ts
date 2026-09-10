@@ -11,6 +11,7 @@ export const requestUpcomingNotification = async (
     const userId = user?.id;
     if (!userId) return res.status(401).json({ error: 'Usuario no autenticado' });
     const movieId = positiveInt(req.body.movieId);
+    if (!movieId) return res.status(400).json({ error: 'movieId es requerido' });
     const location = req.body.cityId ?? user.cityId;
     const cityId = location == null ? undefined : positiveInt(location);
     return res

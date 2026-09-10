@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Cines
  * ---------------
@@ -23,11 +24,13 @@ import requireRole from '../middlewares/requireRole';
 import { authToken } from '../middlewares/authToken';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
  * /api/cinemas:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Crear un nuevo cine
  *     tags:
  *       - Cinemas
@@ -89,6 +92,7 @@ router.get('/:id/movies', getCinemaMovies);
  * @swagger
  * /api/cinemas/{id}/movies/{movieId}:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Asignar una película a un cine
  *     tags:
  *       - Cinemas
@@ -112,21 +116,18 @@ router.get('/:id/movies', getCinemaMovies);
  *           schema:
  *             type: object
  *             required:
- *               - horario
- *               - fecha
- *               - sala
- *               - precio
+ *               - startsAt
+ *               - room
+ *               - price
  *             properties:
- *               horario:
+ *               startsAt:
  *                 type: string
- *                 example: "19:30"
- *               fecha:
- *                 type: string
- *                 example: "2026-08-20"
- *               sala:
+ *                 format: date-time
+ *                 example: "2030-09-12T19:30:00-05:00"
+ *               room:
  *                 type: string
  *                 example: "A-5"
- *               precio:
+ *               price:
  *                 type: number
  *                 example: 15.99
  *     responses:
@@ -147,6 +148,7 @@ router.post('/:id/movies/:movieId', authToken, requireRole('admin'), addMovieToC
  * @swagger
  * /api/cinemas/{id}/movies/{movieId}:
  *   delete:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Quitar una película de un cine
  *     tags:
  *       - Cinemas

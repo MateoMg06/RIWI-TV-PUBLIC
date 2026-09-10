@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Ciudades
  * ------------------
@@ -9,14 +10,12 @@
  */
 
 import { Router } from 'express';
-import {
-  getCityCinemas,
-  createCity,
-} from '../controllers/city.controller';
+import { getCityCinemas, createCity } from '../controllers/city.controller';
 import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router({ mergeParams: true });
+router.use(validateJsonBody);
 
 /**
  * @swagger
@@ -48,6 +47,7 @@ router.get('/:id/cinemas', getCityCinemas);
  * @swagger
  * /api/departments/{departmentId}/cities:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Crear una nueva ciudad
  *     tags:
  *       - Cities
@@ -80,6 +80,6 @@ router.get('/:id/cinemas', getCityCinemas);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', authToken, requireRole("admin"), createCity);
+router.post('/', authToken, requireRole('admin'), createCity);
 
 export default router;

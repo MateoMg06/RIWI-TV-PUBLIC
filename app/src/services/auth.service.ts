@@ -37,6 +37,27 @@ class AuthService implements IAuthService {
     emailSent: boolean;
     activationToken?: string;
   }> {
+    for (const field of [
+      'name',
+      'lastName',
+      'email',
+      'confirmEmail',
+      'password',
+      'confirmPassword',
+      'phone',
+      'documentType',
+      'documentNumber',
+      'birthDate',
+      'city',
+      'captchaToken',
+    ] as const) {
+      if (typeof dto?.[field] !== 'string' || !dto[field].trim()) {
+        throw new ErrorHandler(400, `El campo ${field} es requerido`);
+      }
+    }
+    if (!Number.isFinite(dto.captchaAnswer) || Number.isNaN(new Date(dto.birthDate).getTime())) {
+      throw new ErrorHandler(400, 'CAPTCHA o fecha de nacimiento inválidos');
+    }
     if (!verifyCaptcha(dto.captchaToken, dto.captchaAnswer)) {
       throw new ErrorHandler(400, 'Respuesta de CAPTCHA incorrecta');
     }
@@ -246,6 +267,9 @@ class AuthService implements IAuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto, req: Request): Promise<{ message: string }> {
+    if (typeof dto?.email !== 'string' || !dto.email.trim()) {
+      throw new ErrorHandler(400, 'El correo es requerido');
+    }
     const user = await userRepository.findUserCredential(dto.email);
 
     if (!user) {
@@ -304,6 +328,9 @@ class AuthService implements IAuthService {
   }
 
   async resetPassword(dto: ResetPasswordDto, req: Request): Promise<{ message: string }> {
+    if (typeof dto?.token !== 'string' || !dto.token.trim()) {
+      throw new ErrorHandler(400, 'El token de recuperación es requerido');
+    }
     if (dto.password !== dto.confirmPassword) {
       throw new ErrorHandler(400, 'La contraseña y su confirmación no coinciden');
     }
@@ -557,10 +584,12 @@ class AuthService implements IAuthService {
     refreshToken: string,
     req: Request,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = verifyToken(
-      refreshToken,
-      String(process.env.JWT_REFRESH_SECRET),
-    ) as AuthPayload;
+    let payload: AuthPayload;
+    try {
+      payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as AuthPayload;
+    } catch {
+      throw new ErrorHandler(401, 'Refresh token inválido o expirado');
+    }
 
     if (!payload) {
       throw new ErrorHandler(401, 'Token inválido');
@@ -585,10 +614,10 @@ class AuthService implements IAuthService {
     }
 
     const newPayload = {
-      role: payload.role,
-      id: payload.id,
-      name: payload.name,
-      membership: payload.membership,
+      role: user.role,
+      id: user.id,
+      name: user.name,
+      membership: user.membership,
       cityId: user.cityId,
       email: user.email,
     };

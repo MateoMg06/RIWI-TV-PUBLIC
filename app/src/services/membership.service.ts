@@ -9,6 +9,21 @@ class MembershipService {
   async createMembership(
     dto: CreateMembershipDto,
   ): Promise<{ message: string; membershipCode: string }> {
+    if (
+      !Number.isInteger(dto.durationMonths) ||
+      dto.durationMonths <= 0 ||
+      dto.durationMonths > 120
+    ) {
+      throw new ErrorHandler(400, 'durationMonths debe ser un entero entre 1 y 120');
+    }
+    if (
+      dto.initialBonus !== undefined &&
+      (typeof dto.initialBonus !== 'number' ||
+        !Number.isFinite(dto.initialBonus) ||
+        dto.initialBonus < 0)
+    ) {
+      throw new ErrorHandler(400, 'initialBonus debe ser un número no negativo');
+    }
     // Verificar que el usuario existe
     const user = await userRepository.findByID(dto.userId);
     if (!user) {
