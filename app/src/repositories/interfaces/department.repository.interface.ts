@@ -5,4 +5,5 @@ export interface IDepartmentRepository {
   findByPk(id: number): Promise<Department | null>;
   findByCountryId(countryId: number): Promise<Department[]>;
   create(data: DepartmentCreationAttributes): Promise<Department>;
+  findWithCities(departmentId: number): Promise<any>;
 }

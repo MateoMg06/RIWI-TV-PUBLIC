@@ -14,8 +14,10 @@ import {
   logout,
   refresh,
   updateUser,
+  setLocation,
 } from '../controllers/user.controller';
 import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -33,18 +35,62 @@ const router = Router();
  *             type: object
  *             required:
  *               - name
+ *               - lastName
  *               - email
+ *               - confirmEmail
  *               - password
+ *               - confirmPassword
+ *               - phone
+ *               - documentType
+ *               - documentNumber
+ *               - birthDate
+ *               - city
+ *               - acceptsDataProcessing
+ *               - acceptsTerms
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe
+ *                 example: John
+ *               lastName:
+ *                 type: string
+ *                 example: Doe
  *               email:
+ *                 type: string
+ *                 example: john.doe@example.com
+ *               confirmEmail:
  *                 type: string
  *                 example: john.doe@example.com
  *               password:
  *                 type: string
- *                 example: "123"
+ *                 example: "SecurePass123!"
+ *               confirmPassword:
+ *                 type: string
+ *                 example: "SecurePass123!"
+ *               phone:
+ *                 type: string
+ *                 example: "3001234567"
+ *               documentType:
+ *                 type: string
+ *                 example: "CC"
+ *               documentNumber:
+ *                 type: string
+ *                 example: "1234567890"
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *                 example: "1990-01-01"
+ *               city:
+ *                 type: string
+ *                 example: "Bogotá"
+ *               acceptsDataProcessing:
+ *                 type: boolean
+ *                 example: true
+ *               acceptsTerms:
+ *                 type: boolean
+ *                 example: true
+ *               acceptsNotifications:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       201:
  *         description: Usuario creado exitosamente
@@ -68,8 +114,8 @@ router.post('/register', createUser);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/', getUsers);
-router.get('/getUsers', getUsers);
+router.get('/', authToken, requireRole('admin'), getUsers);
+router.get('/getUsers', authToken, requireRole('admin'), getUsers);
 
 /**
  * @swagger
@@ -172,7 +218,7 @@ router.post('/refresh', refresh);
  *       200:
  *         description: Sesión cerrada correctamente
  */
-router.post('/logout', logout);
+router.post('/logout', authToken, logout);
 
 /**
  * @swagger
@@ -198,14 +244,29 @@ router.post('/logout', logout);
  *             properties:
  *               name:
  *                 type: string
+ *               lastName:
+ *                 type: string
  *               email:
  *                 type: string
  *               password:
  *                 type: string
- *               role:
+ *               phone:
  *                 type: string
- *               membership:
+ *               documentType:
  *                 type: string
+ *               documentNumber:
+ *                 type: string
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *               city:
+ *                 type: string
+ *               acceptsDataProcessing:
+ *                 type: boolean
+ *               acceptsTerms:
+ *                 type: boolean
+ *               acceptsNotifications:
+ *                 type: boolean
  *     responses:
  *       200:
  *         description: Usuario actualizado exitosamente
@@ -220,7 +281,9 @@ router.post('/logout', logout);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', authToken, updateUser)
+router.post('/location', authToken, setLocation);
+router.put('/location', authToken, setLocation);
+router.put('/:id', authToken, requireRole('admin', 'usuario'), updateUser);
 router.post('/legacy-login', authUser);
 
 export default router;

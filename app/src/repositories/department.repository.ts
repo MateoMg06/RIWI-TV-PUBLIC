@@ -19,6 +19,12 @@ class DepartmentRepository implements IDepartmentRepository {
   async create(data: DepartmentCreationAttributes): Promise<Department> {
     return await Department.create(data);
   }
+
+  async findWithCities(departmentId: number): Promise<any> {
+    return await Department.findByPk(departmentId, {
+      include: [{ association: 'cities' }]
+    });
+  }
 }
 
 export default new DepartmentRepository();

@@ -15,6 +15,8 @@ import {
   getCountryDepartments,
   createCountry,
 } from '../controllers/country.controller';
+import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router();
 
@@ -86,6 +88,6 @@ router.get('/:id/departments', getCountryDepartments);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCountry);
+router.post('/', authToken, requireRole("admin"), createCountry);
 
 export default router;

@@ -13,6 +13,8 @@ import {
   getCityCinemas,
   createCity,
 } from '../controllers/city.controller';
+import { authToken } from '../middlewares/authToken';
+import requireRole from '../middlewares/requireRole';
 
 const router = Router({ mergeParams: true });
 
@@ -78,6 +80,6 @@ router.get('/:id/cinemas', getCityCinemas);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCity);
+router.post('/', authToken, requireRole("admin"), createCity);
 
 export default router;
