@@ -5,7 +5,12 @@ import type { Request } from 'express';
 
 export interface IAuthService {
   getCaptcha(): Promise<{ token: string; question: string }>;
-  register(dto: RegisterDto): Promise<{ message: string; userId: number }>;
+  register(dto: RegisterDto): Promise<{
+    message: string;
+    userId: number;
+    emailSent: boolean;
+    activationToken?: string;
+  }>;
   activateAccount(token: string): Promise<{ message: string }>;
   forgotPassword(dto: ForgotPasswordDto, req: Request): Promise<{ message: string }>;
   resetPassword(dto: ResetPasswordDto, req: Request): Promise<{ message: string }>;

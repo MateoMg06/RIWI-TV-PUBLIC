@@ -23,7 +23,22 @@ const router = Router();
  *   post:
  *     tags: [Auth]
  *     summary: Verificar el correo con el token de activación
- *     responses: { 200: { description: Cuenta activada } }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token]
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token recibido por correo o devuelto durante el registro en desarrollo
+ *     responses:
+ *       200:
+ *         description: Cuenta activada
+ *       400:
+ *         description: Token ausente, inválido o expirado
  * /api/auth/login:
  *   post:
  *     tags: [Auth]
@@ -102,10 +117,11 @@ router.get('/captcha', getCaptcha);
  *                 example: Doe
  *               email:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 description: Debe ser único
+ *                 example: nuevo.usuario@example.com
  *               confirmEmail:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 example: nuevo.usuario@example.com
  *               password:
  *                 type: string
  *                 example: "SecurePass123!"
@@ -120,7 +136,8 @@ router.get('/captcha', getCaptcha);
  *                 example: "CC"
  *               documentNumber:
  *                 type: string
- *                 example: "1234567890"
+ *                 description: Debe ser único
+ *                 example: "9876543210"
  *               birthDate:
  *                 type: string
  *                 format: date
@@ -150,6 +167,20 @@ router.get('/captcha', getCaptcha);
  *     responses:
  *       201:
  *         description: Usuario registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userId:
+ *                   type: integer
+ *                 emailSent:
+ *                   type: boolean
+ *                 activationToken:
+ *                   type: string
+ *                   description: Solo se incluye fuera de producción cuando SMTP no está configurado
  *       400:
  *         description: Datos inválidos
  *       409:

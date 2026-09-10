@@ -15,6 +15,10 @@ class EmailService {
     });
   }
 
+  isConfigured(): boolean {
+    return Boolean(process.env.SMTP_USER?.trim() && process.env.SMTP_PASS?.trim());
+  }
+
   async sendActivationEmail(email: string, token: string, userName: string): Promise<void> {
     const activationUrl = `${process.env.APP_URL || 'http://localhost:5001'}/api/auth/activate?token=${token}`;
 

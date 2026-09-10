@@ -20,6 +20,7 @@ import { AuthPayload } from '../types/index.d';
 import { getClientIp, getDeviceInfo, getUserAgent } from '../helpers/device-info';
 import { calculateExpiryDate } from '../utils/token-expiry';
 import { IAuthService } from './interfaces/auth.service.interface';
+import { UniqueConstraintError, ValidationError } from 'sequelize';
 
 class AuthService implements IAuthService {
   async getCaptcha(): Promise<{ token: string; question: string }> {
@@ -30,7 +31,12 @@ class AuthService implements IAuthService {
     };
   }
 
-  async register(dto: RegisterDto): Promise<{ message: string; userId: number }> {
+  async register(dto: RegisterDto): Promise<{
+    message: string;
+    userId: number;
+    emailSent: boolean;
+    activationToken?: string;
+  }> {
     if (!verifyCaptcha(dto.captchaToken, dto.captchaAnswer)) {
       throw new ErrorHandler(400, 'Respuesta de CAPTCHA incorrecta');
     }
@@ -68,6 +74,11 @@ class AuthService implements IAuthService {
     const existingUser = await userRepository.findUserCredential(dto.email);
     if (existingUser) {
       throw new ErrorHandler(409, 'El usuario ya existe');
+    }
+
+    const existingDocument = await profileRepository.findByDocumentNumber(dto.documentNumber);
+    if (existingDocument) {
+      throw new ErrorHandler(409, 'El número de documento ya está registrado');
     }
 
     // Generar token de activación (válido por 24 horas)
@@ -152,26 +163,55 @@ class AuthService implements IAuthService {
       // Confirmar transacción
       await transaction?.commit();
 
-      // Enviar correo de activación (fuera de la transacción)
-      try {
-        await emailService.sendActivationEmail(dto.email, activationToken, dto.name);
-      } catch (emailError) {
-        console.error('Error sending activation email:', emailError);
-        // No fallar el registro por error de correo
+      // Enviar correo fuera de la transacción. En desarrollo sin SMTP se
+      // devuelve el token para que el flujo pueda probarse desde Swagger.
+      let emailSent = false;
+      if (emailService.isConfigured()) {
+        try {
+          await emailService.sendActivationEmail(dto.email, activationToken, dto.name);
+          emailSent = true;
+        } catch (emailError) {
+          console.error('Error sending activation email:', emailError);
+        }
       }
 
+      const exposeDevelopmentToken = process.env.NODE_ENV !== 'production' && !emailSent;
       return {
-        message:
-          'Usuario registrado exitosamente. Por favor active su cuenta desde el correo enviado.',
+        message: emailSent
+          ? 'Usuario registrado exitosamente. Por favor active su cuenta desde el correo enviado.'
+          : 'Usuario registrado exitosamente. El servicio de correo no está configurado.',
         userId: user.id,
+        emailSent,
+        ...(exposeDevelopmentToken ? { activationToken } : {}),
       };
     } catch (error) {
       await transaction?.rollback();
+
+      if (error instanceof UniqueConstraintError) {
+        const duplicatedFields = error.errors.map((item) => item.path ?? '').join(' ');
+        if (duplicatedFields.includes('documentNumber')) {
+          throw new ErrorHandler(409, 'El número de documento ya está registrado');
+        }
+        if (duplicatedFields.includes('email')) {
+          throw new ErrorHandler(409, 'El correo electrónico ya está registrado');
+        }
+        throw new ErrorHandler(409, 'Ya existe un registro con uno de los datos enviados');
+      }
+
+      if (error instanceof ValidationError) {
+        const details = error.errors.map((item) => item.message).join('; ');
+        throw new ErrorHandler(400, details || 'Los datos de registro no son válidos');
+      }
+
       throw error;
     }
   }
 
   async activateAccount(token: string): Promise<{ message: string }> {
+    if (!token?.trim()) {
+      throw new ErrorHandler(400, 'El token de activación es requerido');
+    }
+
     // Buscar usuario por token de activación
     const userToActivate = await userRepository.findByActivationToken(token);
 

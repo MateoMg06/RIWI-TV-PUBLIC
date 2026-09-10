@@ -23,6 +23,7 @@ import locationRoutes from './routes/location.routes';
 import notificationRoutes from './routes/notification.routes';
 import profileRoutes from './routes/profile.routes';
 import reservationRoutes from './routes/reservation.routes';
+import seedRoutes from './routes/seed.routes';
 import showtimeRoutes from './routes/showtime.routes';
 import { startSeatLockCleanup } from './services/reservation.service';
 
@@ -63,6 +64,7 @@ app.use('/api/v1/membership', membershipRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/functions', showtimeRoutes);
 app.use('/api/v1/reservations', reservationRoutes);
+app.use('/api/v1/seed', seedRoutes);
 
 // Aliases literales descritos por las historias de usuario.
 app.use(locationRoutes);

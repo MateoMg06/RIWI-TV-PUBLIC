@@ -14,6 +14,10 @@ class ProfileRepository implements IProfileRepository {
     return await Profile.findOne({ where: { userId } });
   }
 
+  async findByDocumentNumber(documentNumber: string): Promise<Profile | null> {
+    return await Profile.findOne({ where: { documentNumber } });
+  }
+
   async updateByUserId(
     userId: number,
     data: Partial<ProfileAttributes>,
