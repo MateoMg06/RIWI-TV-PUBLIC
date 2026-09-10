@@ -1,19 +1,11 @@
-
-import Country, { CountryCreationAttributes } from "../../models/country.model";
-import Department, { DepartmentCreationAttributes } from "../../models/department.model";
-import City, { CityCreationAttributes } from "../../models/cities.model";
+import Country from '../../models/country.model';
+import Department from '../../models/department.model';
+import City from '../../models/city.model';
 
 export interface ILocationRepository {
-    getCountries(): Promise<Country[]>;
+  getCountries(): Promise<Country[]>;
 
-    getDepartmentByCountry(
-        countryId: number
-    ): Promise<Department[]>;
+  getDepartmentByCountry(countryId: number): Promise<Department[]>;
 
-
-    getCitiesByDepartment(
-        departmentId: number
-    ): Promise<City[]>;
-
-
+  getCitiesByDepartment(departmentId: number): Promise<City[]>;
 }

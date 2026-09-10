@@ -1,24 +1,35 @@
 import { Request, Response } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
 
 import userService from '../services/user.service';
+import authService from '../services/auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
-import errorhandler from '../error/errorHandler';
-import { createToken, verifyToken } from '../utils/jwt';
+import ErrorHandler from '../error/errorHandler';
 import { cookieOptions } from '../config/cookie';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
-export const createUser = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+const sanitizeUser = (user: any) => {
+  const safe = { ...(typeof user?.get === 'function' ? user.get({ plain: true }) : user) };
+  for (const field of [
+    'password',
+    'activationToken',
+    'accessToken',
+    'refreshToken',
+    'resetToken',
+    'resetTokenExpires',
+  ]) {
+    delete safe[field];
+  }
+  return safe;
+};
+
+export const createUser = async (req: Request, res: Response): Promise<Response> => {
   try {
     const dto: CreateUserDto = req.body;
     const user = await userService.create(dto);
 
     return res.status(201).json(user);
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -26,29 +37,26 @@ export const createUser = async (
   }
 };
 
-export const getUsers = async (
-  _req: Request,
-  res: Response
-): Promise<Response> => {
+export const getUsers = async (_req: Request, res: Response): Promise<Response> => {
   try {
     const users = await userService.findAll();
-    return res.status(200).json(users);
+    // Excluir campos sensibles de la respuesta
+    const safeUsers = users.map(sanitizeUser);
+    return res.status(200).json(safeUsers);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
   }
 };
 
-export const authUser = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const authUser = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { email, password } = req.body;
     const user = await userService.findCredential(email, password);
 
-    return res.status(200).json(user);
+    // Excluir campos sensibles de la respuesta
+    return res.status(200).json(sanitizeUser(user));
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -64,45 +72,16 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    const user = await userService.findOne(email);
+    const result = await authService.login(email, password, req);
 
-    if (!user) {
-      return res.status(401).json({error: 'Credenciales inválidas'});
-    }
-
-    if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()){
-      return res.status(401).json({error: 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos'});
-    }
-
-    const validatedUser = await userService.findCredential(email, password);
-    if (!validatedUser) {
-      return res.status(401).json({error: 'Credenciales inválidas'})
-    }
-
-    await userService.clearAttempts(validatedUser)
-    
-    const payload = {
-      name: user?.name,
-      membership: user?.membership
-    };
-
-    const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: '15m'});
-    const refreshToken = createToken(payload, String(process.env.JWT_REFRESH_SECRET), { expiresIn: '7d' });
-
-    return res
-      .status(201)
-      .cookie('accessToken', accessToken, cookieOptions)
-      .json({
-        message: 'Login exitoso',
-        accessToken,
-        refreshToken,
-        user: {
-          name: payload.name,
-          membership: payload.membership
-        },
-      });
+    return res.status(201).cookie('accessToken', result.accessToken, cookieOptions).json({
+      message: 'Login exitoso',
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+    });
   } catch (error: any) {
-    if (error instanceof errorhandler) {
+    if (error instanceof ErrorHandler) {
       return res.status(error.estado).json({ error: error.message });
     }
 
@@ -118,53 +97,73 @@ export const refresh = async (req: Request, res: Response): Promise<Response> =>
       return res.status(401).json({ error: 'Usuario sin token' });
     }
 
-    const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as JwtPayload;
+    const result = await authService.refresh(refreshToken, req);
 
-    if (!payload) {
-      return res.status(401).json({ error: 'Token inválido' });
-    }
-
-    const newToken = createToken(
-      {
-        name: payload.name,
-        membership: payload.membership
-      },
-      String(process.env.JWT_SECRET),
-      { expiresIn: '15m' }
-    );
-
-    return res
-      .status(201)
-      .cookie('accessToken', newToken, cookieOptions)
-      .json({ newToken });
+    return res.status(201).cookie('accessToken', result.accessToken, cookieOptions).json({
+      message: 'Token refrescado exitosamente',
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    });
   } catch (error: any) {
+    if (error instanceof ErrorHandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
     return res.status(500).json({ error: error.message });
   }
 };
 
-export const logout = async (_req: Request, res: Response): Promise<Response> => {
+export const logout = async (req: Request, res: Response): Promise<Response> => {
   try {
+    const userId = req.user?.id || null;
+
+    await authService.logout(userId, req);
+
     return res
       .status(200)
       .clearCookie('accessToken', cookieOptions)
       .json({ message: 'Sesión cerrada correctamente' });
   } catch (error: any) {
+    if (error instanceof ErrorHandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
     return res.status(500).json({ error: error.message });
   }
 };
 
-export const updateUser= async (req: Request, res: Response): Promise<Response> => {
+export const updateUser = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const id = Number(req.params.id)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+    const userID: number = req.user.id;
     const dto: UpdateUserDto = req.body;
-    const updatedUser= await userService.updateUser(id, dto)
-    return res
-      .status(200)
-      .json({
-        message: "Usuario actualizado correctamente",
-        updatedUser
-      })
+    const updatedUser = await userService.updateUser(userID, dto);
+    return res.status(200).json({
+      message: 'Usuario actualizado correctamente',
+      updatedUser,
+    });
   } catch (error: any) {
+    if (error instanceof ErrorHandler)
+      return res.status(error.estado).json({ error: error.message });
     return res.status(500).json({ error: error.message });
+  }
+};
+
+export const setLocation = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    if (!req.user?.id) return res.status(401).json({ error: 'Usuario no autenticado' });
+    const cityId = Number(req.body.cityId);
+    if (!Number.isInteger(cityId) || cityId <= 0)
+      return res.status(400).json({ error: 'cityId debe ser un entero positivo' });
+    return res.status(200).json({
+      message: 'Ubicación actualizada correctamente',
+      user: await userService.setLocation(req.user.id, cityId),
+    });
+  } catch (error) {
+    if (error instanceof ErrorHandler)
+      return res.status(error.estado).json({ error: error.message });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : 'Error interno' });
   }
 };

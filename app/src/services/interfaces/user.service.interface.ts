@@ -9,5 +9,6 @@ export interface IUserService {
   findCredential(email: string, password: string): Promise<User | null>;
   registerFailedAttempt(user: User): Promise<void>;
   clearAttempts(user: User): Promise<void>;
-  updateUser(id: number, dto: UpdateUserDto): Promise<User | null>
+  updateUser(id: number, dto: UpdateUserDto): Promise<User | null>;
+  setLocation(userId: number, cityId: number): Promise<User>;
 }

@@ -14,19 +14,23 @@
  *  - Disponible en `/api/docs` (ver `server.ts`).
  */
 
-import swaggerJSDoc from "swagger-jsdoc";
+import swaggerJSDoc from 'swagger-jsdoc';
 
 const options = {
   definition: {
-    openapi: "3.0.0",
+    openapi: '3.0.0',
     info: {
-      title: "API Example",
-      version: "1.0.0",
+      title: 'Multicine Riwi API',
+      version: '1.0.0',
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        cookieAuth: { type: 'apiKey', in: 'cookie', name: 'accessToken' },
+      },
     },
   },
-  apis: ["src/routes/**/*.ts"],
+  apis: ['src/routes/**/*.ts'],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);
-
-console.log(JSON.stringify(swaggerSpec, null, 2));

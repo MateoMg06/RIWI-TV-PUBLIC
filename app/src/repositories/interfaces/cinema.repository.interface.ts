@@ -5,4 +5,5 @@ export interface ICinemaRepository {
   findByPk(id: number): Promise<Cinema | null>;
   findByCityId(cityId: number): Promise<Cinema[]>;
   create(data: CinemaCreationAttributes): Promise<Cinema>;
+  findWithMovies(cinemaId: number): Promise<any>;
 }

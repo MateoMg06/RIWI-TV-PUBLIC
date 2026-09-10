@@ -3,6 +3,17 @@
  */
 export interface UpdateUserDto {
   name?: string;
+  lastName?: string;
   email?: string;
   password?: string;
+  phone?: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  city?: string;
+  address?: string;
+  avatar?: string;
+  acceptsDataProcessing?: boolean;
+  acceptsTerms?: boolean;
+  acceptsNotifications?: boolean;
 }

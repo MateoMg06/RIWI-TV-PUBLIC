@@ -1,244 +1,122 @@
-/**
- * Seeder de Datos
- * ----------------
- * Script que popula la base de datos con datos de prueba.
- * 
- * Ejecutar: npm run seed
- * 
- * Inserta:
- *  - 3 países
- *  - Departamentos por país
- *  - Ciudades por departamento
- *  - Cines por ciudad
- *  - Películas
- *  - Proyecciones (Showtime)
- */
-
-/// <reference types="node" />
-
 import sequelize from '../config/database';
-import { Country, Department, City, Cinema, Movie, Showtime } from '../models/index';
+import { Cinema, City, Country, Department, Movie, Seat, Showtime } from '../models';
 
-async function seed() {
-  try {
-    console.log('Iniciando sincronización de la base de datos...');
-    
-    // Sincronizar modelos con la BD (crea las tablas si no existen)
-    await sequelize.sync({ alter: true });
-    console.log('✓ Base de datos sincronizada');
+const futureAt = (days: number, hour: number): Date => {
+  const value = new Date();
+  value.setDate(value.getDate() + days);
+  value.setHours(hour, 0, 0, 0);
+  return value;
+};
 
-    // ============================================================================
-    // 1. CREAR PAÍSES
-    // ============================================================================
-    console.log('\nCreando países...');
+async function seed(): Promise<void> {
+  await sequelize.authenticate();
 
-    const colombia = await Country.create({
-      country: 'Colombia'
+  const [colombia] = await Country.findOrCreate({
+    where: { country: 'Colombia' },
+    defaults: { country: 'Colombia' },
+  });
+  const [antioquia] = await Department.findOrCreate({
+    where: { department: 'Antioquia', countryId: colombia.id },
+    defaults: { department: 'Antioquia', countryId: colombia.id },
+  });
+  const [medellin] = await City.findOrCreate({
+    where: { city: 'Medellín', departmentId: antioquia.id },
+    defaults: { city: 'Medellín', departmentId: antioquia.id, active: true },
+  });
+  const [cinema] = await Cinema.findOrCreate({
+    where: { name: 'Multicine Riwi Centro', cityId: medellin.id },
+    defaults: { name: 'Multicine Riwi Centro', cityId: medellin.id, active: true },
+  });
+
+  const activeMovies = [
+    {
+      name: 'Horizonte Rojo',
+      genre: 'Acción',
+      classification: 'PG-13',
+      duration: 128,
+      director: 'Ana Torres',
+      audienceRating: 8.4,
+    },
+    {
+      name: 'El Jardín de Luz',
+      genre: 'Drama',
+      classification: 'PG',
+      duration: 112,
+      director: 'Luis Vega',
+      audienceRating: 8.1,
+    },
+  ];
+  for (const [index, data] of activeMovies.entries()) {
+    const [movie] = await Movie.findOrCreate({
+      where: { name: data.name },
+      defaults: {
+        ...data,
+        synopsis: `Sinopsis de ${data.name}`,
+        cast: ['Intérprete Uno', 'Intérprete Dos'],
+        releaseDate: futureAt(-14, 0),
+        status: 'ACTIVE',
+      },
     });
-
-    const mexico = await Country.create({
-      country: 'México'
+    const startsAt = futureAt(index + 1, 18 + index);
+    const [showtime] = await Showtime.findOrCreate({
+      where: { cinemaId: cinema.id, movieId: movie.id, startsAt },
+      defaults: {
+        cinemaId: cinema.id,
+        movieId: movie.id,
+        startsAt,
+        room: `Sala ${index + 1}`,
+        roomType: index ? 'VIP' : 'STANDARD',
+        format: index ? 'IMAX' : '2D',
+        language: 'Español',
+        audioType: 'DUBBED',
+        price: index ? 26000 : 18000,
+        availableSeats: 24,
+      },
     });
-
-    const argentina = await Country.create({
-      country: 'Argentina'
-    });
-
-    console.log(`✓ 3 países creados (IDs: ${colombia.id}, ${mexico.id}, ${argentina.id})`);
-
-    // ============================================================================
-    // 2. CREAR DEPARTAMENTOS
-    // ============================================================================
-    console.log('\nCreando departamentos...');
-
-    // Departamentos de Colombia
-    const atlantico = await Department.create({
-      department: 'Atlántico',
-      countryId: colombia.id
-    });
-
-    const cundinamarca = await Department.create({
-      department: 'Cundinamarca',
-      countryId: colombia.id
-    });
-
-    // Departamentos de México
-    const mexico_state = await Department.create({
-      department: 'Estado de México',
-      countryId: mexico.id
-    });
-
-    // Departamentos de Argentina
-    const buenos_aires = await Department.create({
-      department: 'Buenos Aires',
-      countryId: argentina.id
-    });
-
-    console.log(`✓ 4 departamentos creados`);
-
-    // ============================================================================
-    // 3. CREAR CIUDADES
-    // ============================================================================
-    console.log('\nCreando ciudades...');
-
-    const barranquilla = await City.create({
-      city: 'Barranquilla',
-      departmentId: atlantico.id
-    });
-
-    const bogota = await City.create({
-      city: 'Bogotá',
-      departmentId: cundinamarca.id
-    });
-
-    const mexico_city = await City.create({
-      city: 'Ciudad de México',
-      departmentId: mexico_state.id
-    });
-
-    const buenos_aires_city = await City.create({
-      city: 'Buenos Aires',
-      departmentId: buenos_aires.id
-    });
-
-    console.log(`✓ 4 ciudades creadas`);
-
-    // ============================================================================
-    // 4. CREAR CINES
-    // ============================================================================
-    console.log('\nCreando cines...');
-
-    const cinemark_barranquilla = await Cinema.create({
-      name: 'Cinemark Barranquilla',
-      cityId: barranquilla.id
-    });
-
-    const cinepolis_bogota = await Cinema.create({
-      name: 'Cinépolis Bogotá',
-      cityId: bogota.id
-    });
-
-    const cinemark_mexico = await Cinema.create({
-      name: 'Cinemark México City',
-      cityId: mexico_city.id
-    });
-
-    const cinemark_buenos_aires = await Cinema.create({
-      name: 'Cinemark Buenos Aires',
-      cityId: buenos_aires_city.id
-    });
-
-    console.log(`✓ 4 cines creados`);
-
-    // ============================================================================
-    // 5. CREAR PELÍCULAS
-    // ============================================================================
-    console.log('\nCreando películas...');
-
-    const avatar = await Movie.create({
-      name: 'Avatar',
-      clasification: 'PG-13',
-      duration: 192,
-      gener: 'Ciencia Ficción'
-    });
-
-    const spiderman = await Movie.create({
-      name: 'Spiderman: No Way Home',
-      clasification: 'PG-13',
-      duration: 159,
-      gener: 'Acción'
-    });
-
-    const inception = await Movie.create({
-      name: 'Inception',
-      clasification: 'PG-13',
-      duration: 148,
-      gener: 'Ciencia Ficción'
-    });
-
-    console.log(`✓ 3 películas creadas`);
-
-    // ============================================================================
-    // 6. CREAR PROYECCIONES (SHOWTIME)
-    // ============================================================================
-    console.log('\nCreando proyecciones...');
-
-    // Avatar en Cinemark Barranquilla
-    await Showtime.create({
-      cinemaId: cinemark_barranquilla.id,
-      movieId: avatar.id,
-      horario: '19:30',
-      fecha: '2026-08-20',
-      sala: 'A-5',
-      precio: 15.99
-    });
-
-    // Avatar en Cinépolis Bogotá
-    await Showtime.create({
-      cinemaId: cinepolis_bogota.id,
-      movieId: avatar.id,
-      horario: '20:00',
-      fecha: '2026-08-20',
-      sala: 'B-3',
-      precio: 16.99
-    });
-
-    // Spiderman en Cinépolis Bogotá
-    await Showtime.create({
-      cinemaId: cinepolis_bogota.id,
-      movieId: spiderman.id,
-      horario: '18:00',
-      fecha: '2026-08-20',
-      sala: 'A-1',
-      precio: 16.99
-    });
-
-    // Spiderman en Cinemark México City
-    await Showtime.create({
-      cinemaId: cinemark_mexico.id,
-      movieId: spiderman.id,
-      horario: '19:30',
-      fecha: '2026-08-21',
-      sala: 'C-2',
-      precio: 14.50
-    });
-
-    // Inception en Cinemark Buenos Aires
-    await Showtime.create({
-      cinemaId: cinemark_buenos_aires.id,
-      movieId: inception.id,
-      horario: '20:30',
-      fecha: '2026-08-22',
-      sala: 'D-1',
-      precio: 13.00
-    });
-
-    // Inception en Cinemark México City
-    await Showtime.create({
-      cinemaId: cinemark_mexico.id,
-      movieId: inception.id,
-      horario: '21:00',
-      fecha: '2026-08-22',
-      sala: 'A-4',
-      precio: 14.50
-    });
-
-    console.log(`✓ 6 proyecciones creadas`);
-
-    console.log('\n✅ Seeder completado exitosamente');
-    console.log('\nDatos de prueba insertados:');
-    console.log(`  - 3 Países`);
-    console.log(`  - 4 Departamentos`);
-    console.log(`  - 4 Ciudades`);
-    console.log(`  - 4 Cines`);
-    console.log(`  - 3 Películas`);
-    console.log(`  - 6 Proyecciones`);
-
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error en el seeder:', error);
-    process.exit(1);
+    if ((await Seat.count({ where: { showtimeId: showtime.id } })) === 0) {
+      await Seat.bulkCreate(
+        ['A', 'B', 'C'].flatMap((row) =>
+          Array.from({ length: 8 }, (_, position) => ({
+            showtimeId: showtime.id,
+            code: `${row}${position + 1}`,
+            row,
+            number: position + 1,
+            type:
+              row === 'C'
+                ? ('VIP' as const)
+                : row === 'A' && position === 0
+                  ? ('ACCESSIBLE' as const)
+                  : ('STANDARD' as const),
+            priceModifier: row === 'C' ? 8000 : 0,
+          })),
+        ),
+      );
+    }
   }
+
+  await Movie.findOrCreate({
+    where: { name: 'Órbita Final' },
+    defaults: {
+      name: 'Órbita Final',
+      synopsis: 'Una expedición debe regresar antes de que su órbita colapse.',
+      classification: 'PG-13',
+      duration: 135,
+      genre: 'Ciencia ficción',
+      director: 'María León',
+      cast: ['Sofía Ríos', 'Mateo Cruz'],
+      trailerUrl: 'https://www.youtube.com/watch?v=example',
+      releaseDate: futureAt(30, 0),
+      status: 'UPCOMING',
+      audienceRating: 0,
+    },
+  });
+
+  console.log('Datos de demostración HU-001 a HU-010 creados correctamente');
+  await sequelize.close();
 }
 
-seed();
+seed().catch(async (error) => {
+  console.error('No fue posible ejecutar el seeder', error);
+  await sequelize.close();
+  process.exitCode = 1;
+});

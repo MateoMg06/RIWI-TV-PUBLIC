@@ -12,12 +12,23 @@ class CinemaRepository implements ICinemaRepository {
 
   async findByCityId(cityId: number): Promise<Cinema[]> {
     return await Cinema.findAll({
-      where: { cityId },
+      where: { cityId, active: true },
+      order: [['name', 'ASC']],
     });
+  }
+
+  async countActiveByCityId(cityId: number): Promise<number> {
+    return Cinema.count({ where: { cityId, active: true } });
   }
 
   async create(data: CinemaCreationAttributes): Promise<Cinema> {
     return await Cinema.create(data);
+  }
+
+  async findWithMovies(cinemaId: number): Promise<any> {
+    return await Cinema.findByPk(cinemaId, {
+      include: [{ association: 'movies', through: { attributes: [] } }],
+    });
   }
 }
 

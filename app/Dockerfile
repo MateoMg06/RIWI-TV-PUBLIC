@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 # Exponer el puerto
-EXPOSE 3000
+EXPOSE 5001
 
 # Comando por defecto
-CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/index.ts"]
+CMD ["npm", "run", "dev"]
