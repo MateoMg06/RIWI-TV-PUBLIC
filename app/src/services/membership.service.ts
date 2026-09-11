@@ -4,10 +4,26 @@ import purchaseHistoryRepository from '../repositories/purchase-history.reposito
 import userRepository from '../repositories/user.repository';
 import { CreateMembershipDto } from '../dto/create-membership.dto';
 import ErrorHandler from '../error/errorHandler';
-import { Transaction } from 'sequelize';
 
 class MembershipService {
-  async createMembership(dto: CreateMembershipDto): Promise<{ message: string; membershipCode: string }> {
+  async createMembership(
+    dto: CreateMembershipDto,
+  ): Promise<{ message: string; membershipCode: string }> {
+    if (
+      !Number.isInteger(dto.durationMonths) ||
+      dto.durationMonths <= 0 ||
+      dto.durationMonths > 120
+    ) {
+      throw new ErrorHandler(400, 'durationMonths debe ser un entero entre 1 y 120');
+    }
+    if (
+      dto.initialBonus !== undefined &&
+      (typeof dto.initialBonus !== 'number' ||
+        !Number.isFinite(dto.initialBonus) ||
+        dto.initialBonus < 0)
+    ) {
+      throw new ErrorHandler(400, 'initialBonus debe ser un número no negativo');
+    }
     // Verificar que el usuario existe
     const user = await userRepository.findByID(dto.userId);
     if (!user) {
@@ -32,28 +48,40 @@ class MembershipService {
 
     try {
       // Crear membresía
-      const membership = await membershipRepository.create({
-        userId: dto.userId,
-        code: membershipCode,
-        status: 'active',
-        startDate: now,
-        endDate: endDate,
-        bonusWallet: dto.initialBonus || 0,
-      }, transaction);
+      const membership = await membershipRepository.create(
+        {
+          userId: dto.userId,
+          code: membershipCode,
+          qrCode: `MEMBERSHIP:${membershipCode}`,
+          level: 'BRONZE',
+          status: 'active',
+          startDate: now,
+          endDate: endDate,
+          bonusWallet: dto.initialBonus || 0,
+        },
+        transaction,
+      );
 
       // Crear historial de compra
-      await purchaseHistoryRepository.create({
-        userId: dto.userId,
-        membershipId: membership.id,
-        amount: 0,
-        description: `Creación de membresía ${membershipCode}`,
-        date: now,
-      }, transaction);
+      await purchaseHistoryRepository.create(
+        {
+          userId: dto.userId,
+          membershipId: membership.id,
+          amount: 0,
+          description: `Creación de membresía ${membershipCode}`,
+          date: now,
+        },
+        transaction,
+      );
 
       // Actualizar usuario
-      await userRepository.updateByID(dto.userId, {
-        membership: 'premium',
-      }, transaction);
+      await userRepository.updateByID(
+        dto.userId,
+        {
+          membership: 'premium',
+        },
+        transaction,
+      );
 
       await transaction?.commit();
 

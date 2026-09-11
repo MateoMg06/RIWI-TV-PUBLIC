@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Autenticación
  * ----------------------
@@ -5,9 +6,77 @@
  */
 
 import { Router } from 'express';
-import { getCaptcha, register, activateAccount, forgotPassword, resetPassword } from '../controllers/auth.controller';
+import {
+  getCaptcha,
+  register,
+  activateAccount,
+  forgotPassword,
+  resetPassword,
+} from '../controllers/auth.controller';
+import { login, logout, refresh } from '../controllers/user.controller';
+import { authToken } from '../middlewares/authToken';
 
 const router = Router();
+router.use(validateJsonBody);
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Verificar el correo con el token de activación
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [token]
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token recibido por correo o devuelto durante el registro en desarrollo
+ *     responses:
+ *       200:
+ *         description: Cuenta activada
+ *       400:
+ *         description: Token ausente, inválido o expirado
+ * /api/auth/login:
+ *   post:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string, format: password }
+ *     tags: [Auth]
+ *     summary: Iniciar sesión y emitir access y refresh token
+ *     responses: { 201: { description: Login exitoso }, 401: { description: Credenciales inválidas } }
+ * /api/auth/refresh:
+ *   post:
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     tags: [Auth]
+ *     summary: Rotar el refresh token y renovar la sesión
+ *     responses: { 201: { description: Tokens renovados }, 401: { description: Token inválido } }
+ * /api/auth/logout:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Invalidar la sesión activa
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     responses: { 200: { description: Sesión cerrada } }
+ */
 
 /**
  * @swagger
@@ -69,10 +138,11 @@ router.get('/captcha', getCaptcha);
  *                 example: Doe
  *               email:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 description: Debe ser único
+ *                 example: nuevo.usuario@example.com
  *               confirmEmail:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 example: nuevo.usuario@example.com
  *               password:
  *                 type: string
  *                 example: "SecurePass123!"
@@ -87,7 +157,8 @@ router.get('/captcha', getCaptcha);
  *                 example: "CC"
  *               documentNumber:
  *                 type: string
- *                 example: "1234567890"
+ *                 description: Debe ser único
+ *                 example: "9876543210"
  *               birthDate:
  *                 type: string
  *                 format: date
@@ -117,6 +188,20 @@ router.get('/captcha', getCaptcha);
  *     responses:
  *       201:
  *         description: Usuario registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userId:
+ *                   type: integer
+ *                 emailSent:
+ *                   type: boolean
+ *                 activationToken:
+ *                   type: string
+ *                   description: Solo se incluye fuera de producción cuando SMTP no está configurado
  *       400:
  *         description: Datos inválidos
  *       409:
@@ -153,6 +238,12 @@ router.post('/register', register);
  *         description: Error interno del servidor
  */
 router.post('/activate', activateAccount);
+router.post('/verify-email', activateAccount);
+router.get('/activate', activateAccount);
+router.get('/verify-email', activateAccount);
+router.post('/login', login);
+router.post('/refresh', refresh);
+router.post('/logout', authToken, logout);
 
 /**
  * @swagger

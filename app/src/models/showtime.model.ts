@@ -1,95 +1,87 @@
-  // app/src/models/showtime.model.ts
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelize from '../config/database';
 
-  /**
-   * Modelo de Showtime (Proyección)
-   * ---------------------------------
-   * Este archivo define el modelo `showtime` de Sequelize, que actúa como tabla intermedia
-   * para la relación muchos-a-muchos (N:M) entre Cinema y Movie.
-   * 
-   * Cada Showtime representa una proyección de una película en un cine.
-   * 
-   * Contiene:
-   *  - Atributos del modelo (`ShowtimeAttributes`).
-   *  - Atributos requeridos para la creación (`ShowtimeCreationAttributes`).
-   *  - Definición del modelo con sus columnas y restricciones.
-   * 
-   * Relaciones:
-   *  - Pertenece a un Cinema
-   *  - Pertenece a una Movie
-   * 
-   */
+export type ShowtimeStatus = 'ACTIVE' | 'SOLD_OUT' | 'CANCELLED';
 
-  import { DataTypes, Model, Optional } from "sequelize";
-  import sequelize from "../config/database";
+export interface ShowtimeAttributes {
+  id: number;
+  cinemaId: number;
+  movieId: number;
+  startsAt: Date;
+  room: string;
+  roomType: string;
+  format: string;
+  language: string;
+  audioType: 'DUBBED' | 'SUBTITLED' | 'ORIGINAL';
+  price: number;
+  status: ShowtimeStatus;
+  availableSeats: number;
+}
 
-  export interface ShowtimeAttributes {
-    id: number;
-    cinemaId: number;
-    movieId: number;
-    horario: string; // Formato: HH:MM
-    fecha: string | Date;
-    sala: string;
-    precio: number;
-  }
+export interface ShowtimeCreationAttributes extends Optional<
+  ShowtimeAttributes,
+  'id' | 'roomType' | 'format' | 'language' | 'audioType' | 'status' | 'availableSeats'
+> {}
 
-  export interface ShowtimeCreationAttributes extends Optional<ShowtimeAttributes, "id"> {}
+class Showtime
+  extends Model<ShowtimeAttributes, ShowtimeCreationAttributes>
+  implements ShowtimeAttributes
+{
+  public id!: number;
+  public cinemaId!: number;
+  public movieId!: number;
+  public startsAt!: Date;
+  public room!: string;
+  public roomType!: string;
+  public format!: string;
+  public language!: string;
+  public audioType!: 'DUBBED' | 'SUBTITLED' | 'ORIGINAL';
+  public price!: number;
+  public status!: ShowtimeStatus;
+  public availableSeats!: number;
+}
 
-  class Showtime extends Model<ShowtimeAttributes, ShowtimeCreationAttributes> implements ShowtimeAttributes {
-    public id!: number;
-    public cinemaId!: number;
-    public movieId!: number;
-    public horario!: string;
-    public fecha!: string | Date;
-    public sala!: string;
-    public precio!: number;
-  }
-
-  Showtime.init(
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      cinemaId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        field: "cinema_id",
-      },
-      movieId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        field: "movie_id",
-      },
-      horario: {
-        type: DataTypes.TIME,
-        allowNull: false,
-      },
-      fecha: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-      },
-      sala: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-      },
-      precio: {
-        type: DataTypes.DECIMAL(12, 2),
-        allowNull: false,
-      }
+Showtime.init(
+  {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    cinemaId: { type: DataTypes.INTEGER, allowNull: false, field: 'cinema_id' },
+    movieId: { type: DataTypes.INTEGER, allowNull: false, field: 'movie_id' },
+    startsAt: { type: DataTypes.DATE, allowNull: false, field: 'starts_at' },
+    room: { type: DataTypes.STRING(50), allowNull: false },
+    roomType: {
+      type: DataTypes.STRING(30),
+      allowNull: false,
+      defaultValue: 'STANDARD',
+      field: 'room_type',
     },
-    {
-      sequelize,
-      modelName: "Showtime",
-      tableName: "showtime",
-      timestamps: true,
-      indexes: [
-        {
-          unique: true,
-          fields: ["cinema_id", "movie_id"],
-        },
-      ],
-    }
-  );
+    format: { type: DataTypes.STRING(20), allowNull: false, defaultValue: '2D' },
+    language: { type: DataTypes.STRING(50), allowNull: false, defaultValue: 'Español' },
+    audioType: {
+      type: DataTypes.ENUM('DUBBED', 'SUBTITLED', 'ORIGINAL'),
+      allowNull: false,
+      defaultValue: 'DUBBED',
+      field: 'audio_type',
+    },
+    price: { type: DataTypes.DECIMAL(12, 2), allowNull: false },
+    status: {
+      type: DataTypes.ENUM('ACTIVE', 'SOLD_OUT', 'CANCELLED'),
+      allowNull: false,
+      defaultValue: 'ACTIVE',
+    },
+    availableSeats: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'available_seats',
+    },
+  },
+  {
+    sequelize,
+    modelName: 'Showtime',
+    tableName: 'showtimes',
+    timestamps: true,
+    indexes: [{ fields: ['movie_id', 'starts_at'] }, { fields: ['cinema_id', 'starts_at'] }],
+  },
+);
 
-  export default Showtime;
+export default Showtime;

@@ -1,27 +1,33 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import User from './user.model';
 
 export interface MembershipAttributes {
   id: number;
   userId: number;
   code: string;
-  status: "active" | "inactive" | "expired" | "pending";
+  status: 'active' | 'inactive' | 'expired' | 'pending';
   startDate: Date;
   endDate: Date;
   bonusWallet: number;
+  level: 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+  qrCode: string;
 }
 
 export interface MembershipCreationAttributes extends Optional<MembershipAttributes, 'id'> {}
 
-class Membership extends Model<MembershipAttributes, MembershipCreationAttributes> implements MembershipAttributes {
+class Membership
+  extends Model<MembershipAttributes, MembershipCreationAttributes>
+  implements MembershipAttributes
+{
   public id!: number;
   public userId!: number;
   public code!: string;
-  public status!: "active" | "inactive" | "expired" | "pending";
+  public status!: 'active' | 'inactive' | 'expired' | 'pending';
   public startDate!: Date;
   public endDate!: Date;
   public bonusWallet!: number;
+  public level!: 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
+  public qrCode!: string;
 }
 
 Membership.init(
@@ -47,7 +53,7 @@ Membership.init(
       unique: true,
     },
     status: {
-      type: DataTypes.ENUM("active", "inactive", "expired", "pending"),
+      type: DataTypes.ENUM('active', 'inactive', 'expired', 'pending'),
       allowNull: false,
       defaultValue: 'pending',
     },
@@ -62,7 +68,18 @@ Membership.init(
     bonusWallet: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      defaultValue: 0.00,
+      defaultValue: 0.0,
+    },
+    level: {
+      type: DataTypes.ENUM('BRONZE', 'SILVER', 'GOLD', 'PLATINUM'),
+      allowNull: false,
+      defaultValue: 'BRONZE',
+    },
+    qrCode: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+      field: 'qr_code',
     },
   },
   {
@@ -70,7 +87,7 @@ Membership.init(
     modelName: 'Membership',
     tableName: 'memberships',
     timestamps: true,
-  }
+  },
 );
 
 export default Membership;

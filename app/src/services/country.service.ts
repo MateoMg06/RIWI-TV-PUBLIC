@@ -1,7 +1,6 @@
 import { CreateCountryDto } from '../dto/create-country.dto';
 import countryRepository from '../repositories/country.repository';
 import { ICountryService } from './interfaces/country.service.interface';
-import ErrorHandler from '../error/errorHandler';
 
 class CountryService implements ICountryService {
   async findAll(): Promise<any[]> {

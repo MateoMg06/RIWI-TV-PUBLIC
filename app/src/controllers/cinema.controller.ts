@@ -4,10 +4,7 @@ import { CreateCinemaDto } from '../dto/create-cinema.dto';
 import { CreateShowtimeDto } from '../dto/create-showtime.dto';
 import ErrorHandler from '../error/errorHandler';
 
-export const getCinemaMovies = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getCinemaMovies = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params;
     const cinemaId = parseInt(id as string, 10);
@@ -32,20 +29,21 @@ export const getCinemaMovies = async (
   }
 };
 
-export const createCinema = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const createCinema = async (req: Request, res: Response): Promise<Response> => {
   try {
     const dto: CreateCinemaDto = req.body;
 
     // Validar DTO
     if (!dto.name || typeof dto.name !== 'string' || dto.name.trim() === '') {
-      return res.status(400).json({ error: 'El campo "name" es requerido y debe ser un string no vacío' });
+      return res
+        .status(400)
+        .json({ error: 'El campo "name" es requerido y debe ser un string no vacío' });
     }
 
     if (!dto.cityId || typeof dto.cityId !== 'number' || dto.cityId <= 0) {
-      return res.status(400).json({ error: 'El campo "cityId" es requerido y debe ser un número entero positivo' });
+      return res
+        .status(400)
+        .json({ error: 'El campo "cityId" es requerido y debe ser un número entero positivo' });
     }
 
     const cinema = await cinemaService.create(dto);
@@ -58,10 +56,7 @@ export const createCinema = async (
   }
 };
 
-export const addMovieToCinema = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const addMovieToCinema = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id, movieId } = req.params;
     const cinemaId = parseInt(id as string, 10);
@@ -78,20 +73,11 @@ export const addMovieToCinema = async (
     }
 
     // Validar DTO
-    if (!dto.horario || typeof dto.horario !== 'string' || dto.horario.trim() === '') {
-      return res.status(400).json({ error: 'El campo "horario" es requerido' });
+    if (!dto.startsAt || Number.isNaN(new Date(dto.startsAt).getTime())) {
+      return res.status(400).json({ error: 'El campo "startsAt" debe ser una fecha válida' });
     }
-
-    if (!dto.fecha) {
-      return res.status(400).json({ error: 'El campo "fecha" es requerido' });
-    }
-
-    if (!dto.sala || typeof dto.sala !== 'string' || dto.sala.trim() === '') {
-      return res.status(400).json({ error: 'El campo "sala" es requerido' });
-    }
-
-    if (!dto.precio || typeof dto.precio !== 'number' || dto.precio <= 0) {
-      return res.status(400).json({ error: 'El campo "precio" es requerido y debe ser un número positivo' });
+    if (!dto.room || !dto.price || dto.price <= 0) {
+      return res.status(400).json({ error: 'Los campos "room" y "price" son requeridos' });
     }
 
     const showtime = await cinemaService.addMovie(cinemaId, parsedMovieId, dto);
@@ -104,10 +90,7 @@ export const addMovieToCinema = async (
   }
 };
 
-export const removeMovieFromCinema = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const removeMovieFromCinema = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id, movieId } = req.params;
     const cinemaId = parseInt(id as string, 10);
@@ -132,10 +115,7 @@ export const removeMovieFromCinema = async (
   }
 };
 
-export const getShowtimes = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getShowtimes = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params;
     const cinemaId = parseInt(id as string, 10);

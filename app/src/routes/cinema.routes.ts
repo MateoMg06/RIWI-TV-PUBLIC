@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Cines
  * ---------------
@@ -23,11 +24,13 @@ import requireRole from '../middlewares/requireRole';
 import { authToken } from '../middlewares/authToken';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
  * /api/cinemas:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Crear un nuevo cine
  *     tags:
  *       - Cinemas
@@ -57,7 +60,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', createCinema, authToken, requireRole("admin"));
+router.post('/', authToken, requireRole('admin'), createCinema);
 
 /**
  * @swagger
@@ -83,12 +86,13 @@ router.post('/', createCinema, authToken, requireRole("admin"));
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/movies', getCinemaMovies, authToken, requireRole("admin"));
+router.get('/:id/movies', getCinemaMovies);
 
 /**
  * @swagger
  * /api/cinemas/{id}/movies/{movieId}:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Asignar una película a un cine
  *     tags:
  *       - Cinemas
@@ -112,21 +116,18 @@ router.get('/:id/movies', getCinemaMovies, authToken, requireRole("admin"));
  *           schema:
  *             type: object
  *             required:
- *               - horario
- *               - fecha
- *               - sala
- *               - precio
+ *               - startsAt
+ *               - room
+ *               - price
  *             properties:
- *               horario:
+ *               startsAt:
  *                 type: string
- *                 example: "19:30"
- *               fecha:
- *                 type: string
- *                 example: "2026-08-20"
- *               sala:
+ *                 format: date-time
+ *                 example: "2030-09-12T19:30:00-05:00"
+ *               room:
  *                 type: string
  *                 example: "A-5"
- *               precio:
+ *               price:
  *                 type: number
  *                 example: 15.99
  *     responses:
@@ -141,12 +142,13 @@ router.get('/:id/movies', getCinemaMovies, authToken, requireRole("admin"));
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/:id/movies/:movieId', addMovieToCinema, authToken, requireRole("admin"));
+router.post('/:id/movies/:movieId', authToken, requireRole('admin'), addMovieToCinema);
 
 /**
  * @swagger
  * /api/cinemas/{id}/movies/{movieId}:
  *   delete:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Quitar una película de un cine
  *     tags:
  *       - Cinemas
@@ -173,7 +175,7 @@ router.post('/:id/movies/:movieId', addMovieToCinema, authToken, requireRole("ad
  *       500:
  *         description: Error interno del servidor
  */
-router.delete('/:id/movies/:movieId', removeMovieFromCinema, authToken, requireRole("admin"));
+router.delete('/:id/movies/:movieId', authToken, requireRole('admin'), removeMovieFromCinema);
 
 /**
  * @swagger
@@ -199,6 +201,6 @@ router.delete('/:id/movies/:movieId', removeMovieFromCinema, authToken, requireR
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/:id/showtimes', getShowtimes, authToken, requireRole("admin"));
+router.get('/:id/showtimes', getShowtimes);
 
 export default router;

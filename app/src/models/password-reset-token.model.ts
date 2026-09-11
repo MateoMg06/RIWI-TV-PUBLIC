@@ -9,9 +9,15 @@ export interface PasswordResetTokenAttributes {
   used: boolean;
 }
 
-export interface PasswordResetTokenCreationAttributes extends Optional<PasswordResetTokenAttributes, 'id'> {}
+export interface PasswordResetTokenCreationAttributes extends Optional<
+  PasswordResetTokenAttributes,
+  'id'
+> {}
 
-class PasswordResetToken extends Model<PasswordResetTokenAttributes, PasswordResetTokenCreationAttributes> implements PasswordResetTokenAttributes {
+class PasswordResetToken
+  extends Model<PasswordResetTokenAttributes, PasswordResetTokenCreationAttributes>
+  implements PasswordResetTokenAttributes
+{
   public id!: number;
   public userId!: number;
   public token!: string;
@@ -56,7 +62,8 @@ PasswordResetToken.init(
     modelName: 'PasswordResetToken',
     tableName: 'password_reset_tokens',
     timestamps: true,
-  }
+    underscored: true,
+  },
 );
 
 export default PasswordResetToken;

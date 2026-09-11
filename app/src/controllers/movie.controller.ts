@@ -1,95 +1,114 @@
-// app/src/controllers/movie.controller.ts
+import type { Request, Response } from 'express';
+import ErrorHandler from '../error/errorHandler';
+import movieService, { CatalogFilters } from '../services/movie.service';
 
-import { Request, Response } from "express";
-import movieService from "../services/movie.service";
-import movieRepository from "../repositories/movie.repository";
+const positiveInt = (value: unknown): number | undefined => {
+  if (value === undefined || value === '') return undefined;
+  const result = Number(value);
+  if (!Number.isInteger(result) || result <= 0)
+    throw new ErrorHandler(400, 'El identificador debe ser un entero positivo');
+  return result;
+};
 
-/**
- * Controlador de Películas
- * -------------------------
- * Maneja las solicitudes HTTP relacionadas con la entidad Movie.
- *
- * Recibe el Request/Response de Express, delega la lógica de negocio
- * al service, y construye la respuesta HTTP correspondiente.
- */
+const sendError = (res: Response, error: unknown): Response => {
+  if (error instanceof ErrorHandler) return res.status(error.estado).json({ error: error.message });
+  return res.status(500).json({ error: error instanceof Error ? error.message : 'Error interno' });
+};
+
+const filtersFrom = (req: Request): CatalogFilters => ({
+  cityId: positiveInt(req.query.cityId),
+  cinemaId: positiveInt(req.query.cinemaId),
+  genre: req.query.genre as string | undefined,
+  classification: req.query.classification as string | undefined,
+  language: req.query.language as string | undefined,
+  roomType: req.query.roomType as string | undefined,
+  format: req.query.format as string | undefined,
+  available: req.query.available === 'true',
+  date: req.query.date as string | undefined,
+});
+
 class MovieController {
-
-    /**
-     * POST /movies
-     * Crea una nueva película.
-     */
-    async create(req: Request, res: Response): Promise<void> {
-        try {
-            const movie = await movieService.create(req.body);
-            res.status(201).json(movie);
-        } catch (error) {
-            res.status(500).json({
-                message: "Error al crear la película",
-                error: error instanceof Error ? error.message : error,
-            });
-        }
+  create = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(201).json(await movieService.create(req.body));
+    } catch (error) {
+      return sendError(res, error);
     }
+  };
 
-    /**
-     * GET /movies
-     * Obtiene la cartelera completa de películas.
-     */
-    async getCatalog(req: Request, res: Response): Promise<void> {
-        try {
-            const catalog = await movieService.getCatalog();
-            res.status(200).json(catalog);
-        } catch (error) {
-            res.status(500).json({
-                message: "Error al obtener la cartelera",
-                error: error instanceof Error ? error.message : error,
-            });
-        }
+  getCatalog = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(200).json(await movieService.getCatalog(filtersFrom(req)));
+    } catch (error) {
+      return sendError(res, error);
     }
+  };
 
-    /**
-     * GET /movies/:name
-     * Obtiene una película por nombre.
-     */
-    async getByName(req: Request, res: Response): Promise<void> {
-        try {
-            const name = Array.isArray(req.params.name) ? req.params.name[0] : req.params.name;
-            const movie = await movieService.getByName(name);
-            res.status(200).json(movie);
-        } catch (error) {
-            res.status(404).json({
-                message: error instanceof Error ? error.message : "Película no encontrada",
-            });
-        }
+  getWeekly = this.getCatalog;
+
+  getToday = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(200).json(await movieService.getCatalog(filtersFrom(req), 'TODAY'));
+    } catch (error) {
+      return sendError(res, error);
     }
+  };
 
-    /**
-     * GET /movies/:id/cinemas
-     * Obtiene los cines donde se proyecta una película.
-     */
-    async getMovieCinemas(req: Request, res: Response): Promise<void> {
-        try {
-            const { id } = req.params;
-            const movieId = parseInt(id as string, 10);
-
-            if (isNaN(movieId) || movieId <= 0) {
-                res.status(400).json({ error: 'El ID debe ser un número entero positivo' });
-                return;
-            }
-
-            // Validar que la película existe
-            const movie = await movieRepository.findByPk(movieId);
-            if (!movie) {
-                res.status(404).json({ error: 'Película no encontrada' });
-                return;
-            }
-
-            const cinemas = await movieRepository.findCinemasByMovieId(movieId);
-
-            res.status(200).json(cinemas);
-        } catch (error) {
-            res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
-        }
+  getDetail = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res
+        .status(200)
+        .json(
+          await movieService.getDetail(positiveInt(req.params.id)!, positiveInt(req.query.cityId)),
+        );
+    } catch (error) {
+      return sendError(res, error);
     }
+  };
+
+  getFunctions = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res
+        .status(200)
+        .json(
+          await movieService.getFunctions(
+            positiveInt(req.params.id)!,
+            positiveInt(req.query.cityId),
+          ),
+        );
+    } catch (error) {
+      return sendError(res, error);
+    }
+  };
+
+  getRecommendations = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res
+        .status(200)
+        .json(await movieService.getRecommendations(positiveInt(req.params.id)!));
+    } catch (error) {
+      return sendError(res, error);
+    }
+  };
+
+  getUpcoming = async (_req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(200).json(await movieService.getUpcoming());
+    } catch (error) {
+      return sendError(res, error);
+    }
+  };
+
+  getUpcomingDetail = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      return res
+        .status(200)
+        .json(await movieService.getUpcomingDetail(positiveInt(req.params.id)!));
+    } catch (error) {
+      return sendError(res, error);
+    }
+  };
 }
 
+export { positiveInt, sendError };
 export default new MovieController();

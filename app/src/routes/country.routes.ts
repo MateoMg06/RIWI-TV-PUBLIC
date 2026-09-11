@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Países
  * ---------------
@@ -19,6 +20,7 @@ import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
@@ -65,6 +67,7 @@ router.get('/:id/departments', getCountryDepartments);
  * @swagger
  * /api/countries:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Crear un nuevo país
  *     tags:
  *       - Countries
@@ -88,6 +91,6 @@ router.get('/:id/departments', getCountryDepartments);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/', authToken, requireRole("admin"), createCountry);
+router.post('/', authToken, requireRole('admin'), createCountry);
 
 export default router;

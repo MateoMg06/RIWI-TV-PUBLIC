@@ -1,9 +1,14 @@
-import PurchaseHistory, { PurchaseHistoryAttributes, PurchaseHistoryCreationAttributes } from '../models/purchase-history.model';
+import PurchaseHistory, {
+  PurchaseHistoryCreationAttributes,
+} from '../models/purchase-history.model';
 import { IPurchaseHistoryRepository } from './interfaces/purchase-history.repository.interface';
 import { Transaction } from 'sequelize';
 
 class PurchaseHistoryRepository implements IPurchaseHistoryRepository {
-  async create(data: PurchaseHistoryCreationAttributes, transaction?: Transaction): Promise<PurchaseHistory> {
+  async create(
+    data: PurchaseHistoryCreationAttributes,
+    transaction?: Transaction,
+  ): Promise<PurchaseHistory> {
     return await PurchaseHistory.create(data, { transaction });
   }
 

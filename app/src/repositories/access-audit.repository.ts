@@ -1,6 +1,5 @@
-import AccessAudit, { AccessAuditAttributes, AccessAuditCreationAttributes } from '../models/access-audit.model';
+import AccessAudit, { AccessAuditCreationAttributes } from '../models/access-audit.model';
 import { IAccessAuditRepository } from './interfaces/access-audit.repository.interface';
-import { Op } from 'sequelize';
 
 class AccessAuditRepository implements IAccessAuditRepository {
   async create(data: AccessAuditCreationAttributes): Promise<AccessAudit> {

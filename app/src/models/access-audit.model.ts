@@ -23,7 +23,10 @@ export interface AccessAuditAttributes {
 
 export interface AccessAuditCreationAttributes extends Optional<AccessAuditAttributes, 'id'> {}
 
-class AccessAudit extends Model<AccessAuditAttributes, AccessAuditCreationAttributes> implements AccessAuditAttributes {
+class AccessAudit
+  extends Model<AccessAuditAttributes, AccessAuditCreationAttributes>
+  implements AccessAuditAttributes
+{
   public id!: number;
   public userId!: number | null;
   public action!: AccessAuditAction;
@@ -59,7 +62,7 @@ AccessAudit.init(
         'logout',
         'password_reset_requested',
         'password_reset',
-        'account_activated'
+        'account_activated',
       ),
       allowNull: false,
     },
@@ -91,7 +94,8 @@ AccessAudit.init(
     tableName: 'access_audits',
     timestamps: true,
     updatedAt: false,
-  }
+    underscored: true,
+  },
 );
 
 export default AccessAudit;

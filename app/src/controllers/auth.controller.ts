@@ -26,7 +26,11 @@ export const register = async (req: Request, res: Response): Promise<Response> =
 
 export const activateAccount = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { token } = req.body;
+    const rawToken = req.body?.token ?? req.query.token;
+    const token = typeof rawToken === 'string' ? rawToken.trim() : '';
+    if (!token) {
+      throw new ErrorHandler(400, 'El token de activación es requerido');
+    }
     const result = await authService.activateAccount(token);
     return res.status(200).json(result);
   } catch (error: any) {

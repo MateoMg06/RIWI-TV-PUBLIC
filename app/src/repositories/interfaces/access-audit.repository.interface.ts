@@ -1,4 +1,4 @@
-import AccessAudit, { AccessAuditAttributes, AccessAuditCreationAttributes } from '../../models/access-audit.model';
+import AccessAudit, { AccessAuditCreationAttributes } from '../../models/access-audit.model';
 
 export interface IAccessAuditRepository {
   create(data: AccessAuditCreationAttributes): Promise<AccessAudit>;

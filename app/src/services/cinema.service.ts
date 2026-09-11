@@ -44,20 +44,12 @@ class CinemaService implements ICinemaService {
       throw new ErrorHandler(404, `Película con ID ${movieId} no encontrada`);
     }
 
-    // Validar que no exista ya una proyección de esta película en este cine
-    const existingShowtime = await showtimeRepository.findByCinemaAndMovie(cinemaId, movieId);
-    if (existingShowtime) {
-      throw new ErrorHandler(409, `La película ${movieId} ya está asignada al cine ${cinemaId}`);
-    }
-
     // Crear la proyección
     const showtime = await showtimeRepository.create({
       cinemaId,
       movieId,
-      horario: dto.horario,
-      fecha: dto.fecha,
-      sala: dto.sala,
-      precio: dto.precio,
+      ...dto,
+      startsAt: new Date(dto.startsAt),
     });
 
     return showtime;
@@ -66,7 +58,10 @@ class CinemaService implements ICinemaService {
   async removeMovie(cinemaId: number, movieId: number): Promise<void> {
     const showtime = await showtimeRepository.findByCinemaAndMovie(cinemaId, movieId);
     if (!showtime) {
-      throw new ErrorHandler(404, `Proyección no encontrada para el cine ${cinemaId} y película ${movieId}`);
+      throw new ErrorHandler(
+        404,
+        `Proyección no encontrada para el cine ${cinemaId} y película ${movieId}`,
+      );
     }
 
     await showtimeRepository.destroy(showtime.id);

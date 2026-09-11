@@ -1,9 +1,14 @@
-import PasswordResetToken, { PasswordResetTokenAttributes, PasswordResetTokenCreationAttributes } from '../models/password-reset-token.model';
+import PasswordResetToken, {
+  PasswordResetTokenCreationAttributes,
+} from '../models/password-reset-token.model';
 import { IPasswordResetTokenRepository } from './interfaces/password-reset-token.repository.interface';
 import { Transaction } from 'sequelize';
 
 class PasswordResetTokenRepository implements IPasswordResetTokenRepository {
-  async create(data: PasswordResetTokenCreationAttributes, transaction?: Transaction): Promise<PasswordResetToken> {
+  async create(
+    data: PasswordResetTokenCreationAttributes,
+    transaction?: Transaction,
+  ): Promise<PasswordResetToken> {
     return await PasswordResetToken.create(data, { transaction });
   }
 
@@ -18,15 +23,12 @@ class PasswordResetTokenRepository implements IPasswordResetTokenRepository {
   async invalidateByUserId(userId: number, transaction?: Transaction): Promise<void> {
     await PasswordResetToken.update(
       { used: true },
-      { where: { userId, used: false }, transaction }
+      { where: { userId, used: false }, transaction },
     );
   }
 
   async markAsUsed(token: string, transaction?: Transaction): Promise<void> {
-    await PasswordResetToken.update(
-      { used: true },
-      { where: { token }, transaction }
-    );
+    await PasswordResetToken.update({ used: true }, { where: { token }, transaction });
   }
 }
 

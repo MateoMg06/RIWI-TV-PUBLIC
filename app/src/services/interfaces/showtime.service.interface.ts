@@ -1,4 +1,3 @@
-import Movie from '../../models/movie.model';
 import { CreateShowtimeDto } from '../../dto/create-showtime.dto';
 
 export interface IShowtimeService {

@@ -7,7 +7,7 @@ export interface UserAttributes {
   lastName: string;
   email: string;
   password: string;
-  role: "admin" | "usuario";
+  role: 'admin' | 'usuario';
   membership: string;
   failedLoginAttempts: number;
   lastLoginAttempt: Date | null;
@@ -20,14 +20,15 @@ export interface UserAttributes {
   acceptsDataProcessing: boolean;
   acceptsTerms: boolean;
   acceptsNotifications: boolean;
-  accountStatus: "active" | "inactive";
+  accountStatus: 'active' | 'inactive';
   activationToken: string | null;
   activationTokenExpires: Date | null;
   accessToken: string | null;
   refreshToken: string | null;
   resetToken: string | null;
   resetTokenExpires: Date | null;
- }
+  cityId: number | null;
+}
 
 export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
@@ -37,7 +38,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public lastName!: string;
   public email!: string;
   public password!: string;
-  public role!: "admin" | "usuario";
+  public role!: 'admin' | 'usuario';
   public membership!: string;
   public failedLoginAttempts!: number;
   public lastLoginAttempt!: Date | null;
@@ -50,14 +51,15 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public acceptsDataProcessing!: boolean;
   public acceptsTerms!: boolean;
   public acceptsNotifications!: boolean;
-  public accountStatus!: "active" | "inactive";
+  public accountStatus!: 'active' | 'inactive';
   public activationToken!: string | null;
   public activationTokenExpires!: Date | null;
   public accessToken!: string | null;
   public refreshToken!: string | null;
   public resetToken!: string | null;
   public resetTokenExpires!: Date | null;
- }
+  public cityId!: number | null;
+}
 
 User.init(
   {
@@ -84,7 +86,7 @@ User.init(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM("admin", "usuario"),
+      type: DataTypes.ENUM('admin', 'usuario'),
       allowNull: false,
       defaultValue: 'usuario',
     },
@@ -96,17 +98,17 @@ User.init(
     failedLoginAttempts: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
     },
     lastLoginAttempt: {
       type: DataTypes.DATE,
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     lockedUntil: {
       type: DataTypes.DATE,
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
     phone: {
       type: DataTypes.STRING(20),
@@ -144,7 +146,7 @@ User.init(
       defaultValue: false,
     },
     accountStatus: {
-      type: DataTypes.ENUM("active", "inactive"),
+      type: DataTypes.ENUM('active', 'inactive'),
       allowNull: false,
       defaultValue: 'inactive',
     },
@@ -157,11 +159,11 @@ User.init(
       allowNull: true,
     },
     accessToken: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     refreshToken: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     resetToken: {
@@ -171,14 +173,22 @@ User.init(
     resetTokenExpires: {
       type: DataTypes.DATE,
       allowNull: true,
-    }
+    },
+    cityId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'city_id',
+      references: { model: 'cities', key: 'id' },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
+    },
   },
   {
     sequelize,
     modelName: 'User',
     tableName: 'users',
     timestamps: true,
-  }
+  },
 );
 
 export default User;

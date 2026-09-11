@@ -1,6 +1,4 @@
 import User from '../models/user.model';
-import Profile from '../models/profile.model';
-import Membership from '../models/membership.model';
 import { RegisterDto } from '../dto/register.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
@@ -16,13 +14,13 @@ import { generateCaptcha, verifyCaptcha } from '../utils/captcha';
 import { createToken, verifyToken } from '../utils/jwt';
 import emailService from './email.service';
 import ErrorHandler from '../error/errorHandler';
-import { v4 as uuidv4 } from 'uuid';
-import { Transaction } from 'sequelize';
+import { randomUUID } from 'crypto';
 import type { Request } from 'express';
 import { AuthPayload } from '../types/index.d';
 import { getClientIp, getDeviceInfo, getUserAgent } from '../helpers/device-info';
 import { calculateExpiryDate } from '../utils/token-expiry';
 import { IAuthService } from './interfaces/auth.service.interface';
+import { UniqueConstraintError, ValidationError } from 'sequelize';
 
 class AuthService implements IAuthService {
   async getCaptcha(): Promise<{ token: string; question: string }> {
@@ -33,7 +31,33 @@ class AuthService implements IAuthService {
     };
   }
 
-  async register(dto: RegisterDto): Promise<{ message: string; userId: number }> {
+  async register(dto: RegisterDto): Promise<{
+    message: string;
+    userId: number;
+    emailSent: boolean;
+    activationToken?: string;
+  }> {
+    for (const field of [
+      'name',
+      'lastName',
+      'email',
+      'confirmEmail',
+      'password',
+      'confirmPassword',
+      'phone',
+      'documentType',
+      'documentNumber',
+      'birthDate',
+      'city',
+      'captchaToken',
+    ] as const) {
+      if (typeof dto?.[field] !== 'string' || !dto[field].trim()) {
+        throw new ErrorHandler(400, `El campo ${field} es requerido`);
+      }
+    }
+    if (!Number.isFinite(dto.captchaAnswer) || Number.isNaN(new Date(dto.birthDate).getTime())) {
+      throw new ErrorHandler(400, 'CAPTCHA o fecha de nacimiento inválidos');
+    }
     if (!verifyCaptcha(dto.captchaToken, dto.captchaAnswer)) {
       throw new ErrorHandler(400, 'Respuesta de CAPTCHA incorrecta');
     }
@@ -48,7 +72,10 @@ class AuthService implements IAuthService {
 
     const validPassword = await validatePassword(dto.password);
     if (!validPassword) {
-      throw new ErrorHandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
+      throw new ErrorHandler(
+        400,
+        'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña',
+      );
     }
 
     // Validar teléfono (10 dígitos exactos)
@@ -70,8 +97,13 @@ class AuthService implements IAuthService {
       throw new ErrorHandler(409, 'El usuario ya existe');
     }
 
+    const existingDocument = await profileRepository.findByDocumentNumber(dto.documentNumber);
+    if (existingDocument) {
+      throw new ErrorHandler(409, 'El número de documento ya está registrado');
+    }
+
     // Generar token de activación (válido por 24 horas)
-    const activationToken = uuidv4();
+    const activationToken = randomUUID();
     const activationTokenExpires = new Date();
     activationTokenExpires.setHours(activationTokenExpires.getHours() + 24);
 
@@ -83,45 +115,51 @@ class AuthService implements IAuthService {
 
     try {
       // 1. Crear usuario
-      const user = await userRepository.create({
-        name: dto.name,
-        lastName: dto.lastName,
-        email: dto.email,
-        password: hashedPassword,
-        phone: dto.phone,
-        documentType: dto.documentType,
-        documentNumber: dto.documentNumber,
-        birthDate: new Date(dto.birthDate),
-        city: dto.city,
-        acceptsDataProcessing: dto.acceptsDataProcessing,
-        acceptsTerms: dto.acceptsTerms,
-        acceptsNotifications: dto.acceptsNotifications,
-        accountStatus: 'inactive',
-        activationToken,
-        activationTokenExpires,
-        role: 'usuario',
-        membership: 'básica',
-        failedLoginAttempts: 0,
-        lastLoginAttempt: null,
-        lockedUntil: null,
-      } as any, transaction);
+      const user = await userRepository.create(
+        {
+          name: dto.name,
+          lastName: dto.lastName,
+          email: dto.email,
+          password: hashedPassword,
+          phone: dto.phone,
+          documentType: dto.documentType,
+          documentNumber: dto.documentNumber,
+          birthDate: new Date(dto.birthDate),
+          city: dto.city,
+          acceptsDataProcessing: dto.acceptsDataProcessing,
+          acceptsTerms: dto.acceptsTerms,
+          acceptsNotifications: dto.acceptsNotifications,
+          accountStatus: 'inactive',
+          activationToken,
+          activationTokenExpires,
+          role: 'usuario',
+          membership: 'básica',
+          failedLoginAttempts: 0,
+          lastLoginAttempt: null,
+          lockedUntil: null,
+        } as any,
+        transaction,
+      );
 
       if (!user) {
         throw new Error('Error al crear el usuario');
       }
 
       // 2. Crear perfil
-      await profileRepository.create({
-        userId: user.id,
-        lastName: dto.lastName,
-        phone: dto.phone,
-        documentType: dto.documentType,
-        documentNumber: dto.documentNumber,
-        birthDate: new Date(dto.birthDate),
-        city: dto.city,
-        address: dto.address,
-        avatar: dto.avatar,
-      }, transaction);
+      await profileRepository.create(
+        {
+          userId: user.id,
+          lastName: dto.lastName,
+          phone: dto.phone,
+          documentType: dto.documentType,
+          documentNumber: dto.documentNumber,
+          birthDate: new Date(dto.birthDate),
+          city: dto.city,
+          address: dto.address,
+          avatar: dto.avatar,
+        },
+        transaction,
+      );
 
       // 3. Crear membresía inicial
       const membershipCode = this.generateMembershipCode();
@@ -129,37 +167,72 @@ class AuthService implements IAuthService {
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1); // 1 mes de prueba
 
-      await membershipRepository.create({
-        userId: user.id,
-        code: membershipCode,
-        status: 'pending',
-        startDate: now,
-        endDate: endDate,
-        bonusWallet: 0,
-      }, transaction);
+      await membershipRepository.create(
+        {
+          userId: user.id,
+          code: membershipCode,
+          qrCode: `MEMBERSHIP:${membershipCode}`,
+          level: 'BRONZE',
+          status: 'pending',
+          startDate: now,
+          endDate: endDate,
+          bonusWallet: 0,
+        },
+        transaction,
+      );
 
       // Confirmar transacción
       await transaction?.commit();
 
-      // Enviar correo de activación (fuera de la transacción)
-      try {
-        await emailService.sendActivationEmail(dto.email, activationToken, dto.name);
-      } catch (emailError) {
-        console.error('Error sending activation email:', emailError);
-        // No fallar el registro por error de correo
+      // Enviar correo fuera de la transacción. En desarrollo sin SMTP se
+      // devuelve el token para que el flujo pueda probarse desde Swagger.
+      let emailSent = false;
+      if (emailService.isConfigured()) {
+        try {
+          await emailService.sendActivationEmail(dto.email, activationToken, dto.name);
+          emailSent = true;
+        } catch (emailError) {
+          console.error('Error sending activation email:', emailError);
+        }
       }
 
+      const exposeDevelopmentToken = process.env.NODE_ENV !== 'production' && !emailSent;
       return {
-        message: 'Usuario registrado exitosamente. Por favor active su cuenta desde el correo enviado.',
+        message: emailSent
+          ? 'Usuario registrado exitosamente. Por favor active su cuenta desde el correo enviado.'
+          : 'Usuario registrado exitosamente. El servicio de correo no está configurado.',
         userId: user.id,
+        emailSent,
+        ...(exposeDevelopmentToken ? { activationToken } : {}),
       };
     } catch (error) {
       await transaction?.rollback();
+
+      if (error instanceof UniqueConstraintError) {
+        const duplicatedFields = error.errors.map((item) => item.path ?? '').join(' ');
+        if (duplicatedFields.includes('documentNumber')) {
+          throw new ErrorHandler(409, 'El número de documento ya está registrado');
+        }
+        if (duplicatedFields.includes('email')) {
+          throw new ErrorHandler(409, 'El correo electrónico ya está registrado');
+        }
+        throw new ErrorHandler(409, 'Ya existe un registro con uno de los datos enviados');
+      }
+
+      if (error instanceof ValidationError) {
+        const details = error.errors.map((item) => item.message).join('; ');
+        throw new ErrorHandler(400, details || 'Los datos de registro no son válidos');
+      }
+
       throw error;
     }
   }
 
   async activateAccount(token: string): Promise<{ message: string }> {
+    if (!token?.trim()) {
+      throw new ErrorHandler(400, 'El token de activación es requerido');
+    }
+
     // Buscar usuario por token de activación
     const userToActivate = await userRepository.findByActivationToken(token);
 
@@ -167,7 +240,10 @@ class AuthService implements IAuthService {
       throw new ErrorHandler(400, 'Token de activación inválido');
     }
 
-    if (userToActivate.activationTokenExpires && userToActivate.activationTokenExpires < new Date()) {
+    if (
+      userToActivate.activationTokenExpires &&
+      userToActivate.activationTokenExpires < new Date()
+    ) {
       throw new ErrorHandler(400, 'El token de activación ha expirado');
     }
 
@@ -191,6 +267,9 @@ class AuthService implements IAuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto, req: Request): Promise<{ message: string }> {
+    if (typeof dto?.email !== 'string' || !dto.email.trim()) {
+      throw new ErrorHandler(400, 'El correo es requerido');
+    }
     const user = await userRepository.findUserCredential(dto.email);
 
     if (!user) {
@@ -199,14 +278,17 @@ class AuthService implements IAuthService {
     }
 
     if (user.accountStatus === 'inactive') {
-      throw new ErrorHandler(400, 'La cuenta no está activada. Por favor active su cuenta desde el correo enviado.');
+      throw new ErrorHandler(
+        400,
+        'La cuenta no está activada. Por favor active su cuenta desde el correo enviado.',
+      );
     }
 
     // Generar token de recuperación (válido según RESET_TOKEN_EXPIRES_IN)
-    const resetToken = uuidv4();
+    const resetToken = randomUUID();
     const resetTokenExpires = calculateExpiryDate(
       process.env.RESET_TOKEN_EXPIRES_IN || '1h',
-      60 * 60 * 1000
+      60 * 60 * 1000,
     );
 
     // Invalidar tokens anteriores de recuperación
@@ -246,13 +328,19 @@ class AuthService implements IAuthService {
   }
 
   async resetPassword(dto: ResetPasswordDto, req: Request): Promise<{ message: string }> {
+    if (typeof dto?.token !== 'string' || !dto.token.trim()) {
+      throw new ErrorHandler(400, 'El token de recuperación es requerido');
+    }
     if (dto.password !== dto.confirmPassword) {
       throw new ErrorHandler(400, 'La contraseña y su confirmación no coinciden');
     }
 
     const validPassword = await validatePassword(dto.password);
     if (!validPassword) {
-      throw new ErrorHandler(400, 'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña');
+      throw new ErrorHandler(
+        400,
+        'Contraseña inválida, asegúrese de que cumpla con los requerimientos de contraseña',
+      );
     }
 
     // Buscar token de recuperación
@@ -308,7 +396,14 @@ class AuthService implements IAuthService {
    */
   async logAccessAudit(params: {
     userId: number | null;
-    action: 'login' | 'login_failed' | 'refresh' | 'logout' | 'password_reset_requested' | 'password_reset' | 'account_activated';
+    action:
+      | 'login'
+      | 'login_failed'
+      | 'refresh'
+      | 'logout'
+      | 'password_reset_requested'
+      | 'password_reset'
+      | 'account_activated';
     success: boolean;
     req: Request;
     details?: string;
@@ -333,10 +428,21 @@ class AuthService implements IAuthService {
    * anteriores, guarda el accessToken en la DB, registra IP/dispositivo y
    * guarda auditoría de acceso.
    */
-  async login(email: string, password: string, req: Request): Promise<{
+  async login(
+    email: string,
+    password: string,
+    req: Request,
+  ): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: { role: string; id: number; name: string; membership: string };
+    user: {
+      role: string;
+      id: number;
+      name: string;
+      membership: string;
+      cityId: number | null;
+      benefits: unknown;
+    };
   }> {
     const user = await userRepository.findUserCredential(email);
 
@@ -359,7 +465,10 @@ class AuthService implements IAuthService {
         req,
         details: 'Cuenta inactiva',
       });
-      throw new ErrorHandler(401, 'Cuenta no activada. Por favor active su cuenta desde el correo enviado.');
+      throw new ErrorHandler(
+        401,
+        'Cuenta no activada. Por favor active su cuenta desde el correo enviado.',
+      );
     }
 
     if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
@@ -370,7 +479,10 @@ class AuthService implements IAuthService {
         req,
         details: 'Cuenta bloqueada temporalmente',
       });
-      throw new ErrorHandler(401, 'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos');
+      throw new ErrorHandler(
+        401,
+        'Cuenta bloqueada temporalmente por múltiples intentos fallidos, inténtelo nuevamente en unos minutos',
+      );
     }
 
     const passwordMatches = await comparePassword(password, user.password);
@@ -394,10 +506,16 @@ class AuthService implements IAuthService {
       id: user.id,
       name: user.name,
       membership: user.membership,
+      cityId: user.cityId,
+      email: user.email,
     };
 
-    const accessToken = createToken(payload, String(process.env.JWT_SECRET), { expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any });
-    const refreshToken = createToken(payload, String(process.env.JWT_REFRESH_SECRET), { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any });
+    const accessToken = createToken(payload, String(process.env.JWT_SECRET), {
+      expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any,
+    });
+    const refreshToken = createToken(payload, String(process.env.JWT_REFRESH_SECRET), {
+      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+    });
 
     // Guardar accessToken en la DB
     await userRepository.saveAccessToken(user.id, accessToken);
@@ -412,7 +530,7 @@ class AuthService implements IAuthService {
     const userAgent = getUserAgent(req);
     const refreshTokenExpires = calculateExpiryDate(
       process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-      7 * 24 * 60 * 60 * 1000
+      7 * 24 * 60 * 60 * 1000,
     );
 
     await refreshTokenRepository.create({
@@ -434,6 +552,9 @@ class AuthService implements IAuthService {
       details: 'Login exitoso',
     });
 
+    const membership = await membershipRepository.findByUserId(user.id);
+    const discounts = { BRONZE: 0, SILVER: 5, GOLD: 10, PLATINUM: 15 } as const;
+
     return {
       accessToken,
       refreshToken,
@@ -442,6 +563,15 @@ class AuthService implements IAuthService {
         id: payload.id,
         name: payload.name,
         membership: payload.membership,
+        cityId: payload.cityId,
+        benefits: membership
+          ? {
+              code: membership.code,
+              level: membership.level,
+              qrCode: membership.qrCode,
+              ticketDiscountPercent: discounts[membership.level],
+            }
+          : null,
       },
     };
   }
@@ -450,8 +580,16 @@ class AuthService implements IAuthService {
    * Refresca el access token: rota el refresh token, invalida el anterior,
    * guarda el nuevo accessToken en la DB y registra auditoría.
    */
-  async refresh(refreshToken: string, req: Request): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as AuthPayload;
+  async refresh(
+    refreshToken: string,
+    req: Request,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    let payload: AuthPayload;
+    try {
+      payload = verifyToken(refreshToken, String(process.env.JWT_REFRESH_SECRET)) as AuthPayload;
+    } catch {
+      throw new ErrorHandler(401, 'Refresh token inválido o expirado');
+    }
 
     if (!payload) {
       throw new ErrorHandler(401, 'Token inválido');
@@ -471,16 +609,25 @@ class AuthService implements IAuthService {
     if (!user) {
       throw new ErrorHandler(401, 'Usuario no encontrado');
     }
+    if (user.accountStatus !== 'active') {
+      throw new ErrorHandler(401, 'Cuenta no activa');
+    }
 
     const newPayload = {
-      role: payload.role,
-      id: payload.id,
-      name: payload.name,
-      membership: payload.membership,
+      role: user.role,
+      id: user.id,
+      name: user.name,
+      membership: user.membership,
+      cityId: user.cityId,
+      email: user.email,
     };
 
-    const newAccessToken = createToken(newPayload, String(process.env.JWT_SECRET), { expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any });
-    const newRefreshToken = createToken(newPayload, String(process.env.JWT_REFRESH_SECRET), { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any });
+    const newAccessToken = createToken(newPayload, String(process.env.JWT_SECRET), {
+      expiresIn: (process.env.JWT_ACCESS_EXPIRES_IN || '15m') as any,
+    });
+    const newRefreshToken = createToken(newPayload, String(process.env.JWT_REFRESH_SECRET), {
+      expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
+    });
 
     // Guardar nuevo accessToken en la DB
     await userRepository.saveAccessToken(user.id, newAccessToken);
@@ -495,7 +642,7 @@ class AuthService implements IAuthService {
     const userAgent = getUserAgent(req);
     const newRefreshTokenExpires = calculateExpiryDate(
       process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-      7 * 24 * 60 * 60 * 1000
+      7 * 24 * 60 * 60 * 1000,
     );
 
     await refreshTokenRepository.create({
@@ -553,7 +700,9 @@ class AuthService implements IAuthService {
     const now = new Date();
     const lockDuration = 900000; // 15 minutos
     const maxAttempts = parseInt(process.env.MAX_FAILED_ATTEMPTS || '5', 10);
-    const expiredStreak = user.lastLoginAttempt !== null && now.getTime() - user.lastLoginAttempt.getTime() > lockDuration;
+    const expiredStreak =
+      user.lastLoginAttempt !== null &&
+      now.getTime() - user.lastLoginAttempt.getTime() > lockDuration;
     const previousAttempts = expiredStreak ? 0 : user.failedLoginAttempts;
     const updatedAttempts = previousAttempts + 1;
 

@@ -1,7 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import User from './user.model';
-import Membership from './membership.model';
 
 export interface PurchaseHistoryAttributes {
   id: number;
@@ -12,9 +10,15 @@ export interface PurchaseHistoryAttributes {
   date: Date;
 }
 
-export interface PurchaseHistoryCreationAttributes extends Optional<PurchaseHistoryAttributes, 'id'> {}
+export interface PurchaseHistoryCreationAttributes extends Optional<
+  PurchaseHistoryAttributes,
+  'id'
+> {}
 
-class PurchaseHistory extends Model<PurchaseHistoryAttributes, PurchaseHistoryCreationAttributes> implements PurchaseHistoryAttributes {
+class PurchaseHistory
+  extends Model<PurchaseHistoryAttributes, PurchaseHistoryCreationAttributes>
+  implements PurchaseHistoryAttributes
+{
   public id!: number;
   public userId!: number;
   public membershipId!: number;
@@ -69,7 +73,7 @@ PurchaseHistory.init(
     modelName: 'PurchaseHistory',
     tableName: 'purchase_histories',
     timestamps: true,
-  }
+  },
 );
 
 export default PurchaseHistory;

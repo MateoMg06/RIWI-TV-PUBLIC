@@ -1,9 +1,12 @@
-import RefreshToken, { RefreshTokenAttributes, RefreshTokenCreationAttributes } from '../models/refresh-token.model';
+import RefreshToken, { RefreshTokenCreationAttributes } from '../models/refresh-token.model';
 import { IRefreshTokenRepository } from './interfaces/refresh-token.repository.interface';
 import { Transaction, Op } from 'sequelize';
 
 class RefreshTokenRepository implements IRefreshTokenRepository {
-  async create(data: RefreshTokenCreationAttributes, transaction?: Transaction): Promise<RefreshToken> {
+  async create(
+    data: RefreshTokenCreationAttributes,
+    transaction?: Transaction,
+  ): Promise<RefreshToken> {
     return await RefreshToken.create(data, { transaction });
   }
 
@@ -18,21 +21,18 @@ class RefreshTokenRepository implements IRefreshTokenRepository {
   async revokeByUserId(userId: number, transaction?: Transaction): Promise<void> {
     await RefreshToken.update(
       { revoked: true },
-      { where: { userId, revoked: false }, transaction }
+      { where: { userId, revoked: false }, transaction },
     );
   }
 
   async revokeByToken(token: string, transaction?: Transaction): Promise<void> {
-    await RefreshToken.update(
-      { revoked: true },
-      { where: { token }, transaction }
-    );
+    await RefreshToken.update({ revoked: true }, { where: { token }, transaction });
   }
 
   async revokeExpired(): Promise<number> {
     const [count] = await RefreshToken.update(
       { revoked: true },
-      { where: { expiresAt: { [Op.lt]: new Date() }, revoked: false } }
+      { where: { expiresAt: { [Op.lt]: new Date() }, revoked: false } },
     );
     return count;
   }

@@ -1,6 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import User from './user.model';
 
 export interface ProfileAttributes {
   id: number;
@@ -17,7 +16,10 @@ export interface ProfileAttributes {
 
 export interface ProfileCreationAttributes extends Optional<ProfileAttributes, 'id'> {}
 
-class Profile extends Model<ProfileAttributes, ProfileCreationAttributes> implements ProfileAttributes {
+class Profile
+  extends Model<ProfileAttributes, ProfileCreationAttributes>
+  implements ProfileAttributes
+{
   public id!: number;
   public userId!: number;
   public lastName!: string;
@@ -63,6 +65,7 @@ Profile.init(
     documentNumber: {
       type: DataTypes.STRING(50),
       allowNull: false,
+      unique: true,
     },
     birthDate: {
       type: DataTypes.DATE,
@@ -86,7 +89,7 @@ Profile.init(
     modelName: 'Profile',
     tableName: 'profiles',
     timestamps: true,
-  }
+  },
 );
 
 export default Profile;

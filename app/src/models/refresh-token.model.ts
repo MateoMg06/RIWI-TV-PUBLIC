@@ -14,7 +14,10 @@ export interface RefreshTokenAttributes {
 
 export interface RefreshTokenCreationAttributes extends Optional<RefreshTokenAttributes, 'id'> {}
 
-class RefreshToken extends Model<RefreshTokenAttributes, RefreshTokenCreationAttributes> implements RefreshTokenAttributes {
+class RefreshToken
+  extends Model<RefreshTokenAttributes, RefreshTokenCreationAttributes>
+  implements RefreshTokenAttributes
+{
   public id!: number;
   public userId!: number;
   public token!: string;
@@ -43,7 +46,7 @@ RefreshToken.init(
       onDelete: 'CASCADE',
     },
     token: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT,
       allowNull: false,
       unique: true,
     },
@@ -74,7 +77,8 @@ RefreshToken.init(
     modelName: 'RefreshToken',
     tableName: 'refresh_tokens',
     timestamps: true,
-  }
+    underscored: true,
+  },
 );
 
 export default RefreshToken;

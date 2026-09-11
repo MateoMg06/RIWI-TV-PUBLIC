@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Usuario
  * ----------------
@@ -14,17 +15,19 @@ import {
   logout,
   refresh,
   updateUser,
+  setLocation,
 } from '../controllers/user.controller';
 import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router();
+router.use(validateJsonBody);
 
 /**
  * @swagger
  * /api/users:
  *   post:
- *     summary: Crear un nuevo usuario
+ *     summary: Registrar usuario con CAPTCHA, perfil, membresía y activación
  *     tags: [Users]
  *     requestBody:
  *       required: true
@@ -46,6 +49,8 @@ const router = Router();
  *               - city
  *               - acceptsDataProcessing
  *               - acceptsTerms
+ *               - captchaToken
+ *               - captchaAnswer
  *             properties:
  *               name:
  *                 type: string
@@ -55,10 +60,11 @@ const router = Router();
  *                 example: Doe
  *               email:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 description: Debe ser único
+ *                 example: nuevo.usuario@example.com
  *               confirmEmail:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 example: nuevo.usuario@example.com
  *               password:
  *                 type: string
  *                 example: "SecurePass123!"
@@ -73,7 +79,8 @@ const router = Router();
  *                 example: "CC"
  *               documentNumber:
  *                 type: string
- *                 example: "1234567890"
+ *                 description: Debe ser único
+ *                 example: "9876543210"
  *               birthDate:
  *                 type: string
  *                 format: date
@@ -81,6 +88,12 @@ const router = Router();
  *               city:
  *                 type: string
  *                 example: "Bogotá"
+ *               address:
+ *                 type: string
+ *                 example: "Calle 123 #45-67"
+ *               avatar:
+ *                 type: string
+ *                 example: "https://example.com/avatar.jpg"
  *               acceptsDataProcessing:
  *                 type: boolean
  *                 example: true
@@ -90,11 +103,31 @@ const router = Router();
  *               acceptsNotifications:
  *                 type: boolean
  *                 example: true
+ *               captchaToken:
+ *                 type: string
+ *               captchaAnswer:
+ *                 type: number
  *     responses:
  *       201:
- *         description: Usuario creado exitosamente
+ *         description: Usuario registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 userId:
+ *                   type: integer
+ *                 emailSent:
+ *                   type: boolean
+ *                 activationToken:
+ *                   type: string
+ *                   description: Solo se incluye fuera de producción cuando SMTP no está configurado
  *       400:
  *         description: Datos inválidos
+ *       409:
+ *         description: El usuario ya existe
  *       500:
  *         description: Error interno del servidor
  */
@@ -105,6 +138,7 @@ router.post('/register', createUser);
  * @swagger
  * /api/users:
  *   get:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Obtener todos los usuarios
  *     tags: [Users]
  *     responses:
@@ -113,8 +147,8 @@ router.post('/register', createUser);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/', authToken, requireRole("admin"), getUsers);
-router.get('/getUsers', authToken, requireRole("admin"), getUsers);
+router.get('/', authToken, requireRole('admin'), getUsers);
+router.get('/getUsers', authToken, requireRole('admin'), getUsers);
 
 /**
  * @swagger
@@ -166,10 +200,11 @@ router.post('/auth', authUser);
  *             properties:
  *               email:
  *                 type: string
- *                 example: john.doe@example.com
+ *                 example: david@gmail.com
  *               password:
  *                 type: string
- *                 example: "123"
+ *                 example: "DavidElPro123."
+ * 
  *     responses:
  *       201:
  *         description: Login exitoso
@@ -211,29 +246,29 @@ router.post('/refresh', refresh);
  * @swagger
  * /api/users/logout:
  *   post:
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     summary: Cierra la sesión, eliminando la cookie del accessToken
  *     tags: [Auth]
  *     responses:
  *       200:
  *         description: Sesión cerrada correctamente
  */
-router.post('/logout', logout);
+router.post('/logout', authToken, logout);
 
 /**
  * @swagger
  * /api/users/{id}:
  *   put:
- *     summary: Actualizar los datos de un usuario existente
+ *     summary: Actualizar los datos del propio usuario autenticado
  *     tags: [Users]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del usuario a actualizar
+ *         description: Debe coincidir con el ID del usuario autenticado
  *     requestBody:
  *       required: true
  *       content:
@@ -280,7 +315,32 @@ router.post('/logout', logout);
  *       500:
  *         description: Error interno del servidor
  */
-router.put('/:id', authToken, requireRole("admin", "usuario"), updateUser)
+/**
+ * @swagger
+ * /api/users/location:
+ *   post:
+ *     tags: [Location]
+ *     summary: Guardar la ciudad del usuario autenticado
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [cityId]
+ *             properties:
+ *               cityId: { type: integer, minimum: 1 }
+ *     responses:
+ *       200: { description: Ubicación actualizada }
+ *       400: { description: ID inválido }
+ *       401: { description: Sesión inválida }
+ *       404: { description: Ciudad no encontrada }
+ *       422: { description: Ciudad inactiva o sin cines activos }
+ */
+router.post('/location', authToken, setLocation);
+router.put('/location', authToken, setLocation);
+router.put('/:id', authToken, requireRole('admin', 'usuario'), updateUser);
 router.post('/legacy-login', authUser);
 
 export default router;

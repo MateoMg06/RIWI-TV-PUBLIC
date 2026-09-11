@@ -12,7 +12,8 @@ class CityRepository implements ICityRepository {
 
   async findByDepartmentId(departmentId: number): Promise<City[]> {
     return await City.findAll({
-      where: { departmentId },
+      where: { departmentId, active: true },
+      order: [['city', 'ASC']],
     });
   }
 
@@ -21,6 +22,8 @@ class CityRepository implements ICityRepository {
       include: [
         {
           association: 'cinemas',
+          where: { active: true },
+          required: false,
         },
       ],
     });

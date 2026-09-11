@@ -1,3 +1,4 @@
+import { validateJsonBody } from '../middlewares/validateJsonBody';
 /**
  * Rutas de Membresía
  * ------------------
@@ -5,11 +6,33 @@
  */
 
 import { Router } from 'express';
-import { createMembership, getMembership, getPurchaseHistory } from '../controllers/membership.controller';
+import {
+  createMembership,
+  getMembership,
+  getPurchaseHistory,
+} from '../controllers/membership.controller';
+import { getBenefits } from '../controllers/profile.controller';
 import { authToken } from '../middlewares/authToken';
 import requireRole from '../middlewares/requireRole';
 
 const router = Router();
+router.use(validateJsonBody);
+
+/**
+ * @swagger
+ * /api/membership:
+ *   get:
+ *     tags: [Membership]
+ *     summary: Consultar la membresía digital del usuario
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     responses: { 200: { description: Membresía } }
+ * /api/membership/benefits:
+ *   get:
+ *     tags: [Membership]
+ *     summary: Consultar nivel, QR, bonos y descuentos vigentes
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
+ *     responses: { 200: { description: Beneficios } }
+ */
 
 /**
  * @swagger
@@ -17,8 +40,7 @@ const router = Router();
  *   post:
  *     summary: Crear una membresía para el usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     requestBody:
  *       required: true
  *       content:
@@ -29,10 +51,13 @@ const router = Router();
  *               - durationMonths
  *             properties:
  *               durationMonths:
- *                 type: number
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 120
  *                 example: 12
  *               initialBonus:
  *                 type: number
+ *                 minimum: 0
  *                 example: 100
  *     responses:
  *       201:
@@ -46,7 +71,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/create', authToken, requireRole("admin", "usuario"), createMembership);
+router.post('/create', authToken, requireRole('admin', 'usuario'), createMembership);
 
 /**
  * @swagger
@@ -54,8 +79,7 @@ router.post('/create', authToken, requireRole("admin", "usuario"), createMembers
  *   get:
  *     summary: Obtener la membresía del usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     responses:
  *       200:
  *         description: Membresía obtenida exitosamente
@@ -66,7 +90,8 @@ router.post('/create', authToken, requireRole("admin", "usuario"), createMembers
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/me', authToken, authToken, requireRole("admin", "usuario"), getMembership);
+router.get('/me', authToken, requireRole('admin', 'usuario'), getMembership);
+router.get('/', authToken, requireRole('admin', 'usuario'), getMembership);
 
 /**
  * @swagger
@@ -74,8 +99,7 @@ router.get('/me', authToken, authToken, requireRole("admin", "usuario"), getMemb
  *   get:
  *     summary: Obtener el historial de compras del usuario autenticado
  *     tags: [Membership]
- *     security:
- *       - cookieAuth: []
+ *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
  *     responses:
  *       200:
  *         description: Historial de compras obtenido exitosamente
@@ -86,6 +110,7 @@ router.get('/me', authToken, authToken, requireRole("admin", "usuario"), getMemb
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/purchase-history', authToken, requireRole("admin", "usuario"), getPurchaseHistory);
+router.get('/purchase-history', authToken, requireRole('admin', 'usuario'), getPurchaseHistory);
+router.get('/benefits', authToken, requireRole('admin', 'usuario'), getBenefits);
 
 export default router;

@@ -1,244 +1,464 @@
-/**
- * Seeder de Datos
- * ----------------
- * Script que popula la base de datos con datos de prueba.
- * 
- * Ejecutar: npm run seed
- * 
- * Inserta:
- *  - 3 países
- *  - Departamentos por país
- *  - Ciudades por departamento
- *  - Cines por ciudad
- *  - Películas
- *  - Proyecciones (Showtime)
- */
-
-/// <reference types="node" />
-
 import sequelize from '../config/database';
-import { Country, Department, City, Cinema, Movie, Showtime } from '../models/index';
+import { Cinema, City, Country, Department, Membership, Movie, Profile, Seat, Showtime, User } from '../models';
+import type { MovieStatus } from '../models/movie.model';
+import type { SeatType } from '../models/seat.model';
+import { hashPassword } from '../utils/bcrypt';
+import { randomUUID } from 'crypto';
 
-async function seed() {
-  try {
-    console.log('Iniciando inserción de datos de prueba...');
-    
-    // Nota: No usar sequelize.sync({ alter: true }) porque conflictúa con migraciones versionadas.
-    // Las tablas deben ser creadas/actualizadas mediante migraciones, no por el seeder.
-    console.log('✓ Base de datos lista (usar migraciones para crear/actualizar tablas)');
-
-    // ============================================================================
-    // 1. CREAR PAÍSES
-    // ============================================================================
-    console.log('\nCreando países...');
-
-    const colombia = await Country.create({
-      country: 'Colombia'
-    });
-
-    const mexico = await Country.create({
-      country: 'México'
-    });
-
-    const argentina = await Country.create({
-      country: 'Argentina'
-    });
-
-    console.log(`✓ 3 países creados (IDs: ${colombia.id}, ${mexico.id}, ${argentina.id})`);
-
-    // ============================================================================
-    // 2. CREAR DEPARTAMENTOS
-    // ============================================================================
-    console.log('\nCreando departamentos...');
-
-    // Departamentos de Colombia
-    const atlantico = await Department.create({
-      department: 'Atlántico',
-      countryId: colombia.id
-    });
-
-    const cundinamarca = await Department.create({
-      department: 'Cundinamarca',
-      countryId: colombia.id
-    });
-
-    // Departamentos de México
-    const mexico_state = await Department.create({
-      department: 'Estado de México',
-      countryId: mexico.id
-    });
-
-    // Departamentos de Argentina
-    const buenos_aires = await Department.create({
-      department: 'Buenos Aires',
-      countryId: argentina.id
-    });
-
-    console.log(`✓ 4 departamentos creados`);
-
-    // ============================================================================
-    // 3. CREAR CIUDADES
-    // ============================================================================
-    console.log('\nCreando ciudades...');
-
-    const barranquilla = await City.create({
-      city: 'Barranquilla',
-      departmentId: atlantico.id
-    });
-
-    const bogota = await City.create({
-      city: 'Bogotá',
-      departmentId: cundinamarca.id
-    });
-
-    const mexico_city = await City.create({
-      city: 'Ciudad de México',
-      departmentId: mexico_state.id
-    });
-
-    const buenos_aires_city = await City.create({
-      city: 'Buenos Aires',
-      departmentId: buenos_aires.id
-    });
-
-    console.log(`✓ 4 ciudades creadas`);
-
-    // ============================================================================
-    // 4. CREAR CINES
-    // ============================================================================
-    console.log('\nCreando cines...');
-
-    const cinemark_barranquilla = await Cinema.create({
-      name: 'Cinemark Barranquilla',
-      cityId: barranquilla.id
-    });
-
-    const cinepolis_bogota = await Cinema.create({
-      name: 'Cinépolis Bogotá',
-      cityId: bogota.id
-    });
-
-    const cinemark_mexico = await Cinema.create({
-      name: 'Cinemark México City',
-      cityId: mexico_city.id
-    });
-
-    const cinemark_buenos_aires = await Cinema.create({
-      name: 'Cinemark Buenos Aires',
-      cityId: buenos_aires_city.id
-    });
-
-    console.log(`✓ 4 cines creados`);
-
-    // ============================================================================
-    // 5. CREAR PELÍCULAS
-    // ============================================================================
-    console.log('\nCreando películas...');
-
-    const avatar = await Movie.create({
-      name: 'Avatar',
-      clasification: 'PG-13',
-      duration: 192,
-      gener: 'Ciencia Ficción'
-    });
-
-    const spiderman = await Movie.create({
-      name: 'Spiderman: No Way Home',
-      clasification: 'PG-13',
-      duration: 159,
-      gener: 'Acción'
-    });
-
-    const inception = await Movie.create({
-      name: 'Inception',
-      clasification: 'PG-13',
-      duration: 148,
-      gener: 'Ciencia Ficción'
-    });
-
-    console.log(`✓ 3 películas creadas`);
-
-    // ============================================================================
-    // 6. CREAR PROYECCIONES (SHOWTIME)
-    // ============================================================================
-    console.log('\nCreando proyecciones...');
-
-    // Avatar en Cinemark Barranquilla
-    await Showtime.create({
-      cinemaId: cinemark_barranquilla.id,
-      movieId: avatar.id,
-      horario: '19:30',
-      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
-      sala: 'A-5',
-      precio: 15.99
-    });
-
-    // Avatar en Cinépolis Bogotá
-    await Showtime.create({
-      cinemaId: cinepolis_bogota.id,
-      movieId: avatar.id,
-      horario: '20:00',
-      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
-      sala: 'B-3',
-      precio: 16.99
-    });
-
-    // Spiderman en Cinépolis Bogotá
-    await Showtime.create({
-      cinemaId: cinepolis_bogota.id,
-      movieId: spiderman.id,
-      horario: '18:00',
-      fecha: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 días desde hoy
-      sala: 'A-1',
-      precio: 16.99
-    });
-
-    // Spiderman en Cinemark México City
-    await Showtime.create({
-      cinemaId: cinemark_mexico.id,
-      movieId: spiderman.id,
-      horario: '19:30',
-      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
-      sala: 'C-2',
-      precio: 14.50
-    });
-
-    // Inception en Cinemark Buenos Aires
-    await Showtime.create({
-      cinemaId: cinemark_buenos_aires.id,
-      movieId: inception.id,
-      horario: '20:30',
-      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
-      sala: 'D-1',
-      precio: 13.00
-    });
-
-    // Inception en Cinemark México City
-    await Showtime.create({
-      cinemaId: cinemark_mexico.id,
-      movieId: inception.id,
-      horario: '21:00',
-      fecha: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 días desde hoy
-      sala: 'A-4',
-      precio: 14.50
-    });
-
-    console.log(`✓ 6 proyecciones creadas`);
-
-    console.log('\n✅ Seeder completado exitosamente');
-    console.log('\nDatos de prueba insertados:');
-    console.log(`  - 3 Países`);
-    console.log(`  - 4 Departamentos`);
-    console.log(`  - 4 Ciudades`);
-    console.log(`  - 4 Cines`);
-    console.log(`  - 3 Películas`);
-    console.log(`  - 6 Proyecciones`);
-
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error en el seeder:', error);
-    process.exit(1);
-  }
+export interface SeedSeatInput {
+  code: string;
+  row: string;
+  number: number;
+  type?: SeatType;
+  priceModifier?: number;
 }
 
-seed();
+export interface SeedShowtimeInput {
+  startsAt: string;
+  room: string;
+  roomType?: string;
+  format?: string;
+  language?: string;
+  audioType?: 'DUBBED' | 'SUBTITLED' | 'ORIGINAL';
+  price: number;
+  seats?: SeedSeatInput[];
+}
+
+export interface SeedMovieInput {
+  name: string;
+  synopsis?: string;
+  classification: string;
+  duration: number;
+  genre: string;
+  director?: string;
+  cast?: string[];
+  posterUrl?: string;
+  bannerUrl?: string;
+  trailerUrl?: string;
+  releaseDate: string;
+  status?: MovieStatus;
+  audienceRating?: number;
+  showtime?: SeedShowtimeInput;
+}
+
+export interface SeedPayload {
+  location: {
+    country: string;
+    department: string;
+    city: string;
+    cinema: string;
+  };
+  movies: SeedMovieInput[];
+}
+
+export interface SeedResult {
+  message: string;
+  created: {
+    countries: number;
+    departments: number;
+    cities: number;
+    cinemas: number;
+    movies: number;
+    showtimes: number;
+    seats: number;
+    users: number;
+    profiles: number;
+    memberships: number;
+  };
+}
+
+const futureAt = (days: number, hour: number): Date => {
+  const value = new Date();
+  value.setDate(value.getDate() + days);
+  value.setHours(hour, 0, 0, 0);
+  return value;
+};
+
+const defaultSeats = (): SeedSeatInput[] =>
+  ['A', 'B', 'C'].flatMap((row) =>
+    Array.from({ length: 8 }, (_, position) => ({
+      code: `${row}${position + 1}`,
+      row,
+      number: position + 1,
+      type:
+        row === 'C'
+          ? ('VIP' as const)
+          : row === 'A' && position === 0
+            ? ('ACCESSIBLE' as const)
+            : ('STANDARD' as const),
+      priceModifier: row === 'C' ? 8000 : 0,
+    })),
+  );
+
+export const createDefaultSeedPayload = (): SeedPayload => ({
+  location: {
+    country: 'Colombia',
+    department: 'Antioquia',
+    city: 'Medellín',
+    cinema: 'Multicine Riwi Centro',
+  },
+  movies: [
+    {
+      name: 'Horizonte Rojo',
+      synopsis: 'Sinopsis de Horizonte Rojo',
+      genre: 'Acción',
+      classification: 'PG-13',
+      duration: 128,
+      director: 'Ana Torres',
+      cast: ['Intérprete Uno', 'Intérprete Dos'],
+      releaseDate: futureAt(-14, 0).toISOString(),
+      status: 'ACTIVE',
+      audienceRating: 8.4,
+      showtime: {
+        startsAt: futureAt(1, 18).toISOString(),
+        room: 'Sala 1',
+        roomType: 'STANDARD',
+        format: '2D',
+        language: 'Español',
+        audioType: 'DUBBED',
+        price: 18000,
+        seats: defaultSeats(),
+      },
+    },
+    {
+      name: 'El Jardín de Luz',
+      synopsis: 'Sinopsis de El Jardín de Luz',
+      genre: 'Drama',
+      classification: 'PG',
+      duration: 112,
+      director: 'Luis Vega',
+      cast: ['Intérprete Uno', 'Intérprete Dos'],
+      releaseDate: futureAt(-14, 0).toISOString(),
+      status: 'ACTIVE',
+      audienceRating: 8.1,
+      showtime: {
+        startsAt: futureAt(2, 19).toISOString(),
+        room: 'Sala 2',
+        roomType: 'VIP',
+        format: 'IMAX',
+        language: 'Español',
+        audioType: 'DUBBED',
+        price: 26000,
+        seats: defaultSeats(),
+      },
+    },
+    {
+      name: 'Órbita Final',
+      synopsis: 'Una expedición debe regresar antes de que su órbita colapse.',
+      classification: 'PG-13',
+      duration: 135,
+      genre: 'Ciencia ficción',
+      director: 'María León',
+      cast: ['Sofía Ríos', 'Mateo Cruz'],
+      trailerUrl: 'https://www.youtube.com/watch?v=example',
+      releaseDate: futureAt(30, 0).toISOString(),
+      status: 'UPCOMING',
+      audienceRating: 0,
+    },
+  ],
+});
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
+
+const isValidDate = (value: unknown): value is string =>
+  isNonEmptyString(value) && !Number.isNaN(new Date(value).getTime());
+
+export function parseSeedPayload(value: unknown): SeedPayload {
+  if (!isObject(value) || !isObject(value.location) || !Array.isArray(value.movies)) {
+    throw new Error('El JSON debe contener los objetos "location" y "movies"');
+  }
+
+  const { location, movies } = value;
+  for (const field of ['country', 'department', 'city', 'cinema'] as const) {
+    if (!isNonEmptyString(location[field])) {
+      throw new Error(`location.${field} es requerido`);
+    }
+  }
+
+  if (movies.length === 0 || movies.length > 100) {
+    throw new Error('movies debe contener entre 1 y 100 películas');
+  }
+
+  movies.forEach((movie, movieIndex) => {
+    if (!isObject(movie)) throw new Error(`movies[${movieIndex}] debe ser un objeto`);
+
+    for (const field of ['name', 'classification', 'genre'] as const) {
+      if (!isNonEmptyString(movie[field])) {
+        throw new Error(`movies[${movieIndex}].${field} es requerido`);
+      }
+    }
+    if (!Number.isInteger(movie.duration) || Number(movie.duration) <= 0) {
+      throw new Error(`movies[${movieIndex}].duration debe ser un entero positivo`);
+    }
+    if (!isValidDate(movie.releaseDate)) {
+      throw new Error(`movies[${movieIndex}].releaseDate debe ser una fecha válida`);
+    }
+    if (movie.status && !['UPCOMING', 'ACTIVE', 'INACTIVE'].includes(String(movie.status))) {
+      throw new Error(`movies[${movieIndex}].status no es válido`);
+    }
+    if (movie.cast && (!Array.isArray(movie.cast) || !movie.cast.every(isNonEmptyString))) {
+      throw new Error(`movies[${movieIndex}].cast debe ser una lista de textos`);
+    }
+
+    if (movie.showtime !== undefined) {
+      if (!isObject(movie.showtime)) {
+        throw new Error(`movies[${movieIndex}].showtime debe ser un objeto`);
+      }
+      const showtime = movie.showtime;
+      if (!isValidDate(showtime.startsAt) || !isNonEmptyString(showtime.room)) {
+        throw new Error(`movies[${movieIndex}].showtime requiere startsAt y room válidos`);
+      }
+      if (typeof showtime.price !== 'number' || showtime.price < 0) {
+        throw new Error(`movies[${movieIndex}].showtime.price debe ser un número positivo`);
+      }
+      if (
+        showtime.audioType &&
+        !['DUBBED', 'SUBTITLED', 'ORIGINAL'].includes(String(showtime.audioType))
+      ) {
+        throw new Error(`movies[${movieIndex}].showtime.audioType no es válido`);
+      }
+      if (showtime.seats !== undefined) {
+        if (!Array.isArray(showtime.seats) || showtime.seats.length > 1000) {
+          throw new Error(`movies[${movieIndex}].showtime.seats no es válido`);
+        }
+        showtime.seats.forEach((seat, seatIndex) => {
+          if (
+            !isObject(seat) ||
+            !isNonEmptyString(seat.code) ||
+            !isNonEmptyString(seat.row) ||
+            !Number.isInteger(seat.number) ||
+            Number(seat.number) <= 0
+          ) {
+            throw new Error(`movies[${movieIndex}].showtime.seats[${seatIndex}] no es válido`);
+          }
+          if (seat.type && !['STANDARD', 'VIP', 'ACCESSIBLE'].includes(String(seat.type))) {
+            throw new Error(`movies[${movieIndex}].showtime.seats[${seatIndex}].type no es válido`);
+          }
+        });
+      }
+    }
+  });
+
+  return value as unknown as SeedPayload;
+}
+
+let runningSeed: Promise<SeedResult> | undefined;
+
+async function executeSeed(payload: SeedPayload): Promise<SeedResult> {
+  await sequelize.authenticate();
+
+  return sequelize.transaction(async (transaction) => {
+    const created: SeedResult['created'] = {
+      countries: 0,
+      departments: 0,
+      cities: 0,
+      cinemas: 0,
+      movies: 0,
+      showtimes: 0,
+      seats: 0,
+      users: 0,
+      profiles: 0,
+      memberships: 0,
+    };
+
+    const [country, countryCreated] = await Country.findOrCreate({
+      where: { country: payload.location.country.trim() },
+      defaults: { country: payload.location.country.trim() },
+      transaction,
+    });
+    created.countries += Number(countryCreated);
+
+    const [department, departmentCreated] = await Department.findOrCreate({
+      where: { department: payload.location.department.trim(), countryId: country.id },
+      defaults: { department: payload.location.department.trim(), countryId: country.id },
+      transaction,
+    });
+    created.departments += Number(departmentCreated);
+
+    const [city, cityCreated] = await City.findOrCreate({
+      where: { city: payload.location.city.trim(), departmentId: department.id },
+      defaults: { city: payload.location.city.trim(), departmentId: department.id, active: true },
+      transaction,
+    });
+    created.cities += Number(cityCreated);
+
+    const [cinema, cinemaCreated] = await Cinema.findOrCreate({
+      where: { name: payload.location.cinema.trim(), cityId: city.id },
+      defaults: { name: payload.location.cinema.trim(), cityId: city.id, active: true },
+      transaction,
+    });
+    created.cinemas += Number(cinemaCreated);
+
+    for (const input of payload.movies) {
+      const [movie, movieCreated] = await Movie.findOrCreate({
+        where: { name: input.name.trim() },
+        defaults: {
+          name: input.name.trim(),
+          synopsis: input.synopsis?.trim() ?? '',
+          classification: input.classification.trim(),
+          duration: input.duration,
+          genre: input.genre.trim(),
+          director: input.director?.trim() ?? '',
+          cast: input.cast ?? [],
+          posterUrl: input.posterUrl?.trim() || null,
+          bannerUrl: input.bannerUrl?.trim() || null,
+          trailerUrl: input.trailerUrl?.trim() || null,
+          releaseDate: new Date(input.releaseDate),
+          status: input.status ?? 'ACTIVE',
+          audienceRating: input.audienceRating ?? 0,
+        },
+        transaction,
+      });
+      created.movies += Number(movieCreated);
+
+      if (!input.showtime) continue;
+      const showtimeInput = input.showtime;
+      const startsAt = new Date(showtimeInput.startsAt);
+      const [showtime, showtimeCreated] = await Showtime.findOrCreate({
+        where: { cinemaId: cinema.id, movieId: movie.id, startsAt },
+        defaults: {
+          cinemaId: cinema.id,
+          movieId: movie.id,
+          startsAt,
+          room: showtimeInput.room.trim(),
+          roomType: showtimeInput.roomType?.trim() || 'STANDARD',
+          format: showtimeInput.format?.trim() || '2D',
+          language: showtimeInput.language?.trim() || 'Español',
+          audioType: showtimeInput.audioType ?? 'DUBBED',
+          price: showtimeInput.price,
+          availableSeats: showtimeInput.seats?.length ?? 0,
+        },
+        transaction,
+      });
+      created.showtimes += Number(showtimeCreated);
+
+      const requestedSeats = showtimeInput.seats ?? [];
+      if (requestedSeats.length === 0) continue;
+
+      const existingSeats = await Seat.findAll({
+        attributes: ['code'],
+        where: { showtimeId: showtime.id },
+        transaction,
+      });
+      const existingCodes = new Set(existingSeats.map((seat) => seat.code));
+      const missingSeats = requestedSeats.filter((seat) => !existingCodes.has(seat.code));
+
+      if (missingSeats.length > 0) {
+        const seats = await Seat.bulkCreate(
+          missingSeats.map((seat) => ({
+            showtimeId: showtime.id,
+            code: seat.code.trim(),
+            row: seat.row.trim(),
+            number: seat.number,
+            type: seat.type ?? 'STANDARD',
+            priceModifier: seat.priceModifier ?? 0,
+          })),
+          { transaction },
+        );
+        created.seats += seats.length;
+      }
+    }
+
+    const [adminUser, adminCreated] = await User.findOrCreate({
+      where: { email: 'david@gmail.com' },
+      defaults: {
+        name: 'David',
+        lastName: 'Admin',
+        email: 'david@gmail.com',
+        password: await hashPassword('DavidElPro123', Number(process.env.SALT_ROUNDS || 10)),
+        role: 'admin',
+        membership: 'premium',
+        phone: '3001234567',
+        documentType: 'CC',
+        documentNumber: '1234567890',
+        birthDate: new Date('1990-01-01'),
+        city: payload.location.city.trim(),
+        acceptsDataProcessing: true,
+        acceptsTerms: true,
+        acceptsNotifications: true,
+        accountStatus: 'active',
+        activationToken: null,
+        activationTokenExpires: null,
+        accessToken: null,
+        refreshToken: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        cityId: city.id,
+        failedLoginAttempts: 0,
+        lastLoginAttempt: null,
+        lockedUntil: null,
+      },
+      transaction,
+    });
+    created.users += Number(adminCreated);
+
+    if (adminCreated) {
+      await Profile.findOrCreate({
+        where: { userId: adminUser.id },
+        defaults: {
+          userId: adminUser.id,
+          lastName: 'Admin',
+          phone: '3001234567',
+          documentType: 'CC',
+          documentNumber: '1234567890',
+          birthDate: new Date('1990-01-01'),
+          city: payload.location.city.trim(),
+        },
+        transaction,
+      });
+      created.profiles += 1;
+
+      const membershipCode = `ADM-${randomUUID().slice(0, 8).toUpperCase()}`;
+      const now = new Date();
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 10);
+
+      await Membership.findOrCreate({
+        where: { userId: adminUser.id },
+        defaults: {
+          userId: adminUser.id,
+          code: membershipCode,
+          qrCode: `MEMBERSHIP:${membershipCode}`,
+          level: 'PLATINUM',
+          status: 'active',
+          startDate: now,
+          endDate: endDate,
+          bonusWallet: 0,
+        },
+        transaction,
+      });
+      created.memberships += 1;
+    }
+
+    return {
+      message: 'Archivo JSON procesado correctamente',
+      created,
+    };
+  });
+}
+
+export function seedDatabase(
+  payload: SeedPayload = createDefaultSeedPayload(),
+): Promise<SeedResult> {
+  if (!runningSeed) {
+    runningSeed = executeSeed(payload).finally(() => {
+      runningSeed = undefined;
+    });
+  }
+
+  return runningSeed;
+}
+
+if (require.main === module) {
+  seedDatabase()
+    .then((result) => console.log(result.message, result.created))
+    .catch((error) => {
+      console.error('No fue posible ejecutar el seeder', error);
+      process.exitCode = 1;
+    })
+    .finally(() => sequelize.close());
+}

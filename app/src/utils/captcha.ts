@@ -77,4 +77,4 @@ export function cleanExpiredCaptchas(): void {
 }
 
 // Limpiar cada 5 minutos
-setInterval(cleanExpiredCaptchas, 5 * 60 * 1000);
+setInterval(cleanExpiredCaptchas, 5 * 60 * 1000).unref();

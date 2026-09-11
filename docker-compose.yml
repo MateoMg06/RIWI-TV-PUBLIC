@@ -3,6 +3,7 @@ services:
     build: ./app
     container_name: ${APP_CONTAINER_NAME}
     working_dir: /usr/src/app
+    command: sh -c "npm ci && npm run dev"
 
     ports:
       - "${APP_PORT:-5001}:${APP_PORT:-5001}"
@@ -33,7 +34,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${APP_CPU_LIMIT}"
+          cpus: '${APP_CPU_LIMIT}'
           memory: ${APP_MEM_LIMIT}
     networks:
       - backend
@@ -63,7 +64,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "${DB_CPU_LIMIT}"
+          cpus: '${DB_CPU_LIMIT}'
           memory: ${DB_MEM_LIMIT}
     networks:
       - backend

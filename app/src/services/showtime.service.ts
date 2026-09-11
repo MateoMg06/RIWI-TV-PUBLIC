@@ -1,47 +1,51 @@
-import Showtime from '../models/showtime.model';
-import { CreateShowtimeDto } from '../dto/create-showtime.dto';
-import showtimeRepository from '../repositories/showtime.repository';
-import { IShowtimeService } from './interfaces/showtime.service.interface';
+import type { CreateShowtimeDto } from '../dto/create-showtime.dto';
 import ErrorHandler from '../error/errorHandler';
+import showtimeRepository from '../repositories/showtime.repository';
 
-class ShowtimeService implements IShowtimeService {
-  async create(cinemaId: number, movieId: number, dto: CreateShowtimeDto): Promise<any> {
-    // Validar duplicado
-    const duplicate = await this.checkDuplicate(cinemaId, movieId);
-    if (duplicate) {
-      throw new ErrorHandler(409, `Ya existe una proyección de esta película en este cine`);
-    }
+class ShowtimeService {
+  async create(cinemaId: number, movieId: number, dto: CreateShowtimeDto) {
+    const startsAt = new Date(dto.startsAt);
+    if (Number.isNaN(startsAt.getTime()) || startsAt <= new Date())
+      throw new ErrorHandler(400, 'startsAt debe ser una fecha futura');
+    if (!dto.room?.trim() || !dto.price || dto.price <= 0)
+      throw new ErrorHandler(400, 'room y price son requeridos');
+    return showtimeRepository.create({ ...dto, cinemaId, movieId, startsAt });
+  }
 
-    return await showtimeRepository.create({
-      cinemaId,
-      movieId,
-      horario: dto.horario,
-      fecha: dto.fecha,
-      sala: dto.sala,
-      precio: dto.precio,
-    });
+  async getAvailable(id: number) {
+    const showtime = await showtimeRepository.findAvailableById(id);
+    if (!showtime) throw new ErrorHandler(404, 'Función no disponible o ya iniciada');
+    return showtime;
+  }
+
+  async getPrices(id: number) {
+    const showtime = await this.getAvailable(id);
+    const basePrice = Number(showtime.price);
+    return {
+      showtimeId: showtime.id,
+      currency: 'COP',
+      basePrice,
+      format: showtime.format,
+      roomType: showtime.roomType,
+      seatPrices: {
+        STANDARD: basePrice,
+        ACCESSIBLE: basePrice,
+        VIP: basePrice,
+      },
+    };
   }
 
   async delete(id: number): Promise<void> {
-    const showtime = await showtimeRepository.findByPk(id);
-    if (!showtime) {
-      throw new ErrorHandler(404, `Proyección con ID ${id} no encontrada`);
-    }
-
+    if (!(await showtimeRepository.findByPk(id)))
+      throw new ErrorHandler(404, 'Función no encontrada');
     await showtimeRepository.destroy(id);
   }
 
-  async findByCinemaId(cinemaId: number): Promise<any[]> {
-    return await showtimeRepository.findByCinemaId(cinemaId);
+  findByCinemaId(cinemaId: number) {
+    return showtimeRepository.findByCinemaId(cinemaId);
   }
-
-  async findByMovieId(movieId: number): Promise<any[]> {
-    return await showtimeRepository.findByMovieId(movieId);
-  }
-
-  async checkDuplicate(cinemaId: number, movieId: number): Promise<boolean> {
-    const existing = await showtimeRepository.findByCinemaAndMovie(cinemaId, movieId);
-    return !!existing;
+  findByMovieId(movieId: number) {
+    return showtimeRepository.findByMovieId(movieId);
   }
 }
 

@@ -19,6 +19,13 @@ import cinemaRoutes from './routes/cinema.routes';
 import authRoutes from './routes/auth.routes';
 import membershipRoutes from './routes/membership.routes';
 import v1Routes from './routes/v1.routes';
+import locationRoutes from './routes/location.routes';
+import notificationRoutes from './routes/notification.routes';
+import profileRoutes from './routes/profile.routes';
+import reservationRoutes from './routes/reservation.routes';
+import seedRoutes from './routes/seed.routes';
+import showtimeRoutes from './routes/showtime.routes';
+import { startSeatLockCleanup } from './services/reservation.service';
 
 const app = express();
 
@@ -44,8 +51,45 @@ app.use('/api/cities', cityRoutes);
 app.use('/api/cinemas', cinemaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/membership', membershipRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/functions', showtimeRoutes);
+app.use('/api/reservations', reservationRoutes);
+
+app.use('/api/v1', locationRoutes);
+app.use('/api/v1/movies', movieRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/profile', profileRoutes);
+app.use('/api/v1/membership', membershipRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/functions', showtimeRoutes);
+app.use('/api/v1/reservations', reservationRoutes);
+app.use('/api/v1/seed', seedRoutes);
+
+// Aliases literales descritos por las historias de usuario.
+app.use(locationRoutes);
+app.use('/movies', movieRoutes);
+app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
+app.use('/membership', membershipRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/functions', showtimeRoutes);
+app.use('/reservations', reservationRoutes);
 
 // Swagger
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use((error: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'El cuerpo no contiene JSON válido' });
+    return;
+  }
+  const status = error.status === 413 ? 413 : 500;
+  res
+    .status(status)
+    .json({ error: status === 413 ? 'Petición demasiado grande' : 'Error interno del servidor' });
+});
+
+startSeatLockCleanup();
 
 export default app;

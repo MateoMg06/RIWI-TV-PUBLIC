@@ -34,14 +34,14 @@ module.exports = {
     if (await tableExists(queryInterface, usersTable)) {
       if (!(await columnExists(queryInterface, usersTable, 'accessToken'))) {
         await queryInterface.addColumn(usersTable, 'accessToken', {
-          type: Sequelize.STRING(255),
+          type: Sequelize.TEXT,
           allowNull: true,
         });
       }
 
       if (!(await columnExists(queryInterface, usersTable, 'refreshToken'))) {
         await queryInterface.addColumn(usersTable, 'refreshToken', {
-          type: Sequelize.STRING(255),
+          type: Sequelize.TEXT,
           allowNull: true,
         });
       }
@@ -74,14 +74,22 @@ module.exports = {
           onUpdate: 'CASCADE',
           onDelete: 'CASCADE',
         },
-        token: { allowNull: false, type: Sequelize.STRING(255) },
+        token: { allowNull: false, type: Sequelize.TEXT },
         ip_address: { allowNull: true, type: Sequelize.STRING(45) },
         device: { allowNull: true, type: Sequelize.STRING(255) },
         user_agent: { allowNull: true, type: Sequelize.TEXT },
         expires_at: { allowNull: false, type: Sequelize.DATE },
         revoked: { allowNull: false, type: Sequelize.BOOLEAN, defaultValue: false },
-        created_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-        updated_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+        created_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
+        updated_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
       });
 
       await queryInterface.addIndex('refresh_tokens', ['user_id']);
@@ -110,7 +118,7 @@ module.exports = {
             'logout',
             'password_reset_requested',
             'password_reset',
-            'account_activated'
+            'account_activated',
           ),
         },
         ip_address: { allowNull: true, type: Sequelize.STRING(45) },
@@ -118,7 +126,11 @@ module.exports = {
         user_agent: { allowNull: true, type: Sequelize.TEXT },
         success: { allowNull: false, type: Sequelize.BOOLEAN, defaultValue: true },
         details: { allowNull: true, type: Sequelize.TEXT },
-        created_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+        created_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
       });
 
       await queryInterface.addIndex('access_audits', ['user_id']);
@@ -142,8 +154,16 @@ module.exports = {
         token: { allowNull: false, type: Sequelize.STRING(255) },
         expires_at: { allowNull: false, type: Sequelize.DATE },
         used: { allowNull: false, type: Sequelize.BOOLEAN, defaultValue: false },
-        created_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
-        updated_at: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') },
+        created_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
+        updated_at: {
+          allowNull: false,
+          type: Sequelize.DATE,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        },
       });
 
       await queryInterface.addIndex('password_reset_tokens', ['user_id']);
