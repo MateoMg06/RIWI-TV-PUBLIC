@@ -267,6 +267,23 @@ router.post('/logout', authToken, logout);
  *     responses:
  *       200:
  *         description: Si el correo está registrado, se enviará un enlace de recuperación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 emailSent:
+ *                   type: boolean
+ *                   description: Solo se incluye en desarrollo
+ *                 resetToken:
+ *                   type: string
+ *                   description: Solo se incluye en desarrollo
+ *                 resetTokenExpires:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Solo se incluye en desarrollo
  *       400:
  *         description: La cuenta no está activada
  *       500:

@@ -11,6 +11,18 @@ const payload: SeedPayload = {
     city: 'Medellín',
     cinema: 'Multicine Riwi Centro',
   },
+  users: [
+    {
+      name: 'Usuario',
+      lastName: 'Seeder',
+      email: 'usuario.seed@example.com',
+      password: 'UsuarioSeed123!',
+      phone: '3001234567',
+      documentType: 'CC',
+      documentNumber: '900000002',
+      birthDate: '1995-01-01',
+    },
+  ],
   movies: [
     {
       name: 'Película de prueba',
@@ -29,6 +41,9 @@ const result: SeedResult = {
     departments: 1,
     cities: 1,
     cinemas: 1,
+    users: 1,
+    profiles: 1,
+    memberships: 1,
     movies: 3,
     showtimes: 2,
     seats: 48,
@@ -100,5 +115,15 @@ describe('POST /api/v1/seed', () => {
     expect(() => parseSeedPayload({ movies: [] })).toThrow(
       'El JSON debe contener los objetos "location" y "movies"',
     );
+  });
+
+  it('acepta usuarios y exige sus datos principales', () => {
+    expect(parseSeedPayload(payload).users).toHaveLength(1);
+    expect(() =>
+      parseSeedPayload({
+        ...payload,
+        users: [{ ...payload.users![0], email: '' }],
+      }),
+    ).toThrow('users[0].email es requerido');
   });
 });

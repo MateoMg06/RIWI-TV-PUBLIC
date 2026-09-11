@@ -4,6 +4,7 @@ import movieRoutes from '../routes/movie.routes';
 import profileRoutes from '../routes/profile.routes';
 import reservationRoutes from '../routes/reservation.routes';
 import showtimeRoutes from '../routes/showtime.routes';
+import userRoutes from '../routes/user.routes';
 
 type Layer = { route?: { path: string; methods: Record<string, boolean> } };
 const contracts = (router: unknown): string[] =>
@@ -54,6 +55,14 @@ describe('contrato HTTP HU-001 a HU-010', () => {
     expect(contracts(profileRoutes)).toEqual(
       expect.arrayContaining(['GET /', 'PUT /', 'GET /benefits']),
     );
+  });
+
+  it('no duplica login, refresh ni logout bajo /api/users', () => {
+    const userContracts = contracts(userRoutes);
+
+    expect(userContracts).not.toContain('POST /login');
+    expect(userContracts).not.toContain('POST /refresh');
+    expect(userContracts).not.toContain('POST /logout');
   });
 
   it('expone función, precios, mapa de sillas, bloqueo, liberación y resumen', () => {

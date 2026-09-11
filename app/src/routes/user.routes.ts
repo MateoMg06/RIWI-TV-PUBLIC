@@ -11,9 +11,6 @@ import {
   authUser,
   createUser,
   getUsers,
-  login,
-  logout,
-  refresh,
   updateUser,
   setLocation,
 } from '../controllers/user.controller';
@@ -181,78 +178,6 @@ router.get('/getUsers', authToken, requireRole('admin'), getUsers);
  *         description: Error interno del servidor
  */
 router.post('/auth', authUser);
-
-/**
- * @swagger
- * /api/users/login:
- *   post:
- *     summary: Iniciar sesión con JWT
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 example: john.doe@example.com
- *               password:
- *                 type: string
- *                 example: "123"
- *     responses:
- *       201:
- *         description: Login exitoso
- *       401:
- *         description: Credenciales incorrectas
- *       500:
- *         description: Error interno del servidor
- */
-router.post('/login', login);
-
-/**
- * @swagger
- * /api/users/refresh:
- *   post:
- *     summary: Refrescar el token y darle uno nuevo al usuario
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *     responses:
- *       201:
- *         description: Nuevo accessToken generado
- *       401:
- *         description: Refresh token inválido, expirado o no proporcionado
- *       500:
- *         description: Error interno del servidor
- */
-router.post('/refresh', refresh);
-
-/**
- * @swagger
- * /api/users/logout:
- *   post:
- *     security: [{ cookieAuth: [] }, { bearerAuth: [] }]
- *     summary: Cierra la sesión, eliminando la cookie del accessToken
- *     tags: [Auth]
- *     responses:
- *       200:
- *         description: Sesión cerrada correctamente
- */
-router.post('/logout', authToken, logout);
 
 /**
  * @swagger

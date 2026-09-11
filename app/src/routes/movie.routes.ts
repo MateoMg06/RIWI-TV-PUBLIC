@@ -41,6 +41,68 @@ const router = Router();
  *     tags: [Movies]
  *     summary: Consultar cartelera activa
  *     responses: { 200: { description: Cartelera } }
+ *   post:
+ *     tags: [Movies]
+ *     summary: Crear una película
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, classification, duration, genre, releaseDate]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Interestelar
+ *               synopsis:
+ *                 type: string
+ *                 example: Un grupo de exploradores viaja a través de un agujero de gusano.
+ *               classification:
+ *                 type: string
+ *                 example: PG-13
+ *               duration:
+ *                 type: integer
+ *                 example: 169
+ *               genre:
+ *                 type: string
+ *                 example: Ciencia ficción
+ *               director:
+ *                 type: string
+ *                 example: Christopher Nolan
+ *               cast:
+ *                 type: array
+ *                 items: { type: string }
+ *                 example: [Matthew McConaughey, Anne Hathaway]
+ *               posterUrl:
+ *                 type: string
+ *                 nullable: true
+ *               bannerUrl:
+ *                 type: string
+ *                 nullable: true
+ *               trailerUrl:
+ *                 type: string
+ *                 nullable: true
+ *               releaseDate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2026-12-01T00:00:00.000Z"
+ *               status:
+ *                 type: string
+ *                 enum: [UPCOMING, ACTIVE, INACTIVE]
+ *                 example: UPCOMING
+ *               audienceRating:
+ *                 type: number
+ *                 example: 8.7
+ *     responses:
+ *       201: { description: Película creada }
+ *       400: { description: Datos inválidos }
+ *       401: { description: Sesión ausente o inválida }
+ *       403: { description: Se requiere rol admin }
+ *       409: { description: La película ya existe }
  * /api/movies/today:
  *   get:
  *     tags: [Movies]

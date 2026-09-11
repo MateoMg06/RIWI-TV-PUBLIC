@@ -13,9 +13,7 @@
           "name": "Comprobar servidor",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/test",
             "description": "Comprueba que Express está respondiendo. No consulta la base de datos."
           },
@@ -35,9 +33,7 @@
           "name": "Health check v1",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/v1/health",
             "description": "Comprueba la disponibilidad de la API y el estado de la conexión con PostgreSQL."
           },
@@ -57,9 +53,7 @@
           "name": "Abrir Swagger",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "text/html" }
-            ],
+            "header": [{ "key": "Accept", "value": "text/html" }],
             "url": "{{base_url}}/api/docs",
             "description": "Interfaz Swagger UI generada por el backend."
           }
@@ -101,9 +95,7 @@
           "name": "Listar usuarios",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/users"
           },
           "event": [
@@ -138,9 +130,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -158,7 +148,7 @@
               "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "url": "{{base_url}}/api/users/login",
+            "url": "{{base_url}}/api/auth/login",
             "description": "Genera accessToken y refreshToken. Postman conserva automáticamente la cookie accessToken requerida por Actualizar usuario."
           },
           "event": [
@@ -186,7 +176,7 @@
               "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "url": "{{base_url}}/api/users/refresh",
+            "url": "{{base_url}}/api/auth/refresh",
             "description": "Genera un nuevo access token y reemplaza la cookie accessToken."
           },
           "event": [
@@ -222,9 +212,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -233,19 +221,15 @@
           "name": "Cerrar sesión",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": "{{base_url}}/api/users/logout",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/logout",
             "description": "Elimina la cookie accessToken."
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -286,9 +270,7 @@
           "name": "Listar países",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/countries"
           },
           "event": [
@@ -307,18 +289,14 @@
           "name": "Obtener departamentos del país",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/countries/{{country_id}}/departments"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -359,18 +337,14 @@
           "name": "Obtener ciudades del departamento",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/departments/{{department_id}}/cities"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -411,18 +385,14 @@
           "name": "Obtener cines de la ciudad",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/cities/{{city_id}}/cinemas"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -464,9 +434,7 @@
           "name": "Listar cartelera",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/movies"
           },
           "event": [
@@ -485,18 +453,14 @@
           "name": "Buscar película por nombre",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/movies/{{movie_name}}"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -505,18 +469,14 @@
           "name": "Obtener cines de la película",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/movies/{{movie_id}}/cinemas"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -557,18 +517,14 @@
           "name": "Obtener películas del cine",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/cinemas/{{cinema_id}}/movies"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -593,9 +549,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 201', () => pm.response.to.have.status(201));"
-                ]
+                "exec": ["pm.test('Estado 201', () => pm.response.to.have.status(201));"]
               }
             }
           ]
@@ -604,18 +558,14 @@
           "name": "Obtener proyecciones del cine",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/cinemas/{{cinema_id}}/showtimes"
           },
           "event": [
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -624,9 +574,7 @@
           "name": "Quitar película del cine",
           "request": {
             "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/cinemas/{{cinema_id}}/movies/{{movie_id}}",
             "description": "Elimina la proyección que relaciona el cine y la película."
           },
@@ -634,9 +582,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Estado 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Estado 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -667,9 +613,7 @@
           "name": "Listar usuarios - /getUsers",
           "request": {
             "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" }
-            ],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": "{{base_url}}/api/users/getUsers"
           }
         },

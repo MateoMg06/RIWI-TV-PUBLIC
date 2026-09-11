@@ -11,7 +11,6 @@ services:
     volumes:
       - ./app:/usr/src/app
       - node_modules:/usr/src/app/node_modules
-      - ./.env:/usr/src/app/.env
 
     env_file:
       - ./.env
@@ -25,7 +24,11 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:$${APP_PORT:-5001}/api/v1/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://localhost:$${APP_PORT:-5001}/api/v1/health || exit 1",
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -34,7 +37,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${APP_CPU_LIMIT}'
+          cpus: "${APP_CPU_LIMIT}"
           memory: ${APP_MEM_LIMIT}
     networks:
       - backend
@@ -64,7 +67,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '${DB_CPU_LIMIT}'
+          cpus: "${DB_CPU_LIMIT}"
           memory: ${DB_MEM_LIMIT}
     networks:
       - backend

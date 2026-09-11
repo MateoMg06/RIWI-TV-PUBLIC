@@ -66,7 +66,7 @@ export function createSeedRouter(controller: SeedController = seedController): R
    *               file:
    *                 type: string
    *                 format: binary
-   *                 description: Archivo JSON de máximo 1 MB
+   *                 description: Archivo JSON de máximo 1 MB. Puede incluir users; por cada usuario se crean su perfil y membresía.
    *     responses:
    *       200:
    *         description: Seeder procesado correctamente

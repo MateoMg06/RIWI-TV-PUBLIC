@@ -1,7 +1,36 @@
 import sequelize from '../config/database';
-import { Cinema, City, Country, Department, Movie, Seat, Showtime } from '../models';
+import {
+  Cinema,
+  City,
+  Country,
+  Department,
+  Membership,
+  Movie,
+  Profile,
+  Seat,
+  Showtime,
+  User,
+} from '../models';
 import type { MovieStatus } from '../models/movie.model';
 import type { SeatType } from '../models/seat.model';
+import { hashPassword } from '../utils/bcrypt';
+
+export interface SeedUserInput {
+  name: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role?: 'admin' | 'usuario';
+  phone: string;
+  documentType: string;
+  documentNumber: string;
+  birthDate: string;
+  city?: string;
+  address?: string;
+  avatar?: string;
+  acceptsNotifications?: boolean;
+  accountStatus?: 'active' | 'inactive';
+}
 
 export interface SeedSeatInput {
   code: string;
@@ -46,6 +75,7 @@ export interface SeedPayload {
     city: string;
     cinema: string;
   };
+  users?: SeedUserInput[];
   movies: SeedMovieInput[];
 }
 
@@ -56,6 +86,9 @@ export interface SeedResult {
     departments: number;
     cities: number;
     cinemas: number;
+    users: number;
+    profiles: number;
+    memberships: number;
     movies: number;
     showtimes: number;
     seats: number;
@@ -92,6 +125,23 @@ export const createDefaultSeedPayload = (): SeedPayload => ({
     city: 'Medellín',
     cinema: 'Multicine Riwi Centro',
   },
+  users: [
+    {
+      name: 'Administrador',
+      lastName: 'Riwi',
+      email: 'admin.seed@example.com',
+      password: 'AdminSeed123!',
+      role: 'admin',
+      phone: '3001234567',
+      documentType: 'CC',
+      documentNumber: '900000001',
+      birthDate: '1990-01-01',
+      city: 'Medellín',
+      address: 'Sede Multicine Riwi',
+      acceptsNotifications: true,
+      accountStatus: 'active',
+    },
+  ],
   movies: [
     {
       name: 'Horizonte Rojo',
@@ -178,6 +228,42 @@ export function parseSeedPayload(value: unknown): SeedPayload {
     throw new Error('movies debe contener entre 1 y 100 películas');
   }
 
+  if (value.users !== undefined) {
+    if (!Array.isArray(value.users) || value.users.length === 0 || value.users.length > 100) {
+      throw new Error('users debe contener entre 1 y 100 usuarios');
+    }
+
+    value.users.forEach((user, userIndex) => {
+      if (!isObject(user)) throw new Error(`users[${userIndex}] debe ser un objeto`);
+
+      for (const field of [
+        'name',
+        'lastName',
+        'email',
+        'password',
+        'phone',
+        'documentType',
+        'documentNumber',
+      ] as const) {
+        if (!isNonEmptyString(user[field])) {
+          throw new Error(`users[${userIndex}].${field} es requerido`);
+        }
+      }
+      if (!String(user.email).includes('@')) {
+        throw new Error(`users[${userIndex}].email no es válido`);
+      }
+      if (!isValidDate(user.birthDate)) {
+        throw new Error(`users[${userIndex}].birthDate debe ser una fecha válida`);
+      }
+      if (user.role && !['admin', 'usuario'].includes(String(user.role))) {
+        throw new Error(`users[${userIndex}].role no es válido`);
+      }
+      if (user.accountStatus && !['active', 'inactive'].includes(String(user.accountStatus))) {
+        throw new Error(`users[${userIndex}].accountStatus no es válido`);
+      }
+    });
+  }
+
   movies.forEach((movie, movieIndex) => {
     if (!isObject(movie)) throw new Error(`movies[${movieIndex}] debe ser un objeto`);
 
@@ -252,6 +338,9 @@ async function executeSeed(payload: SeedPayload): Promise<SeedResult> {
       departments: 0,
       cities: 0,
       cinemas: 0,
+      users: 0,
+      profiles: 0,
+      memberships: 0,
       movies: 0,
       showtimes: 0,
       seats: 0,
@@ -284,6 +373,81 @@ async function executeSeed(payload: SeedPayload): Promise<SeedResult> {
       transaction,
     });
     created.cinemas += Number(cinemaCreated);
+
+    for (const input of payload.users ?? []) {
+      const email = input.email.trim().toLowerCase();
+      const password = await hashPassword(input.password, Number(process.env.SALT_ROUNDS || 10));
+      const userCity = input.city?.trim() || payload.location.city.trim();
+      const [user, userCreated] = await User.findOrCreate({
+        where: { email },
+        defaults: {
+          name: input.name.trim(),
+          lastName: input.lastName.trim(),
+          email,
+          password,
+          role: input.role ?? 'usuario',
+          membership: 'básica',
+          failedLoginAttempts: 0,
+          lastLoginAttempt: null,
+          lockedUntil: null,
+          phone: input.phone.trim(),
+          documentType: input.documentType.trim(),
+          documentNumber: input.documentNumber.trim(),
+          birthDate: new Date(input.birthDate),
+          city: userCity,
+          cityId: city.id,
+          acceptsDataProcessing: true,
+          acceptsTerms: true,
+          acceptsNotifications: input.acceptsNotifications ?? true,
+          accountStatus: input.accountStatus ?? 'active',
+          activationToken: null,
+          activationTokenExpires: null,
+          accessToken: null,
+          refreshToken: null,
+          resetToken: null,
+          resetTokenExpires: null,
+        },
+        transaction,
+      });
+      created.users += Number(userCreated);
+
+      const [, profileCreated] = await Profile.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          userId: user.id,
+          lastName: input.lastName.trim(),
+          phone: input.phone.trim(),
+          documentType: input.documentType.trim(),
+          documentNumber: input.documentNumber.trim(),
+          birthDate: new Date(input.birthDate),
+          city: userCity,
+          address: input.address?.trim(),
+          avatar: input.avatar?.trim(),
+        },
+        transaction,
+      });
+      created.profiles += Number(profileCreated);
+
+      const membershipCode = `SEED-${user.id}`;
+      const membershipStart = new Date();
+      const membershipEnd = new Date(membershipStart);
+      membershipEnd.setFullYear(membershipEnd.getFullYear() + 1);
+      const [, membershipCreated] = await Membership.findOrCreate({
+        where: { userId: user.id },
+        defaults: {
+          userId: user.id,
+          code: membershipCode,
+          status: 'active',
+          startDate: membershipStart,
+          endDate: membershipEnd,
+          bonusWallet: 0,
+          level: 'BRONZE',
+          qrCode: `MEMBERSHIP:${membershipCode}`,
+        },
+        transaction,
+      });
+      created.memberships += Number(membershipCreated);
+    }
 
     for (const input of payload.movies) {
       const [movie, movieCreated] = await Movie.findOrCreate({
