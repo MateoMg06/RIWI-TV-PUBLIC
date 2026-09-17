@@ -209,8 +209,18 @@ router.get('/captcha', getCaptcha);
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/register', register);
+  router.post(
+    '/register',
 
+    (req, res, next) => {
+      console.log('>>> REGISTER ROUTE ENTERED');
+      console.log('>>> BODY:', req.body);
+      next();
+    },
+
+    // tus middlewares actuales...
+    register
+  );
 /**
  * @swagger
  * /api/auth/activate:
