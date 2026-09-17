@@ -6,8 +6,25 @@ export interface CaptchaChallenge {
   answer: number;
 }
 
-// Almacén en memoria de captchas activos (en producción usar Redis o similar)
-const captchaStore = new Map<string, { answer: number; expiresAt: number }>();
+interface CaptchaPayload {
+  answer: number;
+  expiresAt: number;
+  nonce: string;
+}
+
+const CAPTCHA_TTL_MS = 5 * 60 * 1000;
+
+function getCaptchaSecret(): string {
+  const secret = process.env.CAPTCHA_SECRET || process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CAPTCHA_SECRET o JWT_SECRET debe estar configurado');
+  }
+  return secret;
+}
+
+function sign(encodedPayload: string): string {
+  return crypto.createHmac('sha256', getCaptchaSecret()).update(encodedPayload).digest('base64url');
+}
 
 export function generateCaptcha(): CaptchaChallenge {
   const num1 = Math.floor(Math.random() * 10) + 1;
@@ -36,45 +53,42 @@ export function generateCaptcha(): CaptchaChallenge {
       question = `¿Cuánto es ${num1} + ${num2}?`;
   }
 
-  const token = crypto.randomBytes(32).toString('hex');
-  const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutos
-
-  captchaStore.set(token, { answer, expiresAt });
-
-  return {
-    token,
-    question,
+  const payload: CaptchaPayload = {
     answer,
+    expiresAt: Date.now() + CAPTCHA_TTL_MS,
+    nonce: crypto.randomBytes(16).toString('hex'),
   };
+  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = sign(encodedPayload);
+
+  return { token: `${encodedPayload}.${signature}`, question, answer };
 }
 
 export function verifyCaptcha(token: string, userAnswer: number): boolean {
-  const stored = captchaStore.get(token);
+  try {
+    if (typeof token !== 'string' || !Number.isFinite(userAnswer)) return false;
+    const [encodedPayload, providedSignature, extra] = token.split('.');
+    if (!encodedPayload || !providedSignature || extra) return false;
 
-  if (!stored) {
-    return false;
-  }
-
-  // Eliminar el captcha después de verificar (uso único)
-  captchaStore.delete(token);
-
-  // Verificar expiración
-  if (Date.now() > stored.expiresAt) {
-    return false;
-  }
-
-  return stored.answer === userAnswer;
-}
-
-// Limpiar captchas expirados periódicamente
-export function cleanExpiredCaptchas(): void {
-  const now = Date.now();
-  for (const [token, data] of captchaStore.entries()) {
-    if (now > data.expiresAt) {
-      captchaStore.delete(token);
+    const expectedSignature = sign(encodedPayload);
+    const providedBuffer = Buffer.from(providedSignature, 'utf8');
+    const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+    if (
+      providedBuffer.length !== expectedBuffer.length ||
+      !crypto.timingSafeEqual(providedBuffer, expectedBuffer)
+    ) {
+      return false;
     }
+
+    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8')) as CaptchaPayload;
+    if (!Number.isFinite(payload.answer) || !Number.isFinite(payload.expiresAt)) return false;
+    if (Date.now() > payload.expiresAt) return false;
+    return payload.answer === userAnswer;
+  } catch {
+    return false;
   }
 }
 
-// Limpiar cada 5 minutos
-setInterval(cleanExpiredCaptchas, 5 * 60 * 1000).unref();
+// Se conserva por compatibilidad con imports existentes. El CAPTCHA ahora es
+// stateless y firmado, por lo que no necesita limpieza de memoria.
+export function cleanExpiredCaptchas(): void {}

@@ -17,17 +17,14 @@ export const register = async (req: Request, res: Response): Promise<Response> =
     const result = await authService.register(dto);
     return res.status(201).json(result);
   } catch (error: any) {
-  console.error('REGISTER ERROR:', error);
-  console.error('REGISTER ERROR STACK:', error?.stack);
+    if (error instanceof ErrorHandler) {
+      return res.status(error.estado).json({ error: error.message });
+    }
 
-  if (error instanceof ErrorHandler) {
-    return res.status(error.estado).json({ error: error.message });
+    console.error('REGISTER ERROR:', error);
+    console.error('REGISTER ERROR STACK:', error?.stack);
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
-
-  return res.status(500).json({
-    error: 'Error interno del servidor',
-  });
-}
 };
 
 export const activateAccount = async (req: Request, res: Response): Promise<Response> => {
