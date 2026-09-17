@@ -1,0 +1,54 @@
+# Despliegue de prueba: PostgreSQL Free expira a los 30 dias.
+services:
+  - type: web
+    name: riwi-tv-backend
+    runtime: node
+    plan: free
+    region: virginia
+    rootDir: app
+    buildCommand: npm ci --include=dev && npm run build
+    # npm start ejecuta las migraciones mediante prestart.
+    startCommand: APP_URL="${APP_URL:-$RENDER_EXTERNAL_URL}" npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24.14.1
+      - key: PORT
+        value: "10000"
+      - key: APP_PORT
+        value: "10000"
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: riwi-tv-db
+          property: host
+      - key: POSTGRES_PORT
+        value: "5432"
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: riwi-tv-db
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: riwi-tv-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: riwi-tv-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+
+databases:
+  - name: riwi-tv-db
+    plan: free
+    region: virginia
+    postgresMajorVersion: "15"
+    databaseName: riwi_tv
+    user: riwi_tv
+    ipAllowList: []
